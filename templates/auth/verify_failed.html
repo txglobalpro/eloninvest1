@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Verification Failed' if lang == 'en' else 'فشل التوثيق' }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6 py-5">
+        <div class="card border-0" style="background:linear-gradient(135deg,var(--bg-card),rgba(239,68,68,0.05));border:1px solid rgba(239,68,68,0.15);border-radius:24px;overflow:hidden;">
+            <div style="height:4px;background:linear-gradient(90deg,#ef4444,#f87171,#ef4444)"></div>
+            <div class="card-body text-center p-4 p-md-5">
+                <div style="width:90px;height:90px;border-radius:50%;background:rgba(239,68,68,0.12);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:3rem;color:var(--accent-red);">
+                    <i class="bi bi-x-circle-fill"></i>
+                </div>
+                <h3 class="fw-bold mb-1" style="color:var(--text-primary);">{{ 'Verification Link Invalid' if lang == 'en' else 'رابط التوثيق غير صالح' }}</h3>
+                <p class="text-muted mb-4" style="max-width:400px;margin:0 auto;">{{ 'This verification link is invalid or has expired. Please log in and request a new verification email.' if lang == 'en' else 'رابط التوثيق هذا غير صالح أو منتهي الصلاحية. يرجى تسجيل الدخول وطلب بريد توثيق جديد.' }}</p>
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-primary px-4"><i class="bi bi-box-arrow-in-right me-1"></i>{{ 'Log In' if lang == 'en' else 'تسجيل الدخول' }}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

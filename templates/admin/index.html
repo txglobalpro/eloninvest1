@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Admin Panel' if lang == 'en' else 'لوحة المدرب' }}{% endblock %}
+{% block content %}
+<h3 class="mb-4">{{ 'Admin Dashboard' if lang == 'en' else 'لوحة التحكم - المدرب' }}</h3>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center p-3">
+            <h6><i class="bi bi-people-fill text-primary me-1"></i>{{ 'Total Users' if lang == 'en' else 'إجمالي المستخدمين' }}</h6>
+            <h3>{{ stats.total_users }}</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center p-3">
+            <h6><i class="bi bi-arrow-down-circle text-success me-1"></i>{{ 'Total Deposits' if lang == 'en' else 'إجمالي الإيداعات' }}</h6>
+            <h3>${{ "%.0f"|format(stats.total_deposits) }}</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center p-3">
+            <h6><i class="bi bi-arrow-up-circle text-warning me-1"></i>{{ 'Total Withdrawals' if lang == 'en' else 'إجمالي السحوبات' }}</h6>
+            <h3>${{ "%.0f"|format(stats.total_withdrawals) }}</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center p-3">
+            <h6><i class="bi bi-graph-up-arrow text-info me-1"></i>{{ 'Total Profits' if lang == 'en' else 'إجمالي الأرباح' }}</h6>
+            <h3>${{ "%.0f"|format(stats.total_profits) }}</h3>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <div class="card">
+            <div class="card-header"><h5><i class="bi bi-lightning-fill text-warning me-1"></i>{{ 'Quick Actions' if lang == 'en' else 'إجراءات سريعة' }}</h5></div>
+            <div class="card-body">
+                <a href="{{ url_for('admin.users') }}" class="btn btn-primary w-100 mb-2"><i class="bi bi-people-fill me-1"></i>{{ 'Manage Users' if lang == 'en' else 'إدارة المستخدمين' }}</a>
+                <a href="{{ url_for('admin.transactions') }}" class="btn btn-warning w-100 mb-2"><i class="bi bi-arrow-left-right me-1"></i>{{ 'Manage Transactions' if lang == 'en' else 'إدارة المعاملات' }}</a>
+                <a href="{{ url_for('admin.plans') }}" class="btn btn-info w-100 mb-2"><i class="bi bi-pie-chart-fill me-1"></i>{{ 'Manage Plans' if lang == 'en' else 'إدارة الخطط' }}</a>
+                <a href="{{ url_for('admin.payment_methods') }}" class="btn btn-success w-100"><i class="bi bi-credit-card-2-front me-1"></i>{{ 'Payment Methods' if lang == 'en' else 'وسائل الدفع' }}</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card">
+            <div class="card-header"><h5><i class="bi bi-clock-fill text-warning me-1"></i>{{ 'Pending Approvals' if lang == 'en' else 'الموافقات المعلقة' }}</h5></div>
+            <div class="card-body">
+                <p>{{ 'Pending withdrawals' if lang == 'en' else 'سحوبات معلقة' }}: <strong>{{ stats.pending_withdrawals }}</strong></p>
+                <p>{{ 'Pending deposits' if lang == 'en' else 'إيداعات معلقة' }}: <strong>{{ stats.pending_deposits }}</strong></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Profile' if lang == 'en' else 'الملف الشخصي' }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+
+        <!-- Cover Banner -->
+        <div class="profile-cover">
+            <div class="profile-avatar">
+                <i class="bi bi-person-fill"></i>
+            </div>
+            <div class="profile-cover-info">
+                <h4 class="mb-1">{{ current_user.username }}</h4>
+                <p class="mb-0"><i class="bi bi-envelope me-1"></i>{{ current_user.email }}</p>
+                <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>{{ 'Member since' if lang == 'en' else 'عضو منذ' }} {{ current_user.created_at.strftime('%Y-%m-%d') }}</small>
+            </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="profile-stat">
+                    <div class="profile-stat-icon" style="color:var(--accent-green);background:rgba(16,185,129,0.12);">
+                        <i class="bi bi-wallet2"></i>
+                    </div>
+                    <div class="profile-stat-body">
+                        <span class="profile-stat-label">{{ 'Balance' if lang == 'en' else 'الرصيد' }}</span>
+                        <span class="profile-stat-value">${{ "%.2f"|format(current_user.balance) }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="profile-stat">
+                    <div class="profile-stat-icon" style="color:var(--accent-blue);background:rgba(59,130,246,0.12);">
+                        <i class="bi bi-piggy-bank"></i>
+                    </div>
+                    <div class="profile-stat-body">
+                        <span class="profile-stat-label">{{ 'Total Deposits' if lang == 'en' else 'إجمالي الإيداع' }}</span>
+                        <span class="profile-stat-value">${{ "%.2f"|format(current_user.total_deposits) }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="profile-stat">
+                    <div class="profile-stat-icon" style="color:var(--accent-orange);background:rgba(249,115,22,0.12);">
+                        <i class="bi bi-credit-card"></i>
+                    </div>
+                    <div class="profile-stat-body">
+                        <span class="profile-stat-label">{{ 'Withdrawn' if lang == 'en' else 'المسحوب' }}</span>
+                        <span class="profile-stat-value">${{ "%.2f"|format(current_user.total_withdrawn) }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="profile-stat">
+                    <div class="profile-stat-icon" style="color:var(--accent-cyan);background:rgba(6,182,212,0.12);">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <div class="profile-stat-body">
+                        <span class="profile-stat-label">{{ 'Referrals' if lang == 'en' else 'الإحالات' }}</span>
+                        <span class="profile-stat-value">{{ referrals_count }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="card">
+            <div class="card-header p-0">
+                <ul class="nav nav-tabs profile-tabs" id="profileTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">
+                            <i class="bi bi-person-gear me-1"></i>{{ 'Personal Info' if lang == 'en' else 'المعلومات الشخصية' }}
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab">
+                            <i class="bi bi-shield-check me-1"></i>{{ 'Security' if lang == 'en' else 'الأمان' }}
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="payment-tab" data-bs-toggle="tab" data-bs-target="#payment" type="button" role="tab">
+                            <i class="bi bi-credit-card-2-front me-1"></i>{{ 'Payment Info' if lang == 'en' else 'معلومات الدفع' }}
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <div class="tab-content" id="profileTabsContent">
+
+                    <!-- Tab 1: Personal Info -->
+                    <div class="tab-pane fade show active" id="info" role="tabpanel">
+                        <form method="POST">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ 'Username' if lang == 'en' else 'اسم المستخدم' }}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                        <input type="text" class="form-control" value="{{ current_user.username }}" disabled>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ 'Email' if lang == 'en' else 'البريد الإلكتروني' }}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                        <input type="text" class="form-control" value="{{ current_user.email }}" disabled>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ 'Language' if lang == 'en' else 'اللغة' }}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-globe"></i></span>
+                                        <select name="lang" class="form-select">
+                                            <option value="en" {{ 'selected' if current_user.lang == 'en' else '' }}>English</option>
+                                            <option value="ar" {{ 'selected' if current_user.lang == 'ar' else '' }}>العربية</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ 'Referral Code' if lang == 'en' else 'رمز الإحالة' }}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
+                                        <input type="text" class="form-control font-monospace" value="{{ current_user.referral_code }}" readonly id="referralCodeInput">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText('{{ url_for('auth.register', _external=True) + '?ref=' + current_user.referral_code }}').then(function(){showToast('success','{{ 'Referral link copied' if lang == 'en' else 'تم نسخ رابط الإحالة' }}')})" title="{{ 'Copy' if lang == 'en' else 'نسخ' }}">
+                                            <i class="bi bi-clipboard"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ 'Active Investments' if lang == 'en' else 'الاستثمارات النشطة' }}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-briefcase"></i></span>
+                                        <input type="text" class="form-control" value="{{ investments_count }}" disabled>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ 'Transactions' if lang == 'en' else 'المعاملات' }}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-arrow-repeat"></i></span>
+                                        <input type="text" class="form-control" value="{{ transactions_count }}" disabled>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-warning px-4"><i class="bi bi-check-lg me-1"></i>{{ 'Save Changes' if lang == 'en' else 'حفظ التغييرات' }}</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Tab 2: Security -->
+                    <div class="tab-pane fade" id="security" role="tabpanel">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="profile-info-card">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="profile-info-icon" style="color:var(--accent-green);background:rgba(16,185,129,0.12);">
+                                            <i class="bi bi-shield-check"></i>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted d-block">{{ 'Email Verified' if lang == 'en' else 'البريد الإلكتروني موثق' }}</small>
+                                            <strong class="fs-5">
+                                                {% if current_user.email_verified %}
+                                                <span class="text-success"><i class="bi bi-check-circle-fill"></i> {{ 'Verified' if lang == 'en' else 'موثق' }}</span>
+                                                {% else %}
+                                                <span class="text-danger"><i class="bi bi-x-circle-fill"></i> {{ 'Unverified' if lang == 'en' else 'غير موثق' }}</span>
+                                                {% endif %}
+                                            </strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="profile-info-card">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="profile-info-icon" style="color:var(--accent-blue);background:rgba(59,130,246,0.12);">
+                                            <i class="bi bi-clock-history"></i>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted d-block">{{ 'Last Login' if lang == 'en' else 'آخر دخول' }}</small>
+                                            <strong>{{ current_user.last_login.strftime('%Y-%m-%d %H:%M') if current_user.last_login else '-' }}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="profile-info-card">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="profile-info-icon" style="color:var(--accent-amber);background:rgba(245,158,11,0.12);">
+                                            <i class="bi bi-globe"></i>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted d-block">IP</small>
+                                            <strong>{{ current_user.last_login_ip or '-' }}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="profile-info-card">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="profile-info-icon" style="color:var(--accent-cyan);background:rgba(6,182,212,0.12);">
+                                            <i class="bi bi-calendar-check"></i>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted d-block">{{ 'Member Since' if lang == 'en' else 'عضو منذ' }}</small>
+                                            <strong>{{ current_user.created_at.strftime('%Y-%m-%d') }}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: Payment Info -->
+                    <div class="tab-pane fade" id="payment" role="tabpanel">
+                        <form method="POST">
+                            <div class="mb-3">
+                                <label class="form-label">{{ 'Payment Info' if lang == 'en' else 'معلومات الدفع' }}</label>
+                                <textarea name="payment_method" class="form-control" rows="4" placeholder="{{ 'Wallet address, bank details, or PayPal email' if lang == 'en' else 'عنوان المحفظة، تفاصيل البنك، أو بريد باي بال' }}">{{ current_user.payment_method or '' }}</textarea>
+                                <small class="text-muted">{{ 'This info is shared with admin for withdrawal processing' if lang == 'en' else 'هذه المعلومات تُشارَك مع المدرب لمعالجة السحوبات' }}</small>
+                            </div>
+                            <button type="submit" class="btn btn-warning px-4"><i class="bi bi-check-lg me-1"></i>{{ 'Save Changes' if lang == 'en' else 'حفظ التغييرات' }}</button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

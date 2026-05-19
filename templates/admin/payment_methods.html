@@ -1,0 +1,704 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Payment Methods' if lang == 'en' else 'وسائل الدفع' }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0"><i class="bi bi-credit-card-2-front text-success me-2"></i>{{ 'Payment Methods' if lang == 'en' else 'وسائل الدفع' }}</h3>
+    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addPmModal"><i class="bi bi-plus-circle me-1"></i>{{ 'Add Method' if lang == 'en' else 'إضافة وسيلة' }}</button>
+</div>
+
+<div class="row">
+    {% for pm in methods %}
+    <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card h-100" style="{{ '' if pm.is_active else 'opacity:0.5;' }}">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="pm-type-icon" style="font-size:1.5rem;">
+                            {% if pm.type == 'crypto' %}<i class="bi bi-coin text-warning"></i>
+                            {% elif pm.type == 'paypal' %}<i class="bi bi-paypal text-primary"></i>
+                            {% elif pm.type == 'bank' %}<i class="bi bi-bank text-success"></i>
+                            {% elif pm.type == 'card' %}<i class="bi bi-credit-card text-info"></i>
+                            {% else %}<i class="bi bi-wallet2 text-secondary"></i>{% endif %}
+                        </span>
+                        <div>
+                            <span class="badge bg-{{ 'warning' if pm.type == 'crypto' else 'info' if pm.type == 'paypal' else 'success' if pm.type == 'bank' else 'primary' if pm.type == 'card' else 'secondary' }} mb-1">{{ pm.type }}</span>
+                            <h5 class="mb-0">{{ pm.label }}</h5>
+                        </div>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-light" data-bs-toggle="dropdown"><i class="bi bi-three-dots-vertical"></i></button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#editPmModal{{ pm.id }}"><i class="bi bi-pencil me-1"></i>{{ 'Edit' if lang == 'en' else 'تعديل' }}</button></li>
+                            <li>
+                                <form method="POST" action="{{ url_for('admin.payment_methods') }}">
+                                    <input type="hidden" name="action" value="toggle">
+                                    <input type="hidden" name="pm_id" value="{{ pm.id }}">
+                                    <button type="submit" class="dropdown-item"><i class="bi bi-{{ 'eye-slash' if pm.is_active else 'eye' }} me-1"></i>{{ 'Deactivate' if pm.is_active and lang == 'en' else 'Activate' if not pm.is_active and lang == 'en' else 'إيقاف' if pm.is_active else 'تفعيل' }}</button>
+                                </form>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="POST" action="{{ url_for('admin.delete_payment_method', pm_id=pm.id) }}" onsubmit="return confirm('{{ 'Delete?' if lang == 'en' else 'حذف؟' }}')">
+                                    <button type="submit" class="dropdown-item text-danger"><i class="bi bi-trash me-1"></i>{{ 'Delete' if lang == 'en' else 'حذف' }}</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    {% if pm.is_active %}
+                    <span class="badge bg-success">{{ 'Active' if lang == 'en' else 'نشط' }}</span>
+                    {% else %}
+                    <span class="badge bg-secondary">{{ 'Inactive' if lang == 'en' else 'غير نشط' }}</span>
+                    {% endif %}
+                </div>
+                <div class="p-2 rounded" style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);">
+                    {% if pm.details %}
+                        {% set details_lines = pm.details.split('\n') %}
+                        {% for line in details_lines %}
+                            {% if 'Address' in line or 'address' in line or 'wallet' in line %}
+                                <div class="small"><span class="text-muted">{{ 'Address' if lang == 'en' else 'العنوان' }}:</span> <span class="font-monospace">{{ line.split(': ', 1)[1] if ': ' in line else line }}</span></div>
+                            {% elif 'Network' in line or 'network' in line %}
+                                <div class="small"><span class="text-muted">{{ 'Network' if lang == 'en' else 'الشبكة' }}:</span> <span class="badge bg-warning text-dark">{{ line.split(': ', 1)[1] if ': ' in line else line }}</span></div>
+                            {% else %}
+                                <div class="small text-muted">{{ line }}</div>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <small class="text-muted">{{ 'No details' if lang == 'en' else 'لا توجد تفاصيل' }}</small>
+                    {% endif %}
+                </div>
+                <div class="mt-2 d-flex gap-1">
+                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editPmModal{{ pm.id }}"><i class="bi bi-pencil me-1"></i>{{ 'Edit' if lang == 'en' else 'تعديل' }}</button>
+                    <form method="POST" action="{{ url_for('admin.delete_payment_method', pm_id=pm.id) }}" onsubmit="return confirm('{{ 'Delete?' if lang == 'en' else 'حذف؟' }}')" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash me-1"></i>{{ 'Delete' if lang == 'en' else 'حذف' }}</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editPmModal{{ pm.id }}" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form method="POST" action="{{ url_for('admin.edit_payment_method', pm_id=pm.id) }}">
+                    <div class="modal-header"><h5 class="modal-title"><i class="bi bi-pencil text-warning me-1"></i>{{ 'Edit' if lang == 'en' else 'تعديل' }} {{ pm.label }}</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                    <div class="modal-body">
+                        <select name="type" class="d-none pm-type-select">
+                            <option value="crypto" {{ 'selected' if pm.type == 'crypto' }}>Cryptocurrency</option>
+                            <option value="paypal" {{ 'selected' if pm.type == 'paypal' }}>PayPal</option>
+                            <option value="bank" {{ 'selected' if pm.type == 'bank' }}>Bank Transfer</option>
+                            <option value="card" {{ 'selected' if pm.type == 'card' }}>Credit Card</option>
+                            <option value="other" {{ 'selected' if pm.type == 'other' }}>Other</option>
+                        </select>
+                        <textarea name="details" class="d-none">{{ pm.details }}</textarea>
+
+                        <label class="form-label fw-semibold">{{ 'Payment Method Type' if lang == 'en' else 'نوع وسيلة الدفع' }}</label>
+                        <div class="pm-type-buttons d-flex flex-wrap gap-2 mb-3">
+                            <button type="button" class="btn btn-outline-warning pm-type-btn flex-fill text-center" data-value="crypto" style="min-width:90px;" onclick="pmBtnClick(this)">
+                                <i class="bi bi-coin d-block fs-4 mb-1"></i><small>Crypto</small>
+                            </button>
+                            <button type="button" class="btn btn-outline-primary pm-type-btn flex-fill text-center" data-value="paypal" style="min-width:90px;" onclick="pmBtnClick(this)">
+                                <i class="bi bi-paypal d-block fs-4 mb-1"></i><small>PayPal</small>
+                            </button>
+                            <button type="button" class="btn btn-outline-success pm-type-btn flex-fill text-center" data-value="bank" style="min-width:90px;" onclick="pmBtnClick(this)">
+                                <i class="bi bi-bank d-block fs-4 mb-1"></i><small>Bank</small>
+                            </button>
+                            <button type="button" class="btn btn-outline-info pm-type-btn flex-fill text-center" data-value="card" style="min-width:90px;" onclick="pmBtnClick(this)">
+                                <i class="bi bi-credit-card d-block fs-4 mb-1"></i><small>Card</small>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary pm-type-btn flex-fill text-center" data-value="other" style="min-width:90px;" onclick="pmBtnClick(this)">
+                                <i class="bi bi-wallet2 d-block fs-4 mb-1"></i><small>Other</small>
+                            </button>
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold">{{ 'Label' if lang == 'en' else 'التسمية' }}</label>
+                            <div class="input-group">
+                                <span class="input-group-text pm-label-icon"><i class="bi bi-tag"></i></span>
+                                <input type="text" name="label" class="form-control pm-label-input" value="{{ pm.label }}" required>
+                            </div>
+                        </div>
+
+                        <div class="pm-type-fields pm-fields-crypto d-none">
+                            <div class="card border-light mb-2" style="background:rgba(255,255,255,0.02);">
+                                <div class="card-body">
+                                    <h6 class="card-subtitle mb-3 text-muted"><i class="bi bi-coin text-warning me-1"></i>{{ 'Cryptocurrency Details' if lang == 'en' else 'تفاصيل العملة الرقمية' }}</h6>
+                                    <div class="mb-2">
+                                        <label class="form-label">{{ 'Currency' if lang == 'en' else 'العملة' }}</label>
+                                        <select class="form-select pm-currency">
+                                            <option value="">{{ 'Select currency...' if lang == 'en' else 'اختر العملة...' }}</option>
+                                            {% for cur in crypto_currencies %}
+                                            <option value="{{ cur }}">{{ cur }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">{{ 'Network' if lang == 'en' else 'الشبكة' }}</label>
+                                        <input type="text" class="form-control pm-network" placeholder="{{ 'Enter network...' if lang == 'en' else 'أدخل الشبكة...' }}">
+                                    </div>
+                                    <div class="mb-0">
+                                        <label class="form-label">{{ 'Wallet Address' if lang == 'en' else 'عنوان المحفظة' }}</label>
+                                        <input type="text" class="form-control font-monospace pm-address" placeholder="{{ 'Enter wallet address...' if lang == 'en' else 'أدخل عنوان المحفظة...' }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pm-type-fields pm-fields-paypal d-none">
+                            <div class="card border-light mb-2" style="background:rgba(255,255,255,0.02);">
+                                <div class="card-body">
+                                    <h6 class="card-subtitle mb-3 text-muted"><i class="bi bi-paypal text-primary me-1"></i>PayPal Details</h6>
+                                    <div class="mb-0">
+                                        <label class="form-label">PayPal Email</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-envelope-at"></i></span>
+                                            <input type="email" class="form-control pm-email" placeholder="email@example.com">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pm-type-fields pm-fields-bank d-none">
+                            <div class="card border-light mb-2" style="background:rgba(255,255,255,0.02);">
+                                <div class="card-body">
+                                    <h6 class="card-subtitle mb-3 text-muted"><i class="bi bi-bank text-success me-1"></i>{{ 'Bank Transfer Details' if lang == 'en' else 'تفاصيل التحويل البنكي' }}</h6>
+                                    <div class="row g-2">
+                                        <div class="col-md-6">
+                                            <label class="form-label">{{ 'Bank Name' if lang == 'en' else 'اسم البنك' }}</label>
+                                            <input type="text" class="form-control pm-bank-name" placeholder="{{ 'e.g. Chase Bank' if lang == 'en' else 'مثال: بنك تشيس' }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">{{ 'Account Name' if lang == 'en' else 'اسم الحساب' }}</label>
+                                            <input type="text" class="form-control pm-account-name" placeholder="John Doe">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">{{ 'Account Number' if lang == 'en' else 'رقم الحساب' }}</label>
+                                            <input type="text" class="form-control pm-account-number" placeholder="1234567890">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">{{ 'Routing/SWIFT' if lang == 'en' else 'الراوتنغ/سويفت' }}</label>
+                                            <input type="text" class="form-control pm-routing" placeholder="CHASUS33">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pm-type-fields pm-fields-card d-none">
+                            <div class="card border-light mb-2" style="background:rgba(255,255,255,0.02);">
+                                <div class="card-body">
+                                    <h6 class="card-subtitle mb-3 text-muted"><i class="bi bi-credit-card text-info me-1"></i>{{ 'Credit Card Details' if lang == 'en' else 'تفاصيل البطاقة الائتمانية' }}</h6>
+                                    <div class="mb-2">
+                                        <label class="form-label">{{ 'Card Type' if lang == 'en' else 'نوع البطاقة' }}</label>
+                                        <input type="text" class="form-control pm-card-type" placeholder="{{ 'e.g. Visa, Mastercard' if lang == 'en' else 'مثال: فيزا، ماستركارد' }}">
+                                    </div>
+                                    <div class="mb-0">
+                                        <label class="form-label">{{ 'Details' if lang == 'en' else 'التفاصيل' }}</label>
+                                        <textarea class="form-control pm-card-details" rows="3" placeholder="{{ 'Card details...' if lang == 'en' else 'تفاصيل البطاقة...' }}"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pm-type-fields pm-fields-other d-none">
+                            <div class="card border-light mb-2" style="background:rgba(255,255,255,0.02);">
+                                <div class="card-body">
+                                    <h6 class="card-subtitle mb-3 text-muted"><i class="bi bi-wallet2 text-secondary me-1"></i>{{ 'Other Details' if lang == 'en' else 'تفاصيل أخرى' }}</h6>
+                                    <div class="mb-0">
+                                        <label class="form-label">{{ 'Details' if lang == 'en' else 'التفاصيل' }}</label>
+                                        <textarea class="form-control pm-other-details" rows="5" placeholder="{{ 'Enter details...' if lang == 'en' else 'أدخل التفاصيل...' }}"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 p-2 rounded small d-none pm-preview" style="background:rgba(255,255,255,0.03);border:1px dashed var(--border-color);">
+                            <div class="text-muted mb-1"><i class="bi bi-eye me-1"></i>{{ 'Preview' if lang == 'en' else 'معاينة' }}</div>
+                            <pre class="mb-0 font-monospace pm-preview-text" style="white-space:pre-wrap;color:var(--text-primary, #e5e7eb);"></pre>
+                        </div>
+                    </div>
+                    <div class="modal-footer"><button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i>{{ 'Save' if lang == 'en' else 'حفظ' }}</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12"><div class="card"><div class="card-body text-center py-5"><i class="bi bi-credit-card" style="font-size:3rem;"></i><p class="text-muted mt-2">{{ 'No payment methods yet. Add one!' if lang == 'en' else 'لا توجد وسائل دفع بعد. أضف واحدة!' }}</p></div></div></div>
+    {% endfor %}
+</div>
+
+<div class="modal fade" id="addPmModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('admin.payment_methods') }}" novalidate>
+                <input type="hidden" name="action" value="add">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title"><i class="bi bi-plus-circle text-success me-1"></i>{{ 'Add Payment Method' if lang == 'en' else 'إضافة وسيلة دفع' }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body pt-2">
+                    <select name="type" class="d-none pm-type-select">
+                        <option value="crypto">Cryptocurrency</option>
+                        <option value="paypal">PayPal</option>
+                        <option value="bank">Bank Transfer</option>
+                        <option value="card">Credit Card</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <textarea name="details" class="d-none"></textarea>
+
+                    <div class="d-flex align-items-center gap-2 mb-3 px-1 step-indicator">
+                        <span class="step-dot active"></span><span class="step-line"></span>
+                        <span class="step-dot"></span><span class="step-line"></span>
+                        <span class="step-dot"></span>
+                        <small class="text-muted ms-2">{{ 'Type — Details — Confirm' if lang == 'en' else 'النوع — التفاصيل — التأكيد' }}</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-uppercase text-muted">{{ 'Payment Type' if lang == 'en' else 'نوع الدفع' }}</label>
+                        <div class="row g-2 pm-type-buttons">
+                            <div class="col">
+                                <button type="button" class="btn pm-type-btn pm-type-tile w-100 active" data-value="crypto">
+                                    <i class="bi bi-coin fs-3 d-block"></i><small class="mt-1">Crypto</small>
+                                </button>
+                            </div>
+                            <div class="col">
+                                <button type="button" class="btn pm-type-btn pm-type-tile w-100" data-value="paypal">
+                                    <i class="bi bi-paypal fs-3 d-block"></i><small class="mt-1">PayPal</small>
+                                </button>
+                            </div>
+                            <div class="col">
+                                <button type="button" class="btn pm-type-btn pm-type-tile w-100" data-value="bank">
+                                    <i class="bi bi-bank fs-3 d-block"></i><small class="mt-1">Bank</small>
+                                </button>
+                            </div>
+                            <div class="col">
+                                <button type="button" class="btn pm-type-btn pm-type-tile w-100" data-value="card">
+                                    <i class="bi bi-credit-card fs-3 d-block"></i><small class="mt-1">Card</small>
+                                </button>
+                            </div>
+                            <div class="col">
+                                <button type="button" class="btn pm-type-btn pm-type-tile w-100" data-value="other">
+                                    <i class="bi bi-wallet2 fs-3 d-block"></i><small class="mt-1">Other</small>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <script>
+(function(){
+var m=document.getElementById('addPmModal');if(!m)return;
+m.querySelectorAll('.pm-type-btn').forEach(function(b){b.onclick=function(){
+ var v=this.dataset.value;
+ m.querySelectorAll('.pm-type-fields').forEach(function(g){g.style.display='none'});
+ var t=m.querySelector('.pm-fields-'+v);if(t){t.style.display='block';t.classList.remove('d-none')}
+ m.querySelectorAll('.pm-type-btn').forEach(function(x){x.classList.remove('active')});
+ this.classList.add('active');m.querySelector('.pm-type-select').value=v;
+}});
+var cur=m.querySelector('.pm-currency');
+if(cur){cur.addEventListener('change',function(){
+ var d=m.querySelector('[name="details"]');if(d)pmGenDetails(m)
+});}
+
+})();
+</script>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-uppercase text-muted">{{ 'Method Label' if lang == 'en' else 'اسم الوسيلة' }}</label>
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text pm-label-icon"><i class="bi bi-tag text-success"></i></span>
+                            <input type="text" name="label" class="form-control pm-label-input" placeholder="{{ 'e.g. USDT (TRC-20)' if lang == 'en' else 'مثال: USDT (TRC-20)' }}" required>
+                        </div>
+                    </div>
+
+                    <!-- Crypto -->
+                    <div class="pm-type-fields pm-fields-crypto d-none">
+                        <div class="pm-section">
+                            <div class="pm-section-header"><i class="bi bi-coin text-warning me-1"></i>{{ 'Cryptocurrency' if lang == 'en' else 'عملة رقمية' }}</div>
+                            <div class="pm-field"><label class="pm-label"><i class="bi bi-currency-exchange me-1"></i>{{ 'Currency' if lang == 'en' else 'العملة' }}</label><select class="form-select pm-currency"><option value="">{{ 'Select currency...' if lang == 'en' else 'اختر العملة...' }}</option>{% for cur in crypto_currencies %}<option value="{{ cur }}">{{ cur }}</option>{% endfor %}</select></div>
+                            <div class="pm-field"><label class="pm-label"><i class="bi bi-diagram-3 me-1"></i>{{ 'Network' if lang == 'en' else 'الشبكة' }}</label><input type="text" class="form-control pm-network" placeholder="{{ 'Enter network...' if lang == 'en' else 'أدخل الشبكة...' }}"></div>
+                            <div class="pm-field mb-0"><label class="pm-label"><i class="bi bi-wallet2 me-1"></i>{{ 'Wallet Address' if lang == 'en' else 'عنوان المحفظة' }}</label><input type="text" class="form-control font-monospace pm-address" placeholder="{{ 'Enter wallet address...' if lang == 'en' else 'أدخل عنوان المحفظة...' }}"></div>
+                        </div>
+                    </div>
+
+                    <!-- PayPal -->
+                    <div class="pm-type-fields pm-fields-paypal d-none">
+                        <div class="pm-section">
+                            <div class="pm-section-header"><i class="bi bi-paypal text-primary me-1"></i>PayPal</div>
+                            <div class="pm-field mb-0"><label class="pm-label"><i class="bi bi-envelope-at me-1"></i>PayPal Email</label><div class="input-group"><span class="input-group-text"><i class="bi bi-envelope-at"></i></span><input type="email" class="form-control pm-email" placeholder="email@example.com"></div></div>
+                        </div>
+                    </div>
+
+                    <!-- Bank -->
+                    <div class="pm-type-fields pm-fields-bank d-none">
+                        <div class="pm-section">
+                            <div class="pm-section-header"><i class="bi bi-bank text-success me-1"></i>{{ 'Bank Transfer' if lang == 'en' else 'تحويل بنكي' }}</div>
+                            <div class="row g-2">
+                                <div class="col-md-6"><div class="pm-field"><label class="pm-label">{{ 'Bank Name' if lang == 'en' else 'اسم البنك' }}</label><input type="text" class="form-control pm-bank-name" placeholder="{{ 'e.g. Chase Bank' if lang == 'en' else 'مثال: بنك تشيس' }}"></div></div>
+                                <div class="col-md-6"><div class="pm-field"><label class="pm-label">{{ 'Account Name' if lang == 'en' else 'اسم الحساب' }}</label><input type="text" class="form-control pm-account-name" placeholder="John Doe"></div></div>
+                                <div class="col-md-6"><div class="pm-field"><label class="pm-label">{{ 'Account Number' if lang == 'en' else 'رقم الحساب' }}</label><input type="text" class="form-control pm-account-number" placeholder="1234567890"></div></div>
+                                <div class="col-md-6"><div class="pm-field"><label class="pm-label">{{ 'Routing / SWIFT' if lang == 'en' else 'الراوتنغ / سويفت' }}</label><input type="text" class="form-control pm-routing" placeholder="CHASUS33"></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card -->
+                    <div class="pm-type-fields pm-fields-card d-none">
+                        <div class="pm-section">
+                            <div class="pm-section-header"><i class="bi bi-credit-card text-info me-1"></i>{{ 'Credit Card' if lang == 'en' else 'بطاقة ائتمان' }}</div>
+                            <div class="pm-field"><label class="pm-label">{{ 'Card Type' if lang == 'en' else 'نوع البطاقة' }}</label><input type="text" class="form-control pm-card-type" placeholder="{{ 'e.g. Visa, Mastercard' if lang == 'en' else 'مثال: فيزا، ماستركارد' }}"></div>
+                            <div class="pm-field mb-0"><label class="pm-label">{{ 'Details' if lang == 'en' else 'التفاصيل' }}</label><textarea class="form-control pm-card-details" rows="3" placeholder="{{ 'Card details...' if lang == 'en' else 'تفاصيل البطاقة...' }}"></textarea></div>
+                        </div>
+                    </div>
+
+                    <!-- Other -->
+                    <div class="pm-type-fields pm-fields-other d-none">
+                        <div class="pm-section">
+                            <div class="pm-section-header"><i class="bi bi-wallet2 text-secondary me-1"></i>{{ 'Other' if lang == 'en' else 'أخرى' }}</div>
+                            <div class="pm-field mb-0"><label class="pm-label">{{ 'Details' if lang == 'en' else 'التفاصيل' }}</label><textarea class="form-control pm-other-details" rows="5" placeholder="{{ 'Enter details...' if lang == 'en' else 'أدخل التفاصيل...' }}"></textarea></div>
+                        </div>
+                    </div>
+
+                    <div class="d-none pm-preview">
+                        <div class="pm-preview-box">
+                            <div class="text-muted mb-1"><i class="bi bi-eye me-1"></i>{{ 'Live Preview' if lang == 'en' else 'معاينة مباشرة' }}</div>
+                            <pre class="mb-0 font-monospace pm-preview-text" style="white-space:pre-wrap;color:var(--text-primary, #e5e7eb);"></pre>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="submit" class="btn btn-success btn-lg px-4"><i class="bi bi-plus-circle me-1"></i>{{ 'Add Method' if lang == 'en' else 'إضافة وسيلة' }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<style>
+.pm-type-btn { transition:all 0.15s ease; }
+.pm-type-btn:hover { transform:translateY(-2px); }
+.pm-type-fields { transition:opacity 0.2s ease; }
+
+/* Modern tile selector */
+.pm-type-tile {
+    border: 2px solid var(--border-color, #374151);
+    border-radius: 12px;
+    padding: 12px 4px;
+    background: transparent;
+    color: var(--text-primary, #e5e7eb);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+.pm-type-tile:hover {
+    border-color: var(--text-muted, #9ca3af);
+    background: rgba(255,255,255,0.03);
+}
+.pm-type-tile.active {
+    border-width: 2px;
+    box-shadow: 0 0 14px rgba(25,135,84,0.18);
+}
+.pm-type-tile.active[data-value="crypto"] { border-color: #ffc107; background:rgba(255,193,7,0.08); box-shadow:0 0 14px rgba(255,193,7,0.15); }
+.pm-type-tile.active[data-value="paypal"] { border-color: #0d6efd; background:rgba(13,110,253,0.08); box-shadow:0 0 14px rgba(13,110,253,0.15); }
+.pm-type-tile.active[data-value="bank"] { border-color: #198754; background:rgba(25,135,84,0.08); box-shadow:0 0 14px rgba(25,135,84,0.15); }
+.pm-type-tile.active[data-value="card"] { border-color: #0dcaf0; background:rgba(13,202,240,0.08); box-shadow:0 0 14px rgba(13,202,240,0.15); }
+.pm-type-tile.active[data-value="other"] { border-color: #6c757d; background:rgba(108,117,125,0.08); box-shadow:0 0 14px rgba(108,117,125,0.15); }
+.pm-type-tile small { font-size:0.7rem; opacity:0.7; }
+.pm-type-tile.active small { opacity:1; }
+
+/* Step indicator */
+.step-indicator { opacity:0.5; }
+.step-dot { width:10px; height:10px; border-radius:50%; background:var(--border-color, #4b5563); flex-shrink:0; }
+.step-dot.active { background:#198754; box-shadow:0 0 8px rgba(25,135,84,0.4); }
+.step-line { flex:1; height:2px; background:var(--border-color, #4b5563); min-width:12px; }
+
+/* Field sections */
+.pm-section {
+    background:rgba(255,255,255,0.015);
+    border:1px solid var(--border-color, #374151);
+    border-radius:10px;
+    padding:16px 16px 12px;
+}
+.pm-section-header {
+    font-size:0.82rem;
+    font-weight:600;
+    color:var(--text-muted, #9ca3af);
+    margin-bottom:12px;
+    padding-bottom:8px;
+    border-bottom:1px solid var(--border-color, #374151);
+}
+.pm-field { margin-bottom:10px; }
+.pm-label {
+    display:block;
+    font-size:0.78rem;
+    color:var(--text-muted, #9ca3af);
+    margin-bottom:4px;
+}
+
+/* Preview box */
+.pm-preview-box {
+    background:rgba(255,255,255,0.02);
+    border:1px dashed var(--border-color, #4b5563);
+    border-radius:10px;
+    padding:12px;
+}
+
+/* Fade animation */
+@keyframes pmFadeIn {
+    from { opacity:0; transform:translateY(8px); }
+    to { opacity:1; transform:translateY(0); }
+}
+.pm-fade-in > .pm-section {
+    animation: pmFadeIn 0.25s ease forwards;
+}
+</style>
+<script>
+const NETWORK_OPTS = {{ network_options | tojson | safe }};
+
+function pmBtnClick(btn) {
+    var modal = btn.closest('.modal');
+    if (!modal) return;
+    pmSelectType(modal, btn.dataset.value);
+    pmGenDetails(modal);
+}
+
+function pmSetNetworkOpts(curSel) {
+    var modal = curSel.closest('.modal');
+    var currency = curSel.value;
+    var netSel = modal.querySelector('.pm-network');
+    if (netSel.tagName === 'SELECT') {
+        while (netSel.options.length > 1) netSel.remove(1);
+        if (currency && NETWORK_OPTS[currency]) {
+            NETWORK_OPTS[currency].forEach(function(n) {
+                var opt = document.createElement('option');
+                opt.value = n; opt.textContent = n;
+                netSel.appendChild(opt);
+            });
+            netSel.selectedIndex = 1;
+        }
+    }
+}
+
+function pmSwitchType(modal, val) {
+    var fields = modal.querySelectorAll('.pm-type-fields');
+    fields.forEach(function(g) {
+        g.style.display = 'none';
+    });
+    var target = modal.querySelector('.pm-fields-' + val);
+    if (target) {
+        target.style.display = 'block';
+        target.classList.remove('d-none');
+        target.classList.remove('pm-fade-in');
+        void target.offsetHeight;
+        target.classList.add('pm-fade-in');
+    }
+    var preview = modal.querySelector('.pm-preview');
+    if (preview) preview.style.display = 'none';
+
+    var icon = modal.querySelector('.pm-label-icon i');
+    var icons = { crypto:'coin', paypal:'paypal', bank:'bank', card:'credit-card', other:'wallet2' };
+    var colors = { crypto:'text-warning', paypal:'text-primary', bank:'text-success', card:'text-info', other:'text-secondary' };
+    if (icon) {
+        icon.className = 'bi bi-' + (icons[val] || 'tag') + ' ' + (colors[val] || '');
+    }
+
+    var placeholders = {
+        crypto: {{ "'e.g. USDT (TRC-20)'" if lang == 'en' else "'مثال: USDT (TRC-20)'" }},
+        paypal: {{ "'e.g. PayPal' if lang == 'en' else "'مثال: باي بال'" }},
+        bank: {{ "'e.g. Chase Bank' if lang == 'en' else "'مثال: بنك تشيس'" }},
+        card: {{ "'e.g. Visa' if lang == 'en' else "'مثال: فيزا'" }},
+        other: {{ "'e.g. Custom Method' if lang == 'en' else "'مثال: وسيلة مخصصة'" }}
+    };
+    var labelInput = modal.querySelector('.pm-label-input');
+    if (labelInput && labelInput.dataset.origPlaceholder) {
+        labelInput.placeholder = placeholders[val] || labelInput.dataset.origPlaceholder;
+    }
+}
+
+function pmSyncTypeBtns(modal, val) {
+    modal.querySelectorAll('.pm-type-btn').forEach(function(b) {
+        b.classList.remove('active');
+        if (b.dataset.value === val) b.classList.add('active');
+    });
+}
+
+function pmSelectType(modal, val) {
+    var sel = modal.querySelector('.pm-type-select');
+    sel.value = val;
+    pmSyncTypeBtns(modal, val);
+    pmSwitchType(modal, val);
+}
+
+function pmGenDetails(modal) {
+    var type = modal.querySelector('.pm-type-select').value;
+    var lines = [];
+    if (type === 'crypto') {
+        var cur = modal.querySelector('.pm-currency').value;
+        var net = modal.querySelector('.pm-network').value;
+        var addr = modal.querySelector('.pm-address').value;
+        if (cur) lines.push('Currency: ' + cur);
+        if (net) lines.push('Network: ' + net);
+        if (addr) lines.push('Address: ' + addr);
+    } else if (type === 'paypal') {
+        var em = modal.querySelector('.pm-email').value;
+        if (em) lines.push('Email: ' + em);
+    } else if (type === 'bank') {
+        var bn = modal.querySelector('.pm-bank-name').value;
+        var an = modal.querySelector('.pm-account-name').value;
+        var anum = modal.querySelector('.pm-account-number').value;
+        var rt = modal.querySelector('.pm-routing').value;
+        if (bn) lines.push('Bank Name: ' + bn);
+        if (an) lines.push('Account Name: ' + an);
+        if (anum) lines.push('Account Number: ' + anum);
+        if (rt) lines.push('Routing/SWIFT: ' + rt);
+    } else if (type === 'card') {
+        var ct = modal.querySelector('.pm-card-type').value;
+        var cd = modal.querySelector('.pm-card-details').value;
+        if (ct) lines.push('Card Type: ' + ct);
+        if (cd) lines.push('Details: ' + cd);
+    } else if (type === 'other') {
+        var od = modal.querySelector('.pm-other-details').value;
+        if (od) lines.push(od);
+    }
+    var details = lines.join('\n');
+    modal.querySelector('[name="details"]').value = details;
+    var preview = modal.querySelector('.pm-preview');
+    var previewText = modal.querySelector('.pm-preview-text');
+    if (preview && previewText) {
+        if (details) {
+            preview.style.display = 'block';
+            preview.classList.remove('d-none');
+            previewText.textContent = details;
+        } else {
+            preview.style.display = 'none';
+        }
+    }
+}
+
+function pmFillEdit(modal) {
+    var typeSel = modal.querySelector('.pm-type-select');
+    var details = modal.querySelector('[name="details"]').value;
+    if (!details) return;
+    var lines = details.split('\n');
+    var hasCur = details.indexOf('Currency:') !== -1;
+    var hasAddr = details.indexOf('Address:') !== -1;
+    var hasNet = details.indexOf('Network:') !== -1;
+    var hasEmail = details.indexOf('Email:') !== -1;
+    var hasBank = details.indexOf('Bank Name:') !== -1;
+    var hasCard = details.indexOf('Card Type:') !== -1;
+    var detected = 'other';
+    if ((hasAddr && hasNet) || hasCur) detected = 'crypto';
+    else if (hasEmail) detected = 'paypal';
+    else if (hasBank) detected = 'bank';
+    else if (hasCard) detected = 'card';
+    pmSelectType(modal, detected);
+    if (detected === 'crypto') {
+        lines.forEach(function(l) {
+            var idx = l.lastIndexOf(': ');
+            if (idx < 0) { idx = l.indexOf(': '); if (idx < 0) return; }
+            var key = l.slice(0, idx).trim(), val = l.slice(idx + 2).trim();
+            if (key.indexOf('Currency') !== -1 || key === 'Currency') { modal.querySelector('.pm-currency').value = val; pmSetNetworkOpts(modal.querySelector('.pm-currency')); }
+            if (key.indexOf('Network') !== -1 || key === 'Network') { modal.querySelector('.pm-network').value = val; }
+            if (key.indexOf('Address') !== -1 || key === 'Address') { modal.querySelector('.pm-address').value = val; }
+        });
+    } else if (detected === 'paypal') {
+        var m = details.match(/Email: (.+)/);
+        if (m) modal.querySelector('.pm-email').value = m[1];
+    } else if (detected === 'bank') {
+        lines.forEach(function(l) {
+            var idx = l.indexOf(': ');
+            if (idx < 0) return;
+            var key = l.slice(0, idx), val = l.slice(idx + 2);
+            if (key === 'Bank Name') modal.querySelector('.pm-bank-name').value = val;
+            if (key === 'Account Name') modal.querySelector('.pm-account-name').value = val;
+            if (key === 'Account Number') modal.querySelector('.pm-account-number').value = val;
+            if (key === 'Routing/SWIFT') modal.querySelector('.pm-routing').value = val;
+        });
+    } else if (detected === 'card') {
+        lines.forEach(function(l) {
+            var idx = l.indexOf(': ');
+            if (idx < 0) return;
+            var key = l.slice(0, idx), val = l.slice(idx + 2);
+            if (key === 'Card Type') modal.querySelector('.pm-card-type').value = val;
+            if (key === 'Details') modal.querySelector('.pm-card-details').value = val;
+        });
+    } else {
+        modal.querySelector('.pm-other-details').value = details;
+    }
+    pmGenDetails(modal);
+}
+
+function pmResetModal(modal) {
+    modal.querySelectorAll('.pm-type-fields').forEach(function(g) { g.style.display = 'none'; });
+    modal.querySelectorAll('.pm-type-fields input, .pm-type-fields select, .pm-type-fields textarea').forEach(function(f) {
+        if (f.tagName === 'SELECT') { f.selectedIndex = 0; }
+        else { f.value = ''; }
+    });
+    modal.querySelector('[name="details"]').value = '';
+    var preview = modal.querySelector('.pm-preview');
+    if (preview) preview.style.display = 'none';
+    pmSelectType(modal, 'crypto');
+}
+
+//
+// Simplified initialization — event delegation for type buttons
+//
+document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.pm-type-btn');
+    if (!btn) return;
+    var modal = btn.closest('.modal');
+    if (!modal) return;
+    pmSelectType(modal, btn.dataset.value);
+    pmGenDetails(modal);
+});
+
+document.addEventListener('change', function(e) {
+    var curSel = e.target.closest('.pm-currency');
+    if (!curSel) return;
+    var modal = curSel.closest('.modal');
+    if (!modal) return;
+    pmSetNetworkOpts(curSel);
+    pmGenDetails(modal);
+});
+
+document.addEventListener('input', function(e) {
+    if (!e.target.closest('.pm-type-fields')) return;
+    var modal = e.target.closest('.modal');
+    if (!modal) return;
+    pmGenDetails(modal);
+});
+
+document.addEventListener('change', function(e) {
+    if (!e.target.closest('.pm-type-fields')) return;
+    var modal = e.target.closest('.modal');
+    if (!modal) return;
+    pmGenDetails(modal);
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Add modal
+    var addModal = document.getElementById('addPmModal');
+    var addForm = addModal.querySelector('form');
+    addForm.addEventListener('submit', function() { pmGenDetails(addModal); });
+    addModal.addEventListener('shown.bs.modal', function() {
+        pmSelectType(addModal, 'crypto');
+        pmGenDetails(addModal);
+    });
+    addModal.addEventListener('hidden.bs.modal', function() { pmResetModal(addModal); });
+    var addLabelInput = addModal.querySelector('.pm-label-input');
+    if (addLabelInput) addLabelInput.dataset.origPlaceholder = addLabelInput.placeholder;
+
+    // Initialize Edit modals
+    document.querySelectorAll('[id^="editPmModal"]').forEach(function(m) {
+        m.querySelector('form').addEventListener('submit', function() { pmGenDetails(m); });
+        var labelInput = m.querySelector('.pm-label-input');
+        if (labelInput) labelInput.dataset.origPlaceholder = 'e.g. USDT';
+        m.addEventListener('shown.bs.modal', function() {
+            var details = m.querySelector('[name="details"]').value;
+            if (details) { pmFillEdit(m); }
+            else { pmSelectType(m, m.querySelector('.pm-type-select').value); }
+        });
+    });
+});
+</script>
+{% endblock %}

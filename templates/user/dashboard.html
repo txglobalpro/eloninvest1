@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% block title %}{{ t('Dashboard') }}{% endblock %}
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="stat-card balance" style="background:rgba(0,200,83,0.08);border:1px solid rgba(0,200,83,0.15);">
+            <h6><i class="bi bi-wallet2 me-1"></i>{{ t('Balance') }}</h6>
+            <p class="stat-value" style="color:#00e676;">${{ "%.2f"|format(current_user.balance) }}</p>
+            <div class="stat-icon"><i class="bi bi-wallet2"></i></div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stat-card profit" style="background:rgba(41,121,255,0.08);border:1px solid rgba(41,121,255,0.15);">
+            <h6><i class="bi bi-graph-up-arrow me-1"></i>{{ t('Total Profit') }}</h6>
+            <p class="stat-value" style="color:#448aff;">${{ "%.2f"|format(current_user.total_profit) }}</p>
+            <div class="stat-icon"><i class="bi bi-graph-up-arrow"></i></div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stat-card deposits" style="background:rgba(0,188,212,0.08);border:1px solid rgba(0,188,212,0.15);">
+            <h6><i class="bi bi-piggy-bank me-1"></i>{{ t('Total Deposits') }}</h6>
+            <p class="stat-value" style="color:#26c6da;">${{ "%.2f"|format(current_user.total_deposits) }}</p>
+            <div class="stat-icon"><i class="bi bi-piggy-bank"></i></div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stat-card withdrawn" style="background:rgba(255,109,0,0.08);border:1px solid rgba(255,109,0,0.15);">
+            <h6><i class="bi bi-credit-card me-1"></i>{{ t('Withdrawn') }}</h6>
+            <p class="stat-value" style="color:#ff9100;">${{ "%.2f"|format(current_user.total_withdrawn) }}</p>
+            <div class="stat-icon"><i class="bi bi-credit-card"></i></div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="stat-card" style="background:rgba(156,39,176,0.08);border:1px solid rgba(156,39,176,0.15);">
+            <h6><i class="bi bi-pie-chart me-1"></i>{{ 'Invested' if lang == 'en' else 'المستثمر' }}</h6>
+            <p class="stat-value" style="color:#ce93d8;">${{ "%.2f"|format(total_invested) }}</p>
+            <div class="stat-icon"><i class="bi bi-pie-chart"></i></div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stat-card" style="background:rgba(255,152,0,0.08);border:1px solid rgba(255,152,0,0.15);">
+            <h6><i class="bi bi-hourglass-split me-1"></i>{{ 'Pending Withdrawals' if lang == 'en' else 'سحوبات معلقة' }}</h6>
+            <p class="stat-value" style="color:#ffb74d;">{{ pending_withdrawals }}</p>
+            <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stat-card" style="background:rgba(0,200,83,0.08);border:1px solid rgba(0,200,83,0.15);">
+            <h6><i class="bi bi-clock-fill me-1"></i>{{ 'Pending Deposits' if lang == 'en' else 'إيداعات معلقة' }}</h6>
+            <p class="stat-value" style="color:#00e676;">{{ pending_deposits }}</p>
+            <div class="stat-icon"><i class="bi bi-clock-fill"></i></div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stat-card" style="background:rgba(0,150,136,0.08);border:1px solid rgba(0,150,136,0.15);">
+            <h6><i class="bi bi-clock-history me-1"></i>{{ 'Last Login' if lang == 'en' else 'آخر دخول' }}</h6>
+            <p class="stat-value" style="color:#4db6ac;font-size:1.1rem;">{{ current_user.last_login.strftime('%Y-%m-%d') if current_user.last_login else '-' }}</p>
+            <div class="stat-icon"><i class="bi bi-clock-history"></i></div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <a href="{{ url_for('user.profile') }}" class="stat-card text-decoration-none" style="background:rgba(33,150,243,0.08);border:1px solid rgba(33,150,243,0.15);display:block;">
+            <h6><i class="bi bi-gear me-1"></i>{{ 'Settings' if lang == 'en' else 'الإعدادات' }}</h6>
+            <p class="stat-value" style="color:#64b5f6;font-size:1.1rem;"><i class="bi bi-arrow-right"></i></p>
+            <div class="stat-icon"><i class="bi bi-gear"></i></div>
+        </a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6 mb-3">
+        <a href="{{ url_for('investment.deposit') }}" class="btn btn-success w-100 py-3">
+            <i class="bi bi-plus-circle me-2"></i>{{ t('Make a Deposit') }}
+        </a>
+    </div>
+    <div class="col-md-6 mb-3">
+        <a href="{{ url_for('investment.withdraw') }}" class="btn btn-warning w-100 py-3">
+            <i class="bi bi-box-arrow-up me-2"></i>{{ t('Request Withdrawal') }}
+        </a>
+    </div>
+</div>
+
+{% if current_user.payment_method %}
+<div class="card mb-4">
+    <div class="card-header"><i class="bi bi-credit-card-2-front me-2"></i>{{ 'My Payment Info' if lang == 'en' else 'معلومات الدفع الخاصة بي' }}</div>
+    <div class="card-body">
+        <pre class="mb-0 small text-muted" style="white-space:pre-wrap;word-break:break-word;">{{ current_user.payment_method }}</pre>
+    </div>
+</div>
+{% endif %}
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-briefcase-fill me-2"></i>{{ t('Active Investments') }}</span>
+        <a href="{{ url_for('investment.plans') }}" class="btn btn-warning btn-sm"><i class="bi bi-plus-lg me-1"></i>{{ t('Invest now') }}</a>
+    </div>
+    <div class="card-body">
+        {% if investments %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead><tr>
+                    <th>{{ t('Plan') }}</th>
+                    <th>{{ t('Amount') }}</th>
+                    <th>{{ 'Daily Profit' if lang == 'en' else 'الربح اليومي' }}</th>
+                    <th>{{ 'Total Profit' if lang == 'en' else 'إجمالي الربح' }}</th>
+                    <th>{{ t('Start') }}</th>
+                    <th>{{ t('End') }}</th>
+                    <th>{{ t('Status') }}</th>
+                </tr></thead>
+                <tbody>
+                    {% for inv in investments %}
+                    {% set days_elapsed = (now - inv.start_date).days %}
+                    {% set profit_so_far = inv.amount * inv.plan.daily_roi * (days_elapsed if days_elapsed < inv.plan.duration_days else inv.plan.duration_days) %}
+                    <tr>
+                        <td>
+                            <strong>
+                                {% if inv.plan.company == 'Tesla' %}<i class="bi bi-lightning-fill text-warning me-1"></i>
+                                {% elif inv.plan.company == 'SpaceX' %}<i class="bi bi-rocket-takeoff text-info me-1"></i>
+                                {% elif inv.plan.company == 'Neuralink' %}<i class="bi bi-cpu text-success me-1"></i>
+                                {% elif inv.plan.company == 'X' %}<i class="bi bi-twitter text-primary me-1"></i>
+                                {% elif inv.plan.company == 'The Boring Company' %}<i class="bi bi-trench text-secondary me-1"></i>
+                                {% endif %}
+                                {{ inv.plan.name }}
+                            </strong><br><small class="text-muted">{{ inv.plan.company }}</small>
+                        </td>
+                        <td><strong>${{ "%.2f"|format(inv.amount) }}</strong></td>
+                        <td style="color:#00e676;">+${{ "%.2f"|format(inv.amount * inv.plan.daily_roi) }} <small class="text-muted">({{ "%.1f"|format(inv.plan.daily_roi * 100) }}%)</small></td>
+                        <td style="color:#448aff;">+${{ "%.2f"|format(profit_so_far) }}</td>
+                        <td>{{ inv.start_date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ inv.end_date.strftime('%Y-%m-%d') if inv.end_date else '-' }}</td>
+                        <td><span class="badge bg-{{ 'success' if inv.status == 'active' else 'secondary' }}">{{ inv.status }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="bi bi-briefcase text-muted" style="font-size:3rem;"></i>
+            <p class="text-muted mt-2">{{ t('No active investments') }}</p>
+            <a href="{{ url_for('investment.plans') }}" class="btn btn-warning"><i class="bi bi-plus-lg me-1"></i>{{ t('Invest now') }}</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header"><i class="bi bi-arrow-repeat me-2"></i>{{ t('Recent Transactions') }}</div>
+    <div class="card-body">
+        {% if transactions %}
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead><tr>
+                    <th>{{ t('Type') }}</th>
+                    <th>{{ t('Amount') }}</th>
+                    <th>{{ t('Status') }}</th>
+                    <th>{{ t('Date') }}</th>
+                </tr></thead>
+                <tbody>
+                    {% for t in transactions[:10] %}
+                    <tr>
+                        <td>
+                            <span class="badge bg-{{ 'info' if t.type == 'deposit' else 'success' if t.type in ['profit','referral','reward'] else 'warning' if t.type == 'withdraw' else 'secondary' }}">
+                                <i class="bi bi-{{ 'arrow-down-circle' if t.type == 'deposit' else 'arrow-up-circle' if t.type == 'withdraw' else 'graph-up' if t.type == 'profit' else 'people' if t.type == 'referral' else 'gift' if t.type == 'reward' else 'gear' }} me-1"></i>
+                                {{ t.type }}
+                            </span>
+                        </td>
+                        <td><strong>${{ "%.2f"|format(t.amount) }}</strong></td>
+                        <td><span class="badge bg-{{ 'success' if t.status == 'completed' else 'warning' if t.status == 'pending' else 'danger' }}">{{ t.status }}</span></td>
+                        <td>{{ t.created_at.strftime('%Y-%m-%d') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="bi bi-clock-history text-muted" style="font-size:3rem;"></i>
+            <p class="text-muted mt-2">{{ t('No transactions yet') }}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

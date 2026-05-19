@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Manage Plans' if lang == 'en' else 'إدارة الخطط' }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0"><i class="bi bi-pie-chart-fill text-info me-2"></i>{{ 'Investment Plans' if lang == 'en' else 'الخطط الاستثمارية' }}</h3>
+    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addPlanModal"><i class="bi bi-plus-circle me-1"></i>{{ 'Add Plan' if lang == 'en' else 'إضافة خطة' }}</button>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead><tr>
+                    <th>ID</th>
+                    <th>{{ 'Name' if lang == 'en' else 'الاسم' }}</th>
+                    <th>{{ 'Company' if lang == 'en' else 'الشركة' }}</th>
+                    <th>{{ 'Min' if lang == 'en' else 'الحد الأدنى' }}</th>
+                    <th>{{ 'Max' if lang == 'en' else 'الحد الأقصى' }}</th>
+                    <th>{{ 'Daily ROI' if lang == 'en' else 'العائد اليومي' }}</th>
+                    <th>{{ 'Duration' if lang == 'en' else 'المدة' }}</th>
+                    <th>{{ 'Description' if lang == 'en' else 'الوصف' }}</th>
+                    <th>{{ 'Actions' if lang == 'en' else 'إجراءات' }}</th>
+                </tr></thead>
+                <tbody>
+                    {% for plan in plans %}
+                    <tr>
+                        <td>{{ plan.id }}</td>
+                        <td><strong>
+                            {% if plan.company == 'Tesla' %}<i class="bi bi-lightning-fill text-warning me-1"></i>
+                            {% elif plan.company == 'SpaceX' %}<i class="bi bi-rocket-takeoff text-info me-1"></i>
+                            {% elif plan.company == 'Neuralink' %}<i class="bi bi-cpu text-success me-1"></i>
+                            {% elif plan.company == 'X' %}<i class="bi bi-twitter text-primary me-1"></i>
+                            {% elif plan.company == 'The Boring Company' %}<i class="bi bi-trench text-secondary me-1"></i>
+                            {% endif %}
+                            {{ plan.name }}
+                        </strong></td>
+                        <td>{{ plan.company }}</td>
+                        <td>${{ "%.0f"|format(plan.min_amount) }}</td>
+                        <td>${{ "%.0f"|format(plan.max_amount) }}</td>
+                        <td><span class="text-success">{{ "%.1f"|format(plan.daily_roi * 100) }}%</span></td>
+                        <td>{{ plan.duration_days }}d</td>
+                        <td><small class="text-muted">{{ plan.description[:40] ~ '...' if plan.description else '-' }}</small></td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editPlanModal{{ plan.id }}"><i class="bi bi-pencil"></i></button>
+                            <form method="POST" action="{{ url_for('admin.delete_plan', plan_id=plan.id) }}" class="d-inline" onsubmit="return confirm('{{ 'Delete this plan?' if lang == 'en' else 'حذف هذه الخطة؟' }}')">
+                                <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    <div class="modal fade" id="editPlanModal{{ plan.id }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <form method="POST" action="{{ url_for('admin.edit_plan', plan_id=plan.id) }}">
+                                    <div class="modal-header"><h5 class="modal-title"><i class="bi bi-pencil text-warning me-1"></i>{{ 'Edit' if lang == 'en' else 'تعديل' }} {{ plan.name }}</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                                    <div class="modal-body">
+                                        <div class="mb-2"><label class="form-label">{{ 'Name' if lang == 'en' else 'الاسم' }}</label><input type="text" name="name" class="form-control" value="{{ plan.name }}" required></div>
+                                        <div class="mb-2"><label class="form-label">{{ 'Company' if lang == 'en' else 'الشركة' }}</label><input type="text" name="company" class="form-control" value="{{ plan.company }}" required></div>
+                                        <div class="row mb-2">
+                                            <div class="col-6"><label class="form-label">{{ 'Min $' if lang == 'en' else 'الحد الأدنى $' }}</label><input type="number" step="0.01" name="min_amount" class="form-control" value="{{ plan.min_amount }}" required></div>
+                                            <div class="col-6"><label class="form-label">{{ 'Max $' if lang == 'en' else 'الحد الأقصى $' }}</label><input type="number" step="0.01" name="max_amount" class="form-control" value="{{ plan.max_amount }}" required></div>
+                                        </div>
+                                        <div class="row mb-2">
+                                            <div class="col-6"><label class="form-label">{{ 'Daily ROI %' if lang == 'en' else 'العائد اليومي %' }}</label><input type="number" step="0.1" name="daily_roi" class="form-control" value="{{ "%.1f"|format(plan.daily_roi * 100) }}" required></div>
+                                            <div class="col-6"><label class="form-label">{{ 'Days' if lang == 'en' else 'الأيام' }}</label><input type="number" name="duration_days" class="form-control" value="{{ plan.duration_days }}" required></div>
+                                        </div>
+                                        <div class="mb-2"><label class="form-label">{{ 'Description' if lang == 'en' else 'الوصف' }}</label><textarea name="description" class="form-control" rows="2">{{ plan.description }}</textarea></div>
+                                    </div>
+                                    <div class="modal-footer"><button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i>{{ 'Save' if lang == 'en' else 'حفظ' }}</button></div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <tr><td colspan="9" class="text-center text-muted">{{ 'No plans' if lang == 'en' else 'لا توجد خطط' }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addPlanModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('admin.plans') }}">
+                <input type="hidden" name="action" value="add">
+                <div class="modal-header"><h5 class="modal-title"><i class="bi bi-plus-circle text-success me-1"></i>{{ 'Add New Plan' if lang == 'en' else 'إضافة خطة جديدة' }}</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <div class="mb-2"><label class="form-label">{{ 'Name' if lang == 'en' else 'الاسم' }}</label><input type="text" name="name" class="form-control" required></div>
+                    <div class="mb-2"><label class="form-label">{{ 'Company' if lang == 'en' else 'الشركة' }}</label><input type="text" name="company" class="form-control" required></div>
+                    <div class="row mb-2">
+                        <div class="col-6"><label class="form-label">{{ 'Min $' if lang == 'en' else 'الحد الأدنى $' }}</label><input type="number" step="0.01" name="min_amount" class="form-control" required></div>
+                        <div class="col-6"><label class="form-label">{{ 'Max $' if lang == 'en' else 'الحد الأقصى $' }}</label><input type="number" step="0.01" name="max_amount" class="form-control" required></div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-6"><label class="form-label">{{ 'Daily ROI %' if lang == 'en' else 'العائد اليومي %' }}</label><input type="number" step="0.1" name="daily_roi" class="form-control" required></div>
+                        <div class="col-6"><label class="form-label">{{ 'Duration (days)' if lang == 'en' else 'المدة (أيام)' }}</label><input type="number" name="duration_days" class="form-control" required></div>
+                    </div>
+                    <div class="mb-2"><label class="form-label">{{ 'Description' if lang == 'en' else 'الوصف' }}</label><textarea name="description" class="form-control" rows="2"></textarea></div>
+                </div>
+                <div class="modal-footer"><button type="submit" class="btn btn-success"><i class="bi bi-plus-circle me-1"></i>{{ 'Add Plan' if lang == 'en' else 'إضافة الخطة' }}</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

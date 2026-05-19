@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Email Verified' if lang == 'en' else 'البريد الإلكتروني موثق' }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6 py-5">
+        <div class="card border-0" style="background:linear-gradient(135deg,var(--bg-card),rgba(16,185,129,0.05));border:1px solid rgba(16,185,129,0.15);border-radius:24px;overflow:hidden;">
+            <div style="height:4px;background:linear-gradient(90deg,#10b981,#34d399,#10b981)"></div>
+            <div class="card-body text-center p-4 p-md-5">
+                <div style="width:90px;height:90px;border-radius:50%;background:rgba(16,185,129,0.12);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:3rem;color:var(--accent-green);">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <h3 class="fw-bold mb-1" style="color:var(--text-primary);">{{ 'Email Verified!' if lang == 'en' else 'تم توثيق البريد الإلكتروني!' }}</h3>
+                <p class="text-muted mb-4" style="max-width:400px;margin:0 auto;">{{ 'Your email address has been successfully verified. You now have full access to all features.' if lang == 'en' else 'تم توثيق بريدك الإلكتروني بنجاح. لديك الآن وصول كامل إلى جميع الميزات.' }}</p>
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-md-3">
+                        <div class="p-3 rounded-3" style="background:rgba(59,130,246,0.08);">
+                            <div style="font-size:1.5rem;color:var(--accent-blue);"><i class="bi bi-pie-chart"></i></div>
+                            <div class="fw-bold mt-1" style="font-size:0.8rem;color:var(--text-secondary);">{{ 'Invest' if lang == 'en' else 'استثمار' }}</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-3 rounded-3" style="background:rgba(240,185,11,0.08);">
+                            <div style="font-size:1.5rem;color:var(--accent-gold);"><i class="bi bi-arrow-up-right"></i></div>
+                            <div class="fw-bold mt-1" style="font-size:0.8rem;color:var(--text-secondary);">{{ 'Withdraw' if lang == 'en' else 'سحب' }}</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-3 rounded-3" style="background:rgba(168,85,247,0.08);">
+                            <div style="font-size:1.5rem;color:#a855f7;"><i class="bi bi-people"></i></div>
+                            <div class="fw-bold mt-1" style="font-size:0.8rem;color:var(--text-secondary);">{{ 'Referral' if lang == 'en' else 'إحالة' }}</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-3 rounded-3" style="background:rgba(16,185,129,0.08);">
+                            <div style="font-size:1.5rem;color:var(--accent-green);"><i class="bi bi-gift"></i></div>
+                            <div class="fw-bold mt-1" style="font-size:0.8rem;color:var(--text-secondary);">{{ 'Rewards' if lang == 'en' else 'مكافآت' }}</div>
+                        </div>
+                    </div>
+                </div>
+                <a href="{{ url_for('user.dashboard') }}" class="btn btn-warning btn-lg px-5"><i class="bi bi-speedometer2 me-1"></i>{{ 'Go to Dashboard' if lang == 'en' else 'اذهب إلى لوحة التحكم' }}</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Investment History' if lang == 'en' else 'سجل الاستثمار' }}{% endblock %}
+{% block content %}
+<h3 class="mb-4"><i class="bi bi-clock-history text-warning me-2"></i>{{ 'Investment History' if lang == 'en' else 'سجل الاستثمار' }}</h3>
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table">
+                <thead><tr>
+                    <th>{{ 'Plan' if lang == 'en' else 'الخطة' }}</th>
+                    <th>{{ 'Amount' if lang == 'en' else 'المبلغ' }}</th>
+                    <th>{{ 'Start' if lang == 'en' else 'البداية' }}</th>
+                    <th>{{ 'End' if lang == 'en' else 'النهاية' }}</th>
+                    <th>{{ 'Status' if lang == 'en' else 'الحالة' }}</th>
+                </tr></thead>
+                <tbody>
+                    {% for inv in investments %}
+                    <tr>
+                        <td>
+                            {% if inv.plan.company == 'Tesla' %}<i class="bi bi-lightning-fill text-warning me-1"></i>
+                            {% elif inv.plan.company == 'SpaceX' %}<i class="bi bi-rocket-takeoff text-info me-1"></i>
+                            {% elif inv.plan.company == 'Neuralink' %}<i class="bi bi-cpu text-success me-1"></i>
+                            {% elif inv.plan.company == 'X' %}<i class="bi bi-twitter text-primary me-1"></i>
+                            {% elif inv.plan.company == 'The Boring Company' %}<i class="bi bi-trench text-secondary me-1"></i>
+                            {% endif %}
+                            {{ inv.plan.name }}
+                        </td>
+                        <td>${{ "%.2f"|format(inv.amount) }}</td>
+                        <td>{{ inv.start_date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ inv.end_date.strftime('%Y-%m-%d') if inv.end_date else '-' }}</td>
+                        <td><span class="badge bg-{{ 'success' if inv.status == 'active' else 'secondary' }}">{{ inv.status }}</span></td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="5" class="text-center text-muted">{{ 'No investments' if lang == 'en' else 'لا توجد استثمارات' }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

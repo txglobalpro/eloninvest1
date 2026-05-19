@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Rewards' if lang == 'en' else 'المكافآت' }}{% endblock %}
+{% block content %}
+<h3 class="mb-4"><i class="bi bi-gift-fill text-warning me-2"></i>{{ 'Rewards Center' if lang == 'en' else 'مركز المكافآت' }}</h3>
+
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card text-center p-3 h-100">
+            <h1 class="text-success"><i class="bi bi-gift"></i></h1>
+            <h5>{{ 'Welcome Bonus' if lang == 'en' else 'مكافأة الترحيب' }}</h5>
+            <h3 class="text-success">$5</h3>
+            <small class="text-muted">{{ 'Automatic on registration' if lang == 'en' else 'تلقائي عند التسجيل' }}</small>
+            {% if claimed.welcome %}<span class="badge bg-success mt-2">{{ 'Claimed' if lang == 'en' else 'تم الاستلام' }}</span>{% endif %}
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center p-3 h-100">
+            <h1 class="text-info"><i class="bi bi-piggy-bank"></i></h1>
+            <h5>{{ 'First Deposit' if lang == 'en' else 'أول إيداع' }}</h5>
+            <h3 class="text-info">10%</h3>
+            <small class="text-muted">{{ 'Of your first deposit' if lang == 'en' else 'من أول إيداع لك' }}</small>
+            {% if claimed.first_deposit %}<span class="badge bg-success mt-2">{{ 'Claimed' if lang == 'en' else 'تم الاستلام' }}</span>{% endif %}
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center p-3 h-100">
+            <h1 class="text-warning"><i class="bi bi-calendar-check"></i></h1>
+            <h5>{{ 'Daily Streak' if lang == 'en' else 'الحضور اليومي' }}</h5>
+            <h3 class="text-warning">${{ daily_amount }}</h3>
+            <small class="text-muted">{{ 'Current streak' if lang == 'en' else 'السلسلة الحالية' }}: {{ current_user.daily_streak }} {{ 'days' if lang == 'en' else 'أيام' }}</small>
+            <form method="POST" action="{{ url_for('rewards.claim_daily') }}" class="mt-2">
+                <button type="submit" class="btn btn-warning btn-sm w-100">{{ 'Claim Daily' if lang == 'en' else 'استلم يومي' }}</button>
+            </form>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center p-3 h-100">
+            <h1 class="text-primary"><i class="bi bi-award"></i></h1>
+            <h5>{{ 'Loyalty Reward' if lang == 'en' else 'مكافأة الولاء' }}</h5>
+            <h3 class="text-primary">$10</h3>
+            <small class="text-muted">{{ 'Every 30 days' if lang == 'en' else 'كل 30 يوماً' }}</small>
+            {% if claimed.loyalty %}<span class="badge bg-success mt-2">{{ 'Claimed' if lang == 'en' else 'تم الاستلام' }}</span>{% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header"><h5>{{ 'Reward History' if lang == 'en' else 'سجل المكافآت' }}</h5></div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table">
+                <thead><tr>
+                    <th>{{ 'Type' if lang == 'en' else 'النوع' }}</th>
+                    <th>{{ 'Amount' if lang == 'en' else 'المبلغ' }}</th>
+                    <th>{{ 'Date' if lang == 'en' else 'التاريخ' }}</th>
+                </tr></thead>
+                <tbody>
+                    {% for r in rewards %}
+                    <tr>
+                        <td>{{ r.type }}</td>
+                        <td>${{ "%.2f"|format(r.amount) }}</td>
+                        <td>{{ r.claimed_at.strftime('%Y-%m-%d') }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="3" class="text-center text-muted">{{ 'No rewards yet' if lang == 'en' else 'لا توجد مكافآت بعد' }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

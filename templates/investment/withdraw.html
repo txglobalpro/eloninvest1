@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Withdraw' if lang == 'en' else 'سحب' }}{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body p-4">
+                <h5 class="mb-3"><i class="bi bi-wallet2 text-warning me-2"></i>{{ 'Wallet Overview' if lang == 'en' else 'نظرة عامة على المحفظة' }}</h5>
+                <div class="mb-3 p-3 rounded" style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);">
+                    <small class="text-muted">{{ 'Available Balance' if lang == 'en' else 'الرصيد المتاح' }}</small>
+                    <h3 class="text-warning mb-0">${{ "%.2f"|format(current_user.balance) }}</h3>
+                </div>
+                <div class="mb-3 p-3 rounded" style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);">
+                    <small class="text-muted">{{ 'Total Deposits' if lang == 'en' else 'إجمالي الإيداعات' }}</small>
+                    <h5 class="text-success mb-0">${{ "%.2f"|format(current_user.total_deposits) }}</h5>
+                </div>
+                <div class="mb-3 p-3 rounded" style="background:rgba(255,255,255,0.03);border:1px solid var(--border-color);">
+                    <small class="text-muted">{{ 'Total Withdrawn' if lang == 'en' else 'إجمالي المسحوبات' }}</small>
+                    <h5 class="mb-0" style="color:#ff9100;">${{ "%.2f"|format(current_user.total_withdrawn) }}</h5>
+                </div>
+                <hr>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('investment.deposit') }}" class="btn btn-success"><i class="bi bi-plus-circle me-1"></i>{{ 'Deposit Funds' if lang == 'en' else 'إيداع أموال' }}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8 mb-4">
+        <div class="card h-100">
+            <div class="card-body p-4">
+                <h4 class="mb-4"><i class="bi bi-send text-warning me-2"></i>{{ 'Request Withdrawal' if lang == 'en' else 'طلب سحب' }}</h4>
+                <form method="POST" id="withdrawForm" onsubmit="return validateWithdrawForm()">
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold d-flex align-items-center gap-2">
+                            <span class="badge bg-warning text-dark rounded-pill">1</span>
+                            {{ 'Select Payment Method' if lang == 'en' else 'اختر وسيلة الدفع' }}
+                        </label>
+                        <div class="row g-2" id="pmCards">
+                            {% for pm in payment_methods %}
+                            <div class="col-6 col-md-4">
+                                <div class="withdraw-pm-card" data-method="{{ pm.label }}" onclick="selectWithdrawPM(this)">
+                                    <div class="pm-icon">
+                                        {% if 'USDT' in pm.label.upper() %}
+                                            <i class="bi bi-coin text-warning"></i>
+                                        {% elif 'BTC' in pm.label.upper() %}
+                                            <i class="bi bi-currency-bitcoin text-warning"></i>
+                                        {% elif 'ETH' in pm.label.upper() %}
+                                            <i class="bi bi-diamond text-primary"></i>
+                                        {% elif 'PAYPAL' in pm.label.upper() %}
+                                            <i class="bi bi-paypal text-primary"></i>
+                                        {% elif 'BANK' in pm.label.upper() %}
+                                            <i class="bi bi-bank text-success"></i>
+                                        {% else %}
+                                            <i class="bi bi-credit-card text-info"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="pm-label">{{ pm.label }}</div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="withdraw_method" id="withdraw_method" value="">
+                        <small class="text-danger d-none" id="pmError">{{ 'Please select a payment method' if lang == 'en' else 'الرجاء اختيار وسيلة الدفع' }}</small>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold d-flex align-items-center gap-2">
+                            <span class="badge bg-warning text-dark rounded-pill">2</span>
+                            {{ 'Select Network' if lang == 'en' else 'اختر الشبكة' }}
+                        </label>
+                        <div class="position-relative">
+                            <select name="withdraw_network" id="withdraw_network" class="form-select form-select-lg">
+                                <option value="">{{ 'Select network...' if lang == 'en' else 'اختر الشبكة...' }}</option>
+                            </select>
+                        </div>
+                        <small class="text-danger d-none" id="netError">{{ 'Please select a network' if lang == 'en' else 'الرجاء اختيار الشبكة' }}</small>
+                        <div class="alert alert-warning mt-2 py-2 d-none" id="netWarning" role="alert">
+                            <small><i class="bi bi-exclamation-triangle me-1"></i>{{ 'Ensure you select the correct network. Sending to the wrong network may result in permanent loss.' if lang == 'en' else 'تأكد من اختيار الشبكة الصحيحة. الإرسال على شبكة خاطئة قد يؤدي إلى فقدان الأموال بشكل دائم.' }}</small>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold d-flex align-items-center gap-2">
+                            <span class="badge bg-warning text-dark rounded-pill">3</span>
+                            {{ 'Enter Wallet Address' if lang == 'en' else 'أدخل عنوان المحفظة' }}
+                        </label>
+                        <div class="input-group input-group-lg">
+                            <input type="text" name="withdraw_address" id="withdraw_address" class="form-control" placeholder="{{ 'Enter your wallet address...' if lang == 'en' else 'أدخل عنوان محفظتك...' }}" required>
+                            <button type="button" class="btn btn-outline-secondary" onclick="pasteAddress()" title="{{ 'Paste' if lang == 'en' else 'لصق' }}"><i class="bi bi-clipboard"></i></button>
+                        </div>
+                        <small class="text-danger d-none" id="addrError">{{ 'Please enter a valid wallet address' if lang == 'en' else 'الرجاء إدخال عنوان محفظة صحيح' }}</small>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold d-flex align-items-center gap-2">
+                            <span class="badge bg-warning text-dark rounded-pill">4</span>
+                            {{ 'Enter Amount' if lang == 'en' else 'أدخل المبلغ' }}
+                        </label>
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-dark border-secondary"><i class="bi bi-currency-dollar"></i></span>
+                            <input type="number" step="0.01" name="amount" id="withdraw_amount" class="form-control" min="1" max="{{ current_user.balance }}" placeholder="0.00" required>
+                            <button type="button" class="btn btn-outline-warning" onclick="setMaxAmount()">{{ 'Max' if lang == 'en' else 'الحد الأقصى' }}</button>
+                        </div>
+                        <div class="d-flex justify-content-between mt-1">
+                            <small class="text-muted">{{ 'Min: $1' if lang == 'en' else 'الحد الأدنى: 1 دولار' }}</small>
+                            <small class="text-muted">{{ 'Balance' if lang == 'en' else 'الرصيد' }}: ${{ "%.2f"|format(current_user.balance) }}</small>
+                        </div>
+                        <small class="text-danger d-none" id="amtError">{{ 'Please enter a valid amount' if lang == 'en' else 'الرجاء إدخال مبلغ صحيح' }}</small>
+                    </div>
+
+                    <div class="mb-3 p-3 rounded" style="background:rgba(240,185,11,0.05);border:1px solid rgba(240,185,11,0.15);" id="withdrawSummary">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">{{ 'You will receive' if lang == 'en' else 'ستستلم' }}</small>
+                            <strong class="text-warning" id="summaryAmount">$0.00</strong>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-1">
+                            <small class="text-muted">{{ 'Via' if lang == 'en' else 'عبر' }}</small>
+                            <small id="summaryMethod" class="text-light">—</small>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-1">
+                            <small class="text-muted">{{ 'Network' if lang == 'en' else 'الشبكة' }}</small>
+                            <small id="summaryNetwork" class="text-light">—</small>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-1">
+                            <small class="text-muted">{{ 'To' if lang == 'en' else 'إلى' }}</small>
+                            <small id="summaryAddress" class="text-light font-monospace" style="word-break:break-all;">—</small>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info d-flex align-items-center mb-3" role="alert">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <small>{{ 'Your balance will be deducted only after admin approves this request.' if lang == 'en' else 'لن يُخصم الرصيد إلا بعد موافقة المدرب على هذا الطلب.' }}</small>
+                    </div>
+
+                    <button type="submit" class="btn btn-warning w-100 py-3">
+                        <i class="bi bi-send-check me-2"></i>{{ 'Submit Withdrawal Request' if lang == 'en' else 'تقديم طلب السحب' }}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-clock-history me-2"></i>{{ 'Withdrawal History' if lang == 'en' else 'سجل السحوبات' }}</span>
+    </div>
+    <div class="card-body">
+        {% set withdrawals = current_user.transactions|selectattr('type', 'equalto', 'withdraw')|list %}
+        {% if withdrawals %}
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead><tr>
+                    <th>{{ 'Amount' if lang == 'en' else 'المبلغ' }}</th>
+                    <th>{{ 'Method' if lang == 'en' else 'الوسيلة' }}</th>
+                    <th>{{ 'Network' if lang == 'en' else 'الشبكة' }}</th>
+                    <th>{{ 'Address' if lang == 'en' else 'العنوان' }}</th>
+                    <th>{{ 'Status' if lang == 'en' else 'الحالة' }}</th>
+                    <th>{{ 'Date' if lang == 'en' else 'التاريخ' }}</th>
+                </tr></thead>
+                <tbody>
+                    {% for w in withdrawals[:10] %}
+                    <tr>
+                        <td><strong>${{ "%.2f"|format(w.amount) }}</strong></td>
+                        <td><small>{{ w.withdraw_method or 'USDT' }}</small></td>
+                        <td><span class="badge bg-secondary">{{ w.withdraw_network or 'TRC-20' }}</span></td>
+                        <td><small class="font-monospace" title="{{ w.withdraw_address }}">{{ (w.withdraw_address or '—')[:16] }}{% if w.withdraw_address and w.withdraw_address|length > 16 %}...{% endif %}</small></td>
+                        <td><span class="badge bg-{{ 'success' if w.status == 'completed' else 'warning' if w.status == 'pending' else 'danger' }}">{{ w.status }}</span></td>
+                        <td><small>{{ w.created_at.strftime('%Y-%m-%d %H:%M') }}</small></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="bi bi-inbox text-muted" style="font-size:2.5rem;"></i>
+            <p class="text-muted mt-2">{{ 'No withdrawal history yet' if lang == 'en' else 'لا يوجد سبل سحوبات بعد' }}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card text-center p-3">
+            <div class="card-body">
+                <i class="bi bi-shield-check text-success" style="font-size:1.5rem;"></i>
+                <h6 class="mt-2">{{ 'Secure Process' if lang == 'en' else 'عملية آمنة' }}</h6>
+                <small class="text-muted">{{ 'All withdrawals are verified by admin for your security.' if lang == 'en' else 'جميع السحوبات يتم التحقق منها من قبل المدرب لأمنك.' }}</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center p-3">
+            <div class="card-body">
+                <i class="bi bi-clock text-info" style="font-size:1.5rem;"></i>
+                <h6 class="mt-2">{{ 'Processing Time' if lang == 'en' else 'وقت المعالجة' }}</h6>
+                <small class="text-muted">{{ 'Withdrawals are processed within 24 hours after approval.' if lang == 'en' else 'تتم معالجة السحوبات في غضون 24 ساعة بعد الموافقة.' }}</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center p-3">
+            <div class="card-body">
+                <i class="bi bi-headset text-warning" style="font-size:1.5rem;"></i>
+                <h6 class="mt-2">{{ '24/7 Support' if lang == 'en' else 'دعم على مدار الساعة' }}</h6>
+                <small class="text-muted">{{ 'Contact support if you have any questions.' if lang == 'en' else 'اتصل بالدعم إذا كان لديك أي استفسار.' }}</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+var networkOptions = {{ network_options|tojson }};
+var selectedMethod = '';
+
+function selectWithdrawPM(el) {
+    document.querySelectorAll('.withdraw-pm-card').forEach(function(c) { c.classList.remove('active'); });
+    el.classList.add('active');
+    selectedMethod = el.getAttribute('data-method');
+    document.getElementById('withdraw_method').value = selectedMethod;
+    document.getElementById('pmError').classList.add('d-none');
+
+    var sel = document.getElementById('withdraw_network');
+    sel.innerHTML = '<option value="">{{ "Select network..." if lang == "en" else "اختر الشبكة..." }}</option>';
+    var nets = networkOptions[selectedMethod];
+    if (nets) {
+        nets.forEach(function(n) {
+            var opt = document.createElement('option');
+            opt.value = n;
+            opt.textContent = n;
+            sel.appendChild(opt);
+        });
+        sel.disabled = false;
+        document.getElementById('netWarning').classList.remove('d-none');
+    } else {
+        var opt = document.createElement('option');
+        opt.value = 'Standard';
+        opt.textContent = 'Standard';
+        sel.appendChild(opt);
+        sel.disabled = false;
+        document.getElementById('netWarning').classList.add('d-none');
+    }
+    updateSummary();
+}
+
+document.getElementById('withdraw_network').addEventListener('change', updateSummary);
+document.getElementById('withdraw_address').addEventListener('input', updateSummary);
+document.getElementById('withdraw_amount').addEventListener('input', updateSummary);
+
+function updateSummary() {
+    var amt = parseFloat(document.getElementById('withdraw_amount').value) || 0;
+    var method = document.getElementById('withdraw_method').value || '—';
+    var net = document.getElementById('withdraw_network').value || '—';
+    var addr = document.getElementById('withdraw_address').value || '—';
+
+    document.getElementById('summaryAmount').textContent = '$' + amt.toFixed(2);
+    document.getElementById('summaryMethod').textContent = method;
+    document.getElementById('summaryNetwork').textContent = net;
+    var addrShort = addr.length > 30 ? addr.slice(0, 30) + '...' : addr;
+    document.getElementById('summaryAddress').textContent = addrShort;
+}
+
+function setMaxAmount() {
+    var max = {{ current_user.balance }};
+    document.getElementById('withdraw_amount').value = max.toFixed(2);
+    updateSummary();
+}
+
+function pasteAddress() {
+    navigator.clipboard.readText().then(function(text) {
+        if (text) {
+            document.getElementById('withdraw_address').value = text;
+            updateSummary();
+        }
+    }).catch(function() {
+        document.getElementById('withdraw_address').focus();
+    });
+}
+
+function validateWithdrawForm() {
+    var valid = true;
+    if (!document.getElementById('withdraw_method').value) {
+        document.getElementById('pmError').classList.remove('d-none');
+        valid = false;
+    } else {
+        document.getElementById('pmError').classList.add('d-none');
+    }
+    if (!document.getElementById('withdraw_network').value) {
+        document.getElementById('netError').classList.remove('d-none');
+        valid = false;
+    } else {
+        document.getElementById('netError').classList.add('d-none');
+    }
+    if (!document.getElementById('withdraw_address').value.trim()) {
+        document.getElementById('addrError').classList.remove('d-none');
+        valid = false;
+    } else {
+        document.getElementById('addrError').classList.add('d-none');
+    }
+    var amt = parseFloat(document.getElementById('withdraw_amount').value);
+    if (!amt || amt <= 0 || amt > {{ current_user.balance }}) {
+        document.getElementById('amtError').classList.remove('d-none');
+        valid = false;
+    } else {
+        document.getElementById('amtError').classList.add('d-none');
+    }
+    return valid;
+}
+</script>
+{% endblock %}

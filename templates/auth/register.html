@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Register' if lang == 'en' else 'إنشاء حساب' }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow">
+            <div class="card-body p-4">
+                <h3 class="text-center mb-4"><i class="bi bi-person-plus text-warning me-1"></i>{{ 'Create Account' if lang == 'en' else 'إنشاء حساب جديد' }}</h3>
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.username.label(class="form-label") }}
+                        {{ form.username(class="form-control" + (' is-invalid' if form.username.errors else '')) }}
+                        {% for error in form.username.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.email.label(class="form-label") }}
+                        {{ form.email(class="form-control" + (' is-invalid' if form.email.errors else '')) }}
+                        {% for error in form.email.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.password.label(class="form-label") }}
+                        {{ form.password(class="form-control" + (' is-invalid' if form.password.errors else '')) }}
+                        {% for error in form.password.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.confirm.label(class="form-label") }}
+                        {{ form.confirm(class="form-control" + (' is-invalid' if form.confirm.errors else '')) }}
+                        {% for error in form.confirm.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.referral_code.label(class="form-label") }}
+                        {{ form.referral_code(class="form-control") }}
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">{{ 'Register' if lang == 'en' else 'تسجيل' }}</button>
+                </form>
+                <p class="text-center mt-3">{{ 'Have an account?' if lang == 'en' else 'لديك حساب؟' }} <a href="{{ url_for('auth.login') }}">{{ 'Login' if lang == 'en' else 'دخول' }}</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

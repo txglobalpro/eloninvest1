@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Transactions' if lang == 'en' else 'المعاملات' }}{% endblock %}
+{% block content %}
+<h3 class="mb-4"><i class="bi bi-arrow-left-right text-warning me-2"></i>{{ 'Manage Transactions' if lang == 'en' else 'إدارة المعاملات' }}</h3>
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead><tr>
+                    <th>ID</th>
+                    <th>{{ 'User' if lang == 'en' else 'المستخدم' }}</th>
+                    <th>{{ 'Email' if lang == 'en' else 'البريد' }}</th>
+                    <th>{{ 'Deposited Before' if lang == 'en' else 'أودع سابقاً' }}</th>
+                    <th>{{ 'Type' if lang == 'en' else 'النوع' }}</th>
+                    <th>{{ 'Amount' if lang == 'en' else 'المبلغ' }}</th>
+                    <th>{{ 'Status' if lang == 'en' else 'الحالة' }}</th>
+                    <th>{{ 'Note' if lang == 'en' else 'ملاحظة' }}</th>
+                    <th>{{ 'Date' if lang == 'en' else 'التاريخ' }}</th>
+                    <th>{{ 'Actions' if lang == 'en' else 'إجراءات' }}</th>
+                </tr></thead>
+                <tbody>
+                    {% for t in transactions %}
+                    <tr>
+                        <td>{{ t.id }}</td>
+                        <td>{{ t.user.username }}</td>
+                        <td><small>{{ t.user.email }}</small></td>
+                        <td class="text-center">
+                            {% set deposited_before = t.user.total_deposits > 0 %}
+                            {% if deposited_before %}
+                                <span class="badge bg-success" title="{{ 'Has deposited before' if lang == 'en' else 'أودع من قبل' }}"><i class="bi bi-check-lg"></i></span>
+                            {% else %}
+                                <span class="badge bg-danger" title="{{ 'No previous deposits' if lang == 'en' else 'لا توجد إيداعات سابقة' }}"><i class="bi bi-x-lg"></i></span>
+                            {% endif %}
+                        </td>
+                        <td>{{ t.type }}</td>
+                        <td>${{ "%.2f"|format(t.amount) }}</td>
+                        <td><span class="badge bg-{{ 'success' if t.status == 'completed' else 'warning' if t.status == 'pending' else 'danger' }}">{{ t.status }}</span></td>
+                        <td>
+                            {% if t.type == 'withdraw' and (t.withdraw_method or t.withdraw_network or t.withdraw_address) %}
+                                {{ t.note }}<br>
+                                <small class="text-muted">{{ t.withdraw_method }}{% if t.withdraw_network %} ({{ t.withdraw_network }}){% endif %}</small><br>
+                                <small class="font-monospace" style="font-size:0.7rem;">{{ t.withdraw_address[:24] }}{% if t.withdraw_address and t.withdraw_address|length > 24 %}...{% endif %}</small>
+                            {% else %}
+                                {{ t.note }}
+                            {% endif %}
+                        </td>
+                        <td>{{ t.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td>
+                            {% if t.status == 'pending' and t.type == 'withdraw' %}
+                            <form method="POST" action="{{ url_for('admin.approve_withdraw', tx_id=t.id) }}" class="d-inline">
+                                <button class="btn btn-sm btn-success"><i class="bi bi-check-circle me-1"></i>{{ 'Approve' if lang == 'en' else 'موافقة' }}</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('admin.reject_tx', tx_id=t.id) }}" class="d-inline">
+                                <button class="btn btn-sm btn-danger"><i class="bi bi-x-circle me-1"></i>{{ 'Reject' if lang == 'en' else 'رفض' }}</button>
+                            </form>
+                            {% elif t.status == 'pending' and t.type == 'deposit' %}
+                            <form method="POST" action="{{ url_for('admin.approve_deposit', tx_id=t.id) }}" class="d-inline">
+                                <button class="btn btn-sm btn-success"><i class="bi bi-check-circle me-1"></i>{{ 'Approve' if lang == 'en' else 'موافقة' }}</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('admin.reject_tx', tx_id=t.id) }}" class="d-inline">
+                                <button class="btn btn-sm btn-danger"><i class="bi bi-x-circle me-1"></i>{{ 'Reject' if lang == 'en' else 'رفض' }}</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="10" class="text-center text-muted">{{ 'No transactions' if lang == 'en' else 'لا توجد معاملات' }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

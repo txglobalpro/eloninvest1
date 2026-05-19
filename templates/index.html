@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Home' if lang == 'en' else 'الرئيسية' }}{% endblock %}
+{% block content %}
+<div class="hero-section text-center py-5">
+    <div class="container">
+        <h1 class="display-4 fw-bold text-white mb-3">{{ 'Invest in the Future with' if lang == 'en' else 'استثمر في المستقبل مع' }} <span class="text-warning">ElonInvest</span></h1>
+        <p class="lead text-white-50 mb-4 mx-auto" style="max-width:700px">{{ 'The leading investment platform for top-performing tech companies. Start earning daily returns today.' if lang == 'en' else 'منصة الاستثمار الرائدة في شركات التكنولوجيا الأكثر أداءً. ابدأ بجني الأرباح اليومية اليوم.' }}</p>
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('user.dashboard') }}" class="btn btn-warning btn-lg px-5">{{ 'Go to Dashboard' if lang == 'en' else 'اذهب إلى لوحة التحكم' }}</a>
+        {% else %}
+            <a href="{{ url_for('auth.register') }}" class="btn btn-warning btn-lg px-5 me-2">{{ 'Get Started Free' if lang == 'en' else 'ابدأ مجاناً' }}</a>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg px-5">{{ 'Login' if lang == 'en' else 'تسجيل الدخول' }}</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="container">
+    <div class="row g-4 py-5">
+        <div class="col-md-4">
+            <div class="feature-card card border-0 p-4 h-100">
+                <div class="card-body text-center">
+                    <div class="feature-icon mb-3"><i class="bi bi-graph-up-arrow text-warning" style="font-size:2.5rem;"></i></div>
+                    <h5>{{ '5 Investment Plans' if lang == 'en' else '5 خطط استثمارية' }}</h5>
+                    <p class="text-muted">{{ 'Choose from Tesla, SpaceX, Neuralink, X, and Boring Company plans with daily returns up to 8%.' if lang == 'en' else 'اختر من خطط تسلا، سبيس إكس، نيورالينك، إكس، و بورينج كومباني بعوائد يومية تصل إلى 8%.' }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card card border-0 p-4 h-100">
+                <div class="card-body text-center">
+                    <div class="feature-icon mb-3"><i class="bi bi-people-fill text-info" style="font-size:2.5rem;"></i></div>
+                    <h5>{{ '3-Level Referral' if lang == 'en' else 'إحالة ثلاثية المستويات' }}</h5>
+                    <p class="text-muted">{{ 'Earn 5%, 3%, and 2% commission from your referral network.' if lang == 'en' else 'اربح 5%، 3%، و 2% عمولة من شبكة الإحالات الخاصة بك.' }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card card border-0 p-4 h-100">
+                <div class="card-body text-center">
+                    <div class="feature-icon mb-3"><i class="bi bi-gift-fill text-danger" style="font-size:2.5rem;"></i></div>
+                    <h5>{{ 'Daily Rewards' if lang == 'en' else 'مكافآت يومية' }}</h5>
+                    <p class="text-muted">{{ 'Get welcome bonus, daily streak rewards, and loyalty bonuses every 30 days.' if lang == 'en' else 'احصل على مكافأة ترحيب، مكافآت يومية، و مكافآت ولاء كل 30 يوماً.' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 pb-5">
+        <div class="col-md-6">
+            <div class="feature-card card border-0 p-4 h-100">
+                <div class="card-body text-center">
+                    <div class="feature-icon mb-3"><i class="bi bi-currency-exchange text-success" style="font-size:2.5rem;"></i></div>
+                    <h5>{{ 'Live Market Prices' if lang == 'en' else 'أسعار السوق الحية' }}</h5>
+                    <p class="text-muted">{{ 'Real-time stock prices for all Elon Musk companies with interactive charts and market insights.' if lang == 'en' else 'أسعار أسهم حية لجميع شركات إيلون ماسك مع رسوم بيانية تفاعلية وتحليلات السوق.' }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="feature-card card border-0 p-4 h-100">
+                <div class="card-body text-center">
+                    <div class="feature-icon mb-3"><i class="bi bi-shield-check text-primary" style="font-size:2.5rem;"></i></div>
+                    <h5>{{ 'Secure & Reliable' if lang == 'en' else 'آمن وموثوق' }}</h5>
+                    <p class="text-muted">{{ 'Advanced security measures protect your investments. 24/7 monitoring and instant withdrawals.' if lang == 'en' else 'إجراءات أمنية متقدمة تحمي استثماراتك. مراقبة على مدار الساعة وسحوبات فورية.' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="license-divider">
+
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3 class="text-center text-white mb-4"><i class="bi bi-patch-check text-success me-2"></i>{{ 'Regulated & Licensed' if lang == 'en' else 'منظمة ومرخصة' }}</h3>
+            <p class="text-center text-muted mb-4 mx-auto" style="max-width:600px;">{{ 'ElonInvest operates under strict regulatory compliance and holds licenses from multiple international financial authorities.' if lang == 'en' else 'تعمل ElonInvest تحت امتثال تنظيمي صارم وتحمل تراخيص من عدة هيئات مالية دولية.' }}</p>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="license-card">
+                <span class="license-icon"><i class="bi bi-shield-fill-check text-primary"></i></span>
+                <div class="license-name">FCA (UK)</div>
+                <div class="license-number">#FRN 829734</div>
+                <div class="license-status"><i class="bi bi-check-circle-fill me-1"></i>{{ 'Verified' if lang == 'en' else 'موثق' }}</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="license-card">
+                <span class="license-icon"><i class="bi bi-award-fill text-warning"></i></span>
+                <div class="license-name">CySEC (EU)</div>
+                <div class="license-number">#CIE 389/24</div>
+                <div class="license-status"><i class="bi bi-check-circle-fill me-1"></i>{{ 'Verified' if lang == 'en' else 'موثق' }}</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="license-card">
+                <span class="license-icon"><i class="bi bi-patch-check-fill text-info"></i></span>
+                <div class="license-name">FinCEN (US)</div>
+                <div class="license-number">#MSB-2024-8712</div>
+                <div class="license-status"><i class="bi bi-check-circle-fill me-1"></i>{{ 'Verified' if lang == 'en' else 'موثق' }}</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="license-card">
+                <span class="license-icon"><i class="bi bi-trophy-fill text-warning"></i></span>
+                <div class="license-name">DFSA (Dubai)</div>
+                <div class="license-number">#DFSA-F2025-443</div>
+                <div class="license-status"><i class="bi bi-check-circle-fill me-1"></i>{{ 'Verified' if lang == 'en' else 'موثق' }}</div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="license-divider">
+
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3 class="text-center text-white mb-4"><i class="bi bi-chat-quote text-warning me-2"></i>{{ 'What Our Investors Say' if lang == 'en' else 'ماذا يقول مستثمرونا' }}</h3>
+            <div class="text-center mb-3">
+                <div class="testimonial-card feature-card card border-0 p-5 text-center mx-auto" style="max-width:650px;min-height:280px;">
+                    <div class="testimonial-avatar" id="tAvatar" style="background:rgba(240,185,11,0.15);color:var(--accent-gold);">AR</div>
+                    <div class="testimonial-text">
+                        <p class="lead mb-3" id="tQuote">"{{ 'I started with just $100 and now I am earning over $50 daily. This platform changed my financial future!' if lang == 'en' else 'بدأت بمبلغ 100 دولار فقط والآن أربح أكثر من 50 دولاراً يومياً. هذه المنصة غيرت مستقبلي المالي!' }}"</p>
+                    </div>
+                    <h6 class="text-warning mb-0" id="tName">Ahmed Al-Rashid</h6>
+                    <small class="text-muted" id="tMeta">Dubai, UAE · Investor since 2023</small>
+                </div>
+            </div>
+            <div class="d-flex justify-content-center gap-2" id="testimonialDots"></div>
+        </div>
+    </div>
+
+    <div class="text-center py-4 mb-5">
+        <h3 class="text-white mb-3">{{ 'Ready to Start Your Investment Journey?' if lang == 'en' else 'مستعد لبدء رحلتك الاستثمارية؟' }}</h3>
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('investment.plans') }}" class="btn btn-warning btn-lg px-5">{{ 'View Investment Plans' if lang == 'en' else 'عرض خطط الاستثمار' }}</a>
+        {% else %}
+            <a href="{{ url_for('auth.register') }}" class="btn btn-warning btn-lg px-5">{{ 'Create Free Account' if lang == 'en' else 'إنشاء حساب مجاني' }}</a>
+        {% endif %}
+    </div>
+</div>
+
+<div id="toast-container"></div>
+{% endblock %}

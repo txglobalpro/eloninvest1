@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Manage Users' if lang == 'en' else 'إدارة المستخدمين' }}{% endblock %}
+{% block content %}
+<h3 class="mb-4"><i class="bi bi-people-fill text-primary me-2"></i>{{ 'Manage Users' if lang == 'en' else 'إدارة المستخدمين' }}</h3>
+<div class="card">
+    <div class="card-body">
+        <div class="mb-3">
+            <input type="text" id="userSearch" class="form-control" placeholder="{{ 'Search by name, email, or ID...' if lang == 'en' else 'بحث بالاسم، البريد، أو الرقم...' }}" onkeyup="filterUsers()">
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm" id="usersTable">
+                <thead><tr>
+                    <th>ID</th>
+                    <th>{{ 'Username' if lang == 'en' else 'اسم المستخدم' }}</th>
+                    <th>{{ 'Email' if lang == 'en' else 'البريد' }}</th>
+                    <th>{{ 'Balance' if lang == 'en' else 'الرصيد' }}</th>
+                    <th>{{ 'Plan' if lang == 'en' else 'الخطة' }}</th>
+                    <th>{{ 'Payment' if lang == 'en' else 'الدفع' }}</th>
+                    <th>{{ 'Joined' if lang == 'en' else 'تاريخ التسجيل' }}</th>
+                    <th>{{ 'Actions' if lang == 'en' else 'إجراءات' }}</th>
+                </tr></thead>
+                <tbody>
+                    {% for u in users %}
+                    {% set active_inv = u.investments|selectattr('status', 'equalto', 'active')|first %}
+                    <tr class="{{ 'opacity-50' if u.is_banned }}">
+                        <td>{{ u.id }}</td>
+                        <td>
+                            <a href="{{ url_for('admin.user_detail', user_id=u.id) }}" class="text-warning text-decoration-none">
+                                <i class="bi bi-person-circle me-1"></i>{{ u.username }}
+                            </a>
+                            {% if u.is_banned %}<span class="badge bg-danger ms-1">{{ 'Banned' if lang == 'en' else 'محظور' }}</span>{% endif %}
+                        </td>
+                        <td><small>{{ u.email }}</small></td>
+                        <td>${{ "%.2f"|format(u.balance) }}</td>
+                        <td>
+                            {% if active_inv %}
+                                <span class="badge bg-warning text-dark">
+                                    {% if active_inv.plan.company == 'Tesla' %}<i class="bi bi-lightning-fill me-1"></i>
+                                    {% elif active_inv.plan.company == 'SpaceX' %}<i class="bi bi-rocket-takeoff me-1"></i>
+                                    {% elif active_inv.plan.company == 'Neuralink' %}<i class="bi bi-cpu me-1"></i>
+                                    {% elif active_inv.plan.company == 'X' %}<i class="bi bi-twitter me-1"></i>
+                                    {% elif active_inv.plan.company == 'The Boring Company' %}<i class="bi bi-trench me-1"></i>
+                                    {% endif %}
+                                    {{ active_inv.plan.name }}
+                                </span>
+                            {% else %}<small class="text-muted">-</small>{% endif %}
+                        </td>
+                        <td><small class="text-muted">{{ u.payment_method[:20] ~ '...' if u.payment_method and u.payment_method|length > 20 else u.payment_method or '-' }}</small></td>
+                        <td>{{ u.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td>
+                            <a href="{{ url_for('admin.user_detail', user_id=u.id) }}" class="btn btn-sm btn-primary"><i class="bi bi-eye me-1"></i>{{ 'Manage' if lang == 'en' else 'إدارة' }}</a>
+                            <form method="POST" action="{{ url_for('admin.ban_user', user_id=u.id) }}" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-{{ 'success' if u.is_banned else 'warning' }}">
+                                    <i class="bi bi-{{ 'unlock' if u.is_banned else 'lock' }}"></i>
+                                </button>
+                            </form>
+                            <form method="POST" action="{{ url_for('admin.delete_user', user_id=u.id) }}" class="d-inline" onsubmit="return confirm('{{ 'Delete this user permanently?' if lang == 'en' else 'حذف هذا المستخدم نهائياً؟' }}')">
+                                <button type="submit" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function filterUsers() {
+    var input = document.getElementById('userSearch');
+    var filter = input.value.toLowerCase();
+    var table = document.getElementById('usersTable');
+    var tr = table.getElementsByTagName('tr');
+    for (var i = 0; i < tr.length; i++) {
+        var td = tr[i].getElementsByTagName('td');
+        var show = false;
+        for (var j = 0; j < td.length; j++) {
+            if (td[j] && td[j].textContent.toLowerCase().indexOf(filter) > -1) {
+                show = true;
+                break;
+            }
+        }
+        tr[i].style.display = show ? '' : 'none';
+    }
+}
+</script>
+{% endblock %}

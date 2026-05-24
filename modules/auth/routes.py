@@ -1,5 +1,5 @@
 from datetime import datetime
-import secrets
+import secrets, threading
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 from flask_mail import Message
@@ -78,6 +78,7 @@ def send_verification_email(user):
     user.verification_token = token
     db.session.commit()
     verify_url = url_for('auth.verify_email', token=token, _external=True)
+    app = current_app._get_current_object()
     try:
         msg = Message('Verify your email - ElonInvest',
                       recipients=[user.email])
@@ -91,11 +92,18 @@ If you did not create an account, please ignore this email.
 
 - ElonInvest Team'''
         msg.html = _verification_html_email(user, verify_url)
-        mail.send(msg)
-        current_app.logger.info(f'Verification email sent to {user.email}')
+        threading.Thread(target=_send_email_async, args=(app, msg), daemon=True).start()
     except Exception as e:
-        current_app.logger.error(f'Failed to send verification email to {user.email}: {e}')
+        current_app.logger.error(f'Failed to create verification email: {e}')
     return verify_url
+
+def _send_email_async(app, msg):
+    with app.app_context():
+        try:
+            mail.send(msg)
+            app.logger.info(f'Verification email sent')
+        except Exception as e:
+            app.logger.error(f'Async email failed: {e}')
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():

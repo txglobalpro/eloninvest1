@@ -116,6 +116,7 @@ def register():
     if form.validate_on_submit():
         user = User(username=form.username.data, email=form.email.data)
         user.set_password(form.password.data)
+        user.email_verified = True
         if form.referral_code.data:
             referrer = User.query.filter_by(referral_code=form.referral_code.data).first()
             if referrer:
@@ -124,10 +125,14 @@ def register():
         db.session.commit()
         grant_welcome_reward(user, current_app._get_current_object())
         db.session.commit()
-        send_verification_email(user)
+        try:
+            send_verification_email(user)
+        except:
+            pass
         current_app.logger.info(f'New user registered: {user.username}')
-        flash('Registration successful! Please check your email to verify your account.', 'info')
-        return redirect(url_for('auth.login'))
+        flash('Registration successful! Welcome to ElonInvest.', 'success')
+        login_user(user)
+        return redirect(url_for('user.dashboard'))
     return render_template('auth/register.html', form=form)
 
 @auth_bp.route('/verify/<token>')

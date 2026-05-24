@@ -4,7 +4,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_user, logout_user, login_required, current_user
 from flask_mail import Message
 from core.extensions import db, mail
-from core.models import User
+from core.models import User, Referral
 from core.forms import LoginForm, RegisterForm
 from services.rewards import grant_welcome_reward
 
@@ -123,6 +123,10 @@ def register():
                 user.referred_by_id = referrer.id
         db.session.add(user)
         db.session.commit()
+        if user.referred_by_id:
+            ref = Referral(referrer_id=user.referred_by_id, referred_id=user.id, level=1, commission=0)
+            db.session.add(ref)
+            db.session.commit()
         grant_welcome_reward(user, current_app._get_current_object())
         db.session.commit()
         try:

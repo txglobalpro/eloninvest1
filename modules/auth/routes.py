@@ -110,23 +110,31 @@ def register():
     if current_user.is_authenticated:
         return redirect(url_for('user.dashboard'))
     form = RegisterForm()
+    current_app.logger.info('REGISTER: form created')
     ref_code = request.args.get('ref')
     if ref_code:
         form.referral_code.data = ref_code
+    if request.method == 'POST':
+        current_app.logger.info('REGISTER: POST received')
     if form.validate_on_submit():
+        current_app.logger.info('REGISTER: form valid')
         user = User(username=form.username.data, email=form.email.data)
         user.set_password(form.password.data)
         user.email_verified = True
+        current_app.logger.info('REGISTER: password set')
         if form.referral_code.data:
             referrer = User.query.filter_by(referral_code=form.referral_code.data).first()
             if referrer:
                 user.referred_by_id = referrer.id
+        current_app.logger.info('REGISTER: referral set')
         db.session.add(user)
         db.session.commit()
+        current_app.logger.info('REGISTER: user committed')
         if user.referred_by_id:
             ref = Referral(referrer_id=user.referred_by_id, referred_id=user.id, level=1, commission=0)
             db.session.add(ref)
             db.session.commit()
+        current_app.logger.info('REGISTER: referral record created')
         try:
             user.balance = round(user.balance + 5.0, 2)
             reward = Reward(user_id=user.id, type='welcome', amount=5.0)
@@ -134,11 +142,13 @@ def register():
             db.session.add(reward)
             db.session.add(tx)
             db.session.commit()
-        except:
-            pass
-        current_app.logger.info(f'New user registered: {user.username}')
+            current_app.logger.info('REGISTER: welcome reward granted')
+        except Exception as e:
+            current_app.logger.error(f'REGISTER: reward error: {e}')
+        current_app.logger.info(f'REGISTER: new user created: {user.username}')
         flash('Registration successful! Welcome to ElonInvest.', 'success')
         login_user(user)
+        current_app.logger.info('REGISTER: user logged in')
         return redirect(url_for('user.dashboard'))
     return render_template('auth/register.html', form=form)
 

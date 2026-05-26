@@ -4,7 +4,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_user, logout_user, login_required, current_user
 from flask_mail import Message
 from core.extensions import db, mail
-from core.models import User, Referral
+from core.models import User, Referral, Reward, Transaction
 from core.forms import LoginForm, RegisterForm
 from services.rewards import grant_welcome_reward
 
@@ -127,8 +127,15 @@ def register():
             ref = Referral(referrer_id=user.referred_by_id, referred_id=user.id, level=1, commission=0)
             db.session.add(ref)
             db.session.commit()
-        grant_welcome_reward(user, current_app._get_current_object())
-        db.session.commit()
+        try:
+            user.balance = round(user.balance + 5.0, 2)
+            reward = Reward(user_id=user.id, type='welcome', amount=5.0)
+            tx = Transaction(user_id=user.id, type='reward', amount=5.0, status='completed', note='Welcome reward')
+            db.session.add(reward)
+            db.session.add(tx)
+            db.session.commit()
+        except:
+            pass
         current_app.logger.info(f'New user registered: {user.username}')
         flash('Registration successful! Welcome to ElonInvest.', 'success')
         login_user(user)

@@ -129,10 +129,6 @@ def register():
             db.session.commit()
         grant_welcome_reward(user, current_app._get_current_object())
         db.session.commit()
-        try:
-            send_verification_email(user)
-        except:
-            pass
         current_app.logger.info(f'New user registered: {user.username}')
         flash('Registration successful! Welcome to ElonInvest.', 'success')
         login_user(user)

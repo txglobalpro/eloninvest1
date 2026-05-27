@@ -334,11 +334,11 @@ document.getElementById('typeTiles').addEventListener('click', function(e) {
 function updateLabelPlaceholder(type) {
   var input = document.getElementById('addLabel');
   var ph = {
-    crypto: {{ "'e.g. USDT (TRC-20)'" if lang == 'en' else "'مثال: USDT (TRC-20)'" }},
-    paypal: {{ "'e.g. PayPal' if lang == 'en' else "'مثال: باي بال'" }},
-    bank: {{ "'e.g. Chase Bank' if lang == 'en' else "'مثال: بنك تشيس'" }},
-    card: {{ "'e.g. Visa Card' if lang == 'en' else "'مثال: بطاقة فيزا'" }},
-    other: {{ "'e.g. Custom Method' if lang == 'en' else "'مثال: وسيلة مخصصة'" }}
+    crypto: {% if lang == 'en' %}'e.g. USDT (TRC-20)'{% else %}'مثال: USDT (TRC-20)'{% endif %},
+    paypal: {% if lang == 'en' %}'e.g. PayPal'{% else %}'مثال: باي بال'{% endif %},
+    bank: {% if lang == 'en' %}'e.g. Chase Bank'{% else %}'مثال: بنك تشيس'{% endif %},
+    card: {% if lang == 'en' %}'e.g. Visa Card'{% else %}'مثال: بطاقة فيزا'{% endif %},
+    other: {% if lang == 'en' %}'e.g. Custom Method'{% else %}'مثال: وسيلة مخصصة'{% endif %}
   };
   input.placeholder = ph[type] || ph.crypto;
 }
@@ -347,7 +347,7 @@ function updateLabelPlaceholder(type) {
 document.getElementById('cryptoCurrency').addEventListener('change', function() {
   var cur = this.value;
   var sel = document.getElementById('cryptoNetworkSelect');
-  sel.innerHTML = '<option value="">' + ({{ "'Quick' if lang == 'en' else "'سريع'" }}) + '</option>';
+  sel.innerHTML = '<option value="">{% if lang == 'en' %}'Quick'{% else %}'سريع'{% endif %}</option>';
   if (cur && NETWORK_OPTS[cur]) {
     NETWORK_OPTS[cur].forEach(function(n) {
       var opt = document.createElement('option');
@@ -419,7 +419,7 @@ function copyPreview() {
   if (!text) return;
   navigator.clipboard.writeText(text);
   var btn = document.querySelector('#previewBox .btn');
-  if (btn) { btn.textContent = {{ "'Copied!' if lang == 'en' else 'تم النسخ!'" }}; setTimeout(function(){ btn.textContent = {{ "'Copy' if lang == 'en' else 'نسخ'" }}; }, 1500); }
+  if (btn) { btn.textContent = {% if lang == 'en' %}'Copied!'{% else %}'تم النسخ!'{% endif %}; setTimeout(function(){ btn.textContent = {% if lang == 'en' %}'Copy'{% else %}'نسخ'{% endif %}; }, 1500); }
 }
 
 // Init
@@ -443,7 +443,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function copyText(el, text) {
   navigator.clipboard.writeText(text);
   var orig = el.textContent;
-  el.textContent = {{ "'Copied!' if lang == 'en' else 'تم النسخ!'" }};
+  el.textContent = {% if lang == 'en' %}'Copied!'{% else %}'تم النسخ!'{% endif %};
   el.style.color = '#10b981';
   setTimeout(function() { el.textContent = orig; el.style.color = ''; }, 1500);
 }

@@ -1,147 +1,322 @@
 {% extends "base.html" %}
 {% block title %}{{ 'Payment Methods' if lang == 'en' else 'وسائل الدفع' }}{% endblock %}
 {% block content %}
+<style>
+  .crypto-tile {
+    border:2px solid var(--border-color,#374151);border-radius:12px;padding:10px 4px;
+    background:transparent;color:var(--text-primary,#e5e7eb);transition:all .2s ease;
+    cursor:pointer;text-align:center;min-width:72px;flex:1;
+  }
+  .crypto-tile:hover { border-color:var(--text-muted,#9ca3af);background:rgba(255,255,255,.03);transform:translateY(-2px); }
+  .crypto-tile.active { border-color:#f59e0b;background:rgba(245,158,11,.1);box-shadow:0 0 14px rgba(245,158,11,.15); }
+  .crypto-tile .symbol { font-weight:700;font-size:.85rem; }
+  .crypto-tile .name { font-size:.62rem;opacity:.5; }
+  .crypto-tile.active .name { opacity:.8; }
+  .net-btn {
+    border:2px solid var(--border-color,#374151);border-radius:10px;padding:10px 20px;
+    background:transparent;color:var(--text-primary,#e5e7eb);transition:all .2s ease;
+    cursor:pointer;text-align:center;font-weight:600;font-size:.82rem;flex:1;
+  }
+  .net-btn:hover { border-color:var(--text-muted,#9ca3af);background:rgba(255,255,255,.03); }
+  .net-btn.active { border-color:#10b981;background:rgba(16,185,129,.1);box-shadow:0 0 14px rgba(16,185,129,.15);color:#10b981; }
+  .addr-input { font-family:ui-monospace,SFMono-Regular,monospace;font-size:.9rem;letter-spacing:.5px; }
+  .step-num { display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--accent,#f0b90b);color:#000;font-size:.65rem;font-weight:700;margin-right:6px; }
+  .network-chip { display:inline-block;padding:3px 10px;border-radius:6px;font-size:.72rem;font-weight:500;background:rgba(245,158,11,.12);color:#f59e0b; }
+  .preview-box { background:rgba(245,158,11,.04);border:1px solid rgba(245,158,11,.12);border-radius:10px;padding:12px;font-family:monospace;font-size:.82rem;line-height:1.7; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  .fade-up { animation:fadeUp .2s ease; }
+  .method-card { border-left:3px solid var(--accent,#f0b90b);border-radius:10px;transition:all .15s; }
+  .method-card:hover { background:rgba(255,255,255,.02); }
+  .method-card.inactive { opacity:.5; border-left-color:var(--border-color); }
+  .crypto-icon { font-size:1.2rem;font-weight:700; }
+</style>
+
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
   <div>
-    <h4 class="mb-1"><i class="bi bi-credit-card-2-front text-warning me-2"></i>{{ 'Payment Methods' if lang == 'en' else 'وسائل الدفع' }}</h4>
-    <small class="text-muted">{{ 'Manage deposit methods shown to users' if lang == 'en' else 'إدارة وسائل الإيداع المعروضة للمستخدمين' }}</small>
+    <h4 class="mb-1"><i class="bi bi-coin text-warning me-2"></i>{{ 'Payment Methods' if lang == 'en' else 'وسائل الدفع' }}</h4>
+    <small class="text-muted">{{ 'Manage cryptocurrency deposit addresses' if lang == 'en' else 'إدارة عناوين الإيداع الرقمية' }}</small>
   </div>
-  <button class="btn btn-warning text-dark fw-semibold" data-bs-toggle="modal" data-bs-target="#addPmModal"><i class="bi bi-plus-lg me-1"></i>{{ 'Add Method' if lang == 'en' else 'إضافة وسيلة' }}</button>
+  <button class="btn btn-warning text-dark fw-semibold" data-bs-toggle="modal" data-bs-target="#addModal"><i class="bi bi-plus-lg me-1"></i>{{ 'Add Address' if lang == 'en' else 'إضافة عنوان' }}</button>
 </div>
 
-<div class="table-responsive">
-<table class="table table-hover align-middle">
-<thead class="table-dark">
-<tr>
-  <th>{{ 'Type' if lang == 'en' else 'النوع' }}</th>
-  <th>{{ 'Label' if lang == 'en' else 'التسمية' }}</th>
-  <th>{{ 'Details' if lang == 'en' else 'التفاصيل' }}</th>
-  <th>{{ 'Status' if lang == 'en' else 'الحالة' }}</th>
-  <th class="text-end">{{ 'Actions' if lang == 'en' else 'الإجراءات' }}</th>
-</tr>
-</thead>
-<tbody>
-{% for pm in methods %}
-<tr class="{{ 'opacity-50' if not pm.is_active }}" style="{{ 'border-left:3px solid ' if pm.is_active }}{{ 'var(--accent,#f0b90b)' if pm.is_active else '' }}">
-  <td>
-    <span class="badge bg-{{ 'warning text-dark' if pm.type == 'crypto' else 'primary' if pm.type == 'paypal' else 'success' if pm.type == 'bank' else 'info' if pm.type == 'card' else 'secondary' }}">
-      {% if pm.type == 'crypto' %}<i class="bi bi-coin me-1"></i>{% elif pm.type == 'paypal' %}<i class="bi bi-paypal me-1"></i>{% elif pm.type == 'bank' %}<i class="bi bi-bank me-1"></i>{% elif pm.type == 'card' %}<i class="bi bi-credit-card me-1"></i>{% endif %}
-      {{ pm.type }}
-    </span>
-  </td>
-  <td class="fw-semibold">{{ pm.label }}</td>
-  <td style="max-width:300px">
-    {% if pm.details %}
-    <div class="small" style="font-family:monospace;white-space:pre-wrap;font-size:.78rem;line-height:1.4;color:var(--text-muted)">{{ pm.details[:200] }}{{ '...' if pm.details|length > 200 }}</div>
-    {% else %}
-    <small class="text-muted">—</small>
-    {% endif %}
-  </td>
-  <td>
-    {% if pm.is_active %}
-    <span class="badge bg-success-subtle text-success-emphasis">{{ 'Active' if lang == 'en' else 'نشط' }}</span>
-    {% else %}
-    <span class="badge bg-secondary-subtle text-secondary-emphasis">{{ 'Inactive' if lang == 'en' else 'غير نشط' }}</span>
-    {% endif %}
-  </td>
-  <td class="text-end">
-    <div class="d-flex gap-1 justify-content-end">
-      <button class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#editPmModal{{ pm.id }}" title="{{ 'Edit' if lang == 'en' else 'تعديل' }}"><i class="bi bi-pencil"></i></button>
-      <form method="POST" action="{{ url_for('admin.payment_methods') }}" class="d-inline">
-        <input type="hidden" name="action" value="toggle">
-        <input type="hidden" name="pm_id" value="{{ pm.id }}">
-        <button type="submit" class="btn btn-sm btn-outline-light" title="{{ 'Deactivate' if pm.is_active and lang == 'en' else 'Activate' if not pm.is_active and lang == 'en' else 'إيقاف' if pm.is_active else 'تفعيل' }}"><i class="bi bi-{{ 'eye-slash' if pm.is_active else 'eye' }}"></i></button>
-      </form>
-      <form method="POST" action="{{ url_for('admin.delete_payment_method', pm_id=pm.id) }}" onsubmit="return confirm('{{ 'Delete?' if lang == 'en' else 'حذف؟' }}')" class="d-inline">
-        <button type="submit" class="btn btn-sm btn-outline-danger" title="{{ 'Delete' if lang == 'en' else 'حذف' }}"><i class="bi bi-trash"></i></button>
-      </form>
-    </div>
-  </td>
-</tr>
-
-<!-- Edit Modal -->
-<div class="modal fade" id="editPmModal{{ pm.id }}" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow">
-      <form method="POST" action="{{ url_for('admin.edit_payment_method', pm_id=pm.id) }}">
-        <div class="modal-header border-0 pb-0">
-          <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square text-warning me-1"></i>{{ 'Edit' if lang == 'en' else 'تعديل' }} {{ pm.label }}</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body pt-2">
-          <div class="mb-3">
-            <label class="form-label small text-muted">{{ 'Type' if lang == 'en' else 'النوع' }}</label>
-            <select name="type" class="form-select">
-              <option value="crypto" {{ 'selected' if pm.type == 'crypto' }}>Cryptocurrency</option>
-              <option value="paypal" {{ 'selected' if pm.type == 'paypal' }}>PayPal</option>
-              <option value="bank" {{ 'selected' if pm.type == 'bank' }}>Bank Transfer</option>
-              <option value="card" {{ 'selected' if pm.type == 'card' }}>Credit Card</option>
-              <option value="other" {{ 'selected' if pm.type == 'other' }}>Other</option>
-            </select>
-          </div>
-          <div class="mb-3">
-            <label class="form-label small text-muted">{{ 'Label' if lang == 'en' else 'التسمية' }}</label>
-            <input type="text" name="label" class="form-control" value="{{ pm.label }}" required>
-          </div>
-          <div class="mb-2">
-            <label class="form-label small text-muted">{{ 'Details' if lang == 'en' else 'التفاصيل' }}</label>
-            <textarea name="details" class="form-control font-monospace" rows="5" style="font-size:.85rem">{{ pm.details }}</textarea>
+{% if methods %}
+<div class="row g-2">
+  {% for pm in methods %}
+  {% set pm_ns = namespace(currency='', network='', address='') %}
+  {% if pm.details %}
+    {% for line in pm.details.split('\n') %}
+      {% if line.startswith('Currency:') %}{% set pm_ns.currency = line.split(': ',1)[1] %}{% endif %}
+      {% if line.startswith('Network:') %}{% set pm_ns.network = line.split(': ',1)[1] %}{% endif %}
+      {% if line.startswith('Address:') %}{% set pm_ns.address = line.split(': ',1)[1] %}{% endif %}
+    {% endfor %}
+  {% endif %}
+  <div class="col-12 method-card card {{ 'inactive' if not pm.is_active }} px-3 py-2">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+      <div class="d-flex align-items-center gap-3">
+        <span class="crypto-icon" style="min-width:24px;text-align:center">
+          {%- set cur = pm_ns.currency or pm.label.split(' ')[0] -%}
+          {%- if cur == 'USDT' -%}<span style="color:#26a17b">₮</span>
+          {%- elif cur == 'BTC' -%}<span style="color:#f7931a">₿</span>
+          {%- elif cur == 'ETH' -%}<span style="color:#627eea">◇</span>
+          {%- elif cur == 'SOL' -%}<span style="color:#9945ff">◎</span>
+          {%- elif cur == 'BNB' -%}<span style="color:#f0b90b">◆</span>
+          {%- elif cur == 'XRP' -%}<span style="color:#00aa">✕</span>
+          {%- elif cur == 'ADA' -%}<span style="color:#0033ad">₳</span>
+          {%- elif cur == 'DOT' -%}<span style="color:#e6007a">●</span>
+          {%- elif cur == 'DOGE' -%}<span style="color:#c2a633">Ð</span>
+          {%- elif cur == 'LTC' -%}<span style="color:#345d9d">Ł</span>
+          {%- elif cur == 'TRX' -%}<span style="color:#ef0027">↕</span>
+          {%- elif cur == 'USDC' -%}<span style="color:#2775ca">●</span>
+          {%- else -%}<i class="bi bi-coin text-warning"></i>
+          {%- endif -%}
+        </span>
+        <div>
+          <div class="fw-semibold small">{{ pm.label }}</div>
+          <div class="d-flex align-items-center gap-2 mt-1">
+            {% if pm.is_active %}<span class="badge bg-success-subtle text-success-emphasis" style="font-size:.65rem">● {{ 'Active' if lang == 'en' else 'نشط' }}</span>
+            {% else %}<span class="badge bg-secondary-subtle text-secondary-emphasis" style="font-size:.65rem">○ {{ 'Inactive' if lang == 'en' else 'غير نشط' }}</span>{% endif %}
           </div>
         </div>
-        <div class="modal-footer border-0 pt-0">
-          <button type="submit" class="btn btn-warning text-dark fw-semibold px-4"><i class="bi bi-check-lg me-1"></i>{{ 'Save' if lang == 'en' else 'حفظ' }}</button>
-        </div>
-      </form>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        {% if pm_ns.network %}<span class="network-chip">{{ pm_ns.network }}</span>{% endif %}
+        {% if pm_ns.address %}
+        <code style="font-size:.75rem;padding:4px 8px;border-radius:6px;background:rgba(255,255,255,.04);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;direction:ltr">{{ pm_ns.address[:20] }}…{{ pm_ns.address[-6:] }}</code>
+        {% endif %}
+      </div>
+      <div class="d-flex gap-1">
+        <button class="btn btn-sm btn-outline-light py-1 px-2" data-bs-toggle="modal" data-bs-target="#editModal{{ pm.id }}" title="{{ 'Edit' if lang == 'en' else 'تعديل' }}"><i class="bi bi-pencil" style="font-size:.75rem"></i></button>
+        <form method="POST" action="{{ url_for('admin.payment_methods') }}" class="d-inline">
+          <input type="hidden" name="action" value="toggle">
+          <input type="hidden" name="pm_id" value="{{ pm.id }}">
+          <button type="submit" class="btn btn-sm btn-outline-light py-1 px-2" title="{{ 'Toggle' if lang == 'en' else 'تبديل' }}"><i class="bi bi-{{ 'eye-slash' if pm.is_active else 'eye' }}" style="font-size:.75rem"></i></button>
+        </form>
+        <form method="POST" action="{{ url_for('admin.delete_payment_method', pm_id=pm.id) }}" onsubmit="return confirm('{{ 'Delete?' if lang == 'en' else 'حذف؟' }}')" class="d-inline">
+          <button type="submit" class="btn btn-sm btn-outline-danger py-1 px-2" title="{{ 'Delete' if lang == 'en' else 'حذف' }}"><i class="bi bi-trash" style="font-size:.75rem"></i></button>
+        </form>
+      </div>
     </div>
   </div>
+
+  <!-- Edit Modal {{ pm.id }} -->
+  <div class="modal fade" id="editModal{{ pm.id }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <form method="POST" action="{{ url_for('admin.edit_payment_method', pm_id=pm.id) }}">
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square text-warning me-1"></i>{{ 'Edit Address' if lang == 'en' else 'تعديل العنوان' }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body pt-2">
+            <div class="mb-3">
+              <label class="form-label small text-uppercase text-muted fw-semibold"><span class="step-num">1</span>{{ 'Currency' if lang == 'en' else 'العملة' }}</label>
+              <select name="edit_cur" class="form-select ecur" data-id="{{ pm.id }}" data-cur="{{ pm_ns.currency }}">
+                <option value="">{{ 'Select...' if lang == 'en' else 'اختر...' }}</option>
+                {% for c in crypto_currencies %}
+                <option value="{{ c }}" {{ 'selected' if c == pm_ns.currency }}>{{ c }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small text-uppercase text-muted fw-semibold"><span class="step-num">2</span>{{ 'Network' if lang == 'en' else 'الشبكة' }}</label>
+              <div class="d-flex flex-wrap gap-2" id="enet_{{ pm.id }}">
+                {% if pm_ns.currency and network_options.get(pm_ns.currency) %}
+                {% for n in network_options[pm_ns.currency] %}
+                <button type="button" class="net-btn enetb {{ 'active' if n == pm_ns.network }}" data-id="{{ pm.id }}" data-net="{{ n }}" onclick="eNetClick(this)">{{ n }}</button>
+                {% endfor %}
+                {% endif %}
+              </div>
+              <input type="hidden" name="enet" class="enet_inp" data-id="{{ pm.id }}" value="{{ pm_ns.network }}">
+            </div>
+            <div class="mb-2">
+              <label class="form-label small text-uppercase text-muted fw-semibold"><span class="step-num">3</span>{{ 'Wallet Address' if lang == 'en' else 'عنوان المحفظة' }}</label>
+              <input type="text" class="form-control addr-input eaddr" data-id="{{ pm.id }}" value="{{ pm_ns.address }}" placeholder="{{ 'Enter or paste address...' if lang == 'en' else 'أدخل أو الصق العنوان...' }}" dir="ltr" oninput="eUpdate(this.dataset.id)" onchange="eUpdate(this.dataset.id)">
+            </div>
+            <input type="hidden" name="type" value="crypto">
+            <input type="hidden" name="label" class="elabel" data-id="{{ pm.id }}" value="{{ pm.label }}">
+            <textarea name="details" class="d-none edetails" data-id="{{ pm.id }}">{{ pm.details }}</textarea>
+          </div>
+          <div class="modal-footer border-0 pt-0">
+            <button type="submit" class="btn btn-warning text-dark fw-semibold px-4"><i class="bi bi-check-lg me-1"></i>{{ 'Save' if lang == 'en' else 'حفظ' }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
 </div>
 {% else %}
-<tr>
-  <td colspan="5" class="text-center py-5">
-    <i class="bi bi-credit-card-2-front text-warning" style="font-size:3rem;opacity:.4"></i>
-    <p class="text-muted mt-2 mb-0">{{ 'No payment methods yet.' if lang == 'en' else 'لا توجد وسائل دفع بعد.' }}</p>
-  </td>
-</tr>
-{% endfor %}
-</tbody>
-</table>
+<div class="text-center py-5">
+  <i class="bi bi-coin text-warning" style="font-size:3.5rem;opacity:.4"></i>
+  <p class="text-muted mt-2 mb-3">{{ 'No payment methods yet.' if lang == 'en' else 'لا توجد وسائل دفع بعد.' }}</p>
+  <button class="btn btn-warning text-dark fw-semibold" data-bs-toggle="modal" data-bs-target="#addModal">{{ 'Add Your First Address' if lang == 'en' else 'أضف أول عنوان' }}</button>
 </div>
+{% endif %}
 
 <!-- Add Modal -->
-<div class="modal fade" id="addPmModal" tabindex="-1">
+<div class="modal fade" id="addModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow">
       <form method="POST" action="{{ url_for('admin.payment_methods') }}" novalidate>
         <input type="hidden" name="action" value="add">
+        <input type="hidden" name="type" value="crypto">
+        <input type="hidden" name="label" id="labelOut">
+        <input type="hidden" name="details" id="detailsOut">
         <div class="modal-header border-0 pb-0">
-          <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle text-warning me-1"></i>{{ 'Add Payment Method' if lang == 'en' else 'إضافة وسيلة دفع' }}</h5>
+          <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle text-warning me-1"></i>{{ 'Add Crypto Address' if lang == 'en' else 'إضافة عنوان رقمي' }}</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body pt-2">
           <div class="mb-3">
-            <label class="form-label small text-muted">{{ 'Type' if lang == 'en' else 'النوع' }}</label>
-            <select name="type" class="form-select">
-              <option value="crypto">Cryptocurrency</option>
-              <option value="paypal">PayPal</option>
-              <option value="bank">Bank Transfer</option>
-              <option value="card">Credit Card</option>
-              <option value="other">Other</option>
-            </select>
+            <label class="form-label small text-uppercase text-muted fw-semibold"><span class="step-num">1</span>{{ 'Currency' if lang == 'en' else 'العملة' }}</label>
+            <div class="d-flex flex-wrap gap-1" id="curGrid">
+              {% for c in ['USDT','BTC','ETH','SOL','BNB','XRP','ADA','DOT','DOGE','LTC','TRX','USDC','MATIC','AVAX'] %}
+              <button type="button" class="crypto-tile" data-cur="{{ c }}">
+                <div class="symbol">{{ c }}</div>
+                <div class="name">{{ {'USDT':'Tether','BTC':'Bitcoin','ETH':'Ethereum','SOL':'Solana','BNB':'BNB','XRP':'Ripple','ADA':'Cardano','DOT':'Polkadot','DOGE':'Dogecoin','LTC':'Litecoin','TRX':'TRON','USDC':'USD Coin','MATIC':'Polygon','AVAX':'Avalanche'}[c] }}</div>
+              </button>
+              {% endfor %}
+            </div>
           </div>
           <div class="mb-3">
-            <label class="form-label small text-muted">{{ 'Label' if lang == 'en' else 'التسمية' }}</label>
-            <input type="text" name="label" class="form-control" placeholder="{{ 'e.g. USDT (TRC-20)' if lang == 'en' else 'مثال: USDT (TRC-20)' }}" required>
+            <label class="form-label small text-uppercase text-muted fw-semibold"><span class="step-num">2</span>{{ 'Network' if lang == 'en' else 'الشبكة' }}</label>
+            <div class="d-flex flex-wrap gap-2" id="netGrid"></div>
+            <input type="hidden" id="netOut">
           </div>
           <div class="mb-2">
-            <label class="form-label small text-muted">{{ 'Details' if lang == 'en' else 'التفاصيل' }}</label>
-            <textarea name="details" class="form-control font-monospace" rows="5" style="font-size:.85rem" placeholder="Currency: USDT&#10;Network: TRC-20&#10;Address: TTYdsoYhYabq9e4kByamzACpYj5PzP3Q5e"></textarea>
+            <label class="form-label small text-uppercase text-muted fw-semibold"><span class="step-num">3</span>{{ 'Wallet Address' if lang == 'en' else 'عنوان المحفظة' }}</label>
+            <div class="input-group">
+              <input type="text" class="form-control addr-input" id="addrIn" placeholder="{{ 'Enter or paste address...' if lang == 'en' else 'أدخل أو الصق العنوان...' }}" dir="ltr">
+              <button class="btn btn-outline-light" type="button" onclick="doPaste()" title="{{ 'Paste' if lang == 'en' else 'لصق' }}"><i class="bi bi-clipboard"></i></button>
+            </div>
+          </div>
+          <div class="mt-3 d-none fade-up" id="preview">
+            <div class="preview-box">
+              <div class="d-flex align-items-center gap-2 mb-1"><span style="color:var(--text-muted)">Currency:</span> <strong id="pvCur">—</strong></div>
+              <div class="d-flex align-items-center gap-2 mb-1"><span style="color:var(--text-muted)">Network:</span> <strong id="pvNet">—</strong></div>
+              <div class="d-flex align-items-center gap-2"><span style="color:var(--text-muted)">Address:</span> <code id="pvAddr" style="word-break:break-all;font-size:.78rem">—</code></div>
+            </div>
           </div>
         </div>
         <div class="modal-footer border-0 pt-0">
-          <button type="submit" class="btn btn-warning text-dark fw-semibold px-4"><i class="bi bi-plus-lg me-1"></i>{{ 'Add Method' if lang == 'en' else 'إضافة وسيلة' }}</button>
+          <button type="submit" class="btn btn-warning text-dark fw-semibold px-4" id="saveBtn" disabled><i class="bi bi-plus-lg me-1"></i>{{ 'Add Address' if lang == 'en' else 'إضافة العنوان' }}</button>
         </div>
       </form>
     </div>
   </div>
 </div>
+{% endblock %}
+{% block scripts %}
+<script>
+const NET = {{ network_options | tojson | safe }};
+
+// ----- Add Modal -----
+document.getElementById('curGrid').onclick = function(e) {
+  var t = e.target.closest('.crypto-tile');
+  if (!t) return;
+  this.querySelectorAll('.crypto-tile').forEach(function(x) { x.classList.remove('active'); });
+  t.classList.add('active');
+  var cur = t.dataset.cur;
+  document.getElementById('netOut').value = '';
+  var ng = document.getElementById('netGrid');
+  ng.innerHTML = '';
+  if (NET[cur]) {
+    NET[cur].forEach(function(n) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'net-btn'; b.textContent = n;
+      b.onclick = function() {
+        ng.querySelectorAll('.net-btn').forEach(function(x) { x.classList.remove('active'); });
+        this.classList.add('active');
+        document.getElementById('netOut').value = n;
+        updateAddPreview();
+      };
+      ng.appendChild(b);
+    });
+  }
+  updateAddPreview();
+};
+
+document.getElementById('addrIn').oninput = updateAddPreview;
+
+function doPaste() {
+  navigator.clipboard.readText().then(function(t) {
+    if (t) { document.getElementById('addrIn').value = t.trim(); updateAddPreview(); }
+  }).catch(function(){});
+}
+
+function updateAddPreview() {
+  var cur = document.querySelector('#curGrid .active');
+  var c = cur ? cur.dataset.cur : '';
+  var n = document.getElementById('netOut').value;
+  var a = document.getElementById('addrIn').value.trim();
+  document.getElementById('pvCur').textContent = c || '—';
+  document.getElementById('pvNet').textContent = n || '—';
+  document.getElementById('pvAddr').textContent = a || '—';
+  var pb = document.getElementById('preview');
+  if (c && n && a) {
+    pb.classList.remove('d-none');
+    document.getElementById('saveBtn').disabled = false;
+    document.getElementById('detailsOut').value = 'Currency: ' + c + '\nNetwork: ' + n + '\nAddress: ' + a;
+    document.getElementById('labelOut').value = c + ' (' + n + ')';
+  } else {
+    pb.classList.add('d-none');
+    document.getElementById('saveBtn').disabled = true;
+  }
+}
+
+document.getElementById('addModal').addEventListener('hidden.bs.modal', function() {
+  document.querySelectorAll('#curGrid .crypto-tile').forEach(function(t) { t.classList.remove('active'); });
+  document.getElementById('netGrid').innerHTML = '';
+  document.getElementById('netOut').value = '';
+  document.getElementById('addrIn').value = '';
+  document.getElementById('preview').classList.add('d-none');
+  document.getElementById('saveBtn').disabled = true;
+});
+
+// ----- Edit Modals -----
+document.querySelectorAll('.ecur').forEach(function(s) {
+  s.onchange = function() {
+    var id = this.dataset.id;
+    var cur = this.value;
+    var ng = document.getElementById('enet_' + id);
+    ng.innerHTML = '';
+    if (cur && NET[cur]) {
+      NET[cur].forEach(function(n) {
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'net-btn enetb'; b.dataset.id = id; b.dataset.net = n;
+        b.textContent = n;
+        b.onclick = function() { eNetClick(this); };
+        ng.appendChild(b);
+      });
+    }
+    document.querySelector('.enet_inp[data-id="' + id + '"]').value = '';
+    eUpdate(id);
+  };
+});
+
+function eNetClick(b) {
+  var id = b.dataset.id;
+  document.querySelectorAll('.enetb[data-id="' + id + '"]').forEach(function(x) { x.classList.remove('active'); });
+  b.classList.add('active');
+  document.querySelector('.enet_inp[data-id="' + id + '"]').value = b.dataset.net;
+  eUpdate(id);
+}
+
+function eUpdate(id) {
+  var cur = document.querySelector('.ecur[data-id="' + id + '"]').value;
+  var net = document.querySelector('.enet_inp[data-id="' + id + '"]').value;
+  var addr = document.querySelector('.eaddr[data-id="' + id + '"]').value.trim();
+  if (cur && net && addr) {
+    document.querySelector('.edetails[data-id="' + id + '"]').value = 'Currency: ' + cur + '\nNetwork: ' + net + '\nAddress: ' + addr;
+    document.querySelector('.elabel[data-id="' + id + '"]').value = cur + ' (' + net + ')';
+  } else {
+    document.querySelector('.elabel[data-id="' + id + '"]').value = cur ? cur : '';
+  }
+}
+
+// Init edit elabel/edetails from existing values on page load
+document.addEventListener('DOMContentLoaded', function() {
+  // ensure elabel/edetails already have original values from HTML attributes
+});
+</script>
 {% endblock %}

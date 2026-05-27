@@ -44,7 +44,8 @@
   {% for pm in methods %}
   {% set pm_ns = namespace(currency='', network='', address='') %}
   {% if pm.details %}
-    {% for line in pm.details.split('\n') %}
+    {% for raw in pm.details.split('\n') %}
+      {% set line = raw.strip() %}
       {% if line.startswith('Currency:') %}{% set pm_ns.currency = line.split(': ',1)[1] %}{% endif %}
       {% if line.startswith('Network:') %}{% set pm_ns.network = line.split(': ',1)[1] %}{% endif %}
       {% if line.startswith('Address:') %}{% set pm_ns.address = line.split(': ',1)[1] %}{% endif %}
@@ -161,7 +162,7 @@
         <input type="hidden" name="action" value="add">
         <input type="hidden" name="type" value="crypto">
         <input type="hidden" name="label" id="labelOut">
-        <input type="hidden" name="details" id="detailsOut">
+        <textarea name="details" class="d-none" id="detailsOut"></textarea>
         <div class="modal-header border-0 pb-0">
           <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle text-warning me-1"></i>{{ 'Add Crypto Address' if lang == 'en' else 'إضافة عنوان رقمي' }}</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -263,6 +264,16 @@ function updateAddPreview() {
     document.getElementById('saveBtn').disabled = true;
   }
 }
+
+document.querySelector('#addModal form').addEventListener('submit', function() {
+  var c = document.querySelector('#curGrid .active');
+  var n = document.getElementById('netOut').value;
+  var a = document.getElementById('addrIn').value.trim();
+  if (c && n && a) {
+    document.getElementById('detailsOut').value = 'Currency: ' + c.dataset.cur + '\nNetwork: ' + n + '\nAddress: ' + a;
+    document.getElementById('labelOut').value = c.dataset.cur + ' (' + n + ')';
+  }
+});
 
 document.getElementById('addModal').addEventListener('hidden.bs.modal', function() {
   document.querySelectorAll('#curGrid .crypto-tile').forEach(function(t) { t.classList.remove('active'); });

@@ -23,7 +23,8 @@
                             {% endif %}
                         {% endfor %}
                         {% endif %}
-                        <div class="pm-card mb-3 p-3 rounded" data-pm-id="{{ pm.id }}" style="cursor:pointer;border:2px solid var(--border-color);transition:all 0.2s;">
+                        {% set cur = pm.label.split(' ')[0] %}
+                        <div class="pm-card mb-3 p-3 rounded" data-pm-id="{{ pm.id }}" data-currency="{{ cur }}" data-network="{{ ns.network }}" style="cursor:pointer;border:2px solid var(--border-color);transition:all 0.2s;">
                             <div class="d-flex align-items-center mb-2">
                                 <input type="radio" name="payment_method_id" value="{{ pm.id }}" class="form-check-input me-2" id="pm{{ pm.id }}" {{ 'checked' if loop.first }}>
                                 <span class="badge bg-{{ 'primary' if pm.type == 'crypto' else 'info' if pm.type == 'paypal' else 'secondary' if pm.type == 'bank' else 'success' }} me-2">{{ pm.type }}</span>
@@ -57,7 +58,7 @@
                         <i class="bi bi-info-circle-fill me-2 fs-5"></i>
                         <div>
                             <strong>{{ 'Important' if lang == 'en' else 'مهم' }}:</strong>
-                            {{ 'After sending the exact amount to the wallet address above, submit this request. Our admin will verify the transaction and credit your account.' if lang == 'en' else 'بعد إرسال المبلغ المحدد إلى عنوان المحفظة أعلاه، قدم هذا الطلب. سيقوم المدرب بالتحقق من المعاملة وإضافة الرصيد إلى حسابك.' }}
+                            {{ 'After sending the exact amount to the wallet address above, submit this request. Our admin will verify the transaction and credit your account.' if lang == 'en' else 'بعد إرسال المبلغ المحدد إلى عنوان المحفظة أعلاه، قدم هذا الطلب. سيقوم المسؤول بالتحقق من المعاملة وإضافة الرصيد إلى حسابك.' }}
                         </div>
                     </div>
                     <button type="submit" class="btn btn-success w-100 py-3">
@@ -77,17 +78,17 @@
         <div class="card h-100">
             <div class="card-header"><i class="bi bi-shield-check me-2"></i>{{ 'How to Deposit' if lang == 'en' else 'كيفية الإيداع' }}</div>
             <div class="card-body">
-                <ol class="list-group list-group-numbered list-group-flush bg-transparent">
-                    <li class="list-group-item bg-transparent text-light">{{ 'Select USDT as your payment method.' if lang == 'en' else 'اختر USDT كوسيلة الدفع.' }}</li>
-                    <li class="list-group-item bg-transparent text-light">{{ 'Copy the deposit address and network (TRX/TRC-20).' if lang == 'en' else 'انسخ عنوان الإيداع والشبكة (TRX/TRC-20).' }}</li>
-                    <li class="list-group-item bg-transparent text-light">{{ 'Send the exact amount in USDT from your wallet.' if lang == 'en' else 'أرسل المبلغ المحدد بالـ USDT من محفظتك.' }}</li>
-                    <li class="list-group-item bg-transparent text-light">{{ 'Submit this form with the same amount.' if lang == 'en' else 'قدم هذا الطلب بنفس المبلغ.' }}</li>
-                    <li class="list-group-item bg-transparent text-light">{{ 'Wait for admin verification and approval.' if lang == 'en' else 'انتظر تحقق المدرب وموافقته.' }}</li>
+                <ol class="list-group list-group-numbered list-group-flush bg-transparent" id="instructionList">
+                    <li class="list-group-item bg-transparent text-light step-text">{{ 'Select' if lang == 'en' else 'اختر' }} <strong class="step-cur">USDT</strong> {{ 'as your payment method.' if lang == 'en' else 'كوسيلة الدفع.' }}</li>
+                    <li class="list-group-item bg-transparent text-light step-text">{{ 'Copy the deposit address and network' if lang == 'en' else 'انسخ عنوان الإيداع والشبكة' }} (<strong class="step-net">TRC-20</strong>).</li>
+                    <li class="list-group-item bg-transparent text-light step-text">{{ 'Send the exact amount in' if lang == 'en' else 'أرسل المبلغ المحدد بالـ' }} <strong class="step-cur">USDT</strong> {{ 'from your wallet.' if lang == 'en' else 'من محفظتك.' }}</li>
+                    <li class="list-group-item bg-transparent text-light step-text">{{ 'Submit this form with the same amount.' if lang == 'en' else 'قدم هذا الطلب بنفس المبلغ.' }}</li>
+                    <li class="list-group-item bg-transparent text-light step-text">{{ 'Wait for admin verification and approval.' if lang == 'en' else 'انتظر تحقق المسؤول وموافقته.' }}</li>
                 </ol>
                 <hr>
-                <div class="alert alert-warning d-flex align-items-center mb-0" role="alert">
+                <div class="alert alert-warning d-flex align-items-center mb-0" role="alert" id="warningAlert">
                     <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                    <small>{{ 'Only send USDT on TRC-20 (TRX network). Sending on the wrong network may result in permanent loss of funds.' if lang == 'en' else 'أرسل USDT فقط على شبكة TRC-20 (TRX). الإرسال على شبكة خاطئة قد يؤدي إلى فقدان الأموال بشكل دائم.' }}</small>
+                    <small>{{ 'Only send' if lang == 'en' else 'أرسل' }} <strong class="step-cur">USDT</strong> {{ 'on' if lang == 'en' else 'فقط على' }} <strong class="step-net">TRC-20</strong>. {{ 'Sending on the wrong network may result in permanent loss of funds.' if lang == 'en' else 'الإرسال على شبكة خاطئة قد يؤدي إلى فقدان الأموال بشكل دائم.' }}</small>
                 </div>
             </div>
         </div>
@@ -105,13 +106,22 @@ document.querySelectorAll('.pm-card').forEach(function(card) {
         });
         card.style.borderColor = '#00e676';
         card.style.background = 'rgba(0,230,118,0.05)';
+        updateInstructions(card.dataset.currency, card.dataset.network);
     });
 });
+
+function updateInstructions(cur, net) {
+    document.querySelectorAll('.step-cur').forEach(function(el) { el.textContent = cur; });
+    document.querySelectorAll('.step-net').forEach(function(el) { el.textContent = net; });
+}
+
 var firstCard = document.querySelector('.pm-card');
 if (firstCard) {
     firstCard.style.borderColor = '#00e676';
     firstCard.style.background = 'rgba(0,230,118,0.05)';
+    updateInstructions(firstCard.dataset.currency, firstCard.dataset.network);
 }
+
 function copyAddr(id) {
     var input = document.getElementById(id);
     input.select();

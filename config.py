@@ -16,5 +16,9 @@ class Config:
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', '')
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'noreply@eloninvest.com')
 
+    TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
+    TELEGRAM_CHANNEL_ID = os.environ.get('TELEGRAM_CHANNEL_ID', '')
+    TELEGRAM_CHANNEL_URL = os.environ.get('TELEGRAM_CHANNEL_URL', 'https://t.me/eloninvest')
+
     WTF_CSRF_ENABLED = True
     LANGUAGES = {'en': 'English', 'ar': 'العربية'}

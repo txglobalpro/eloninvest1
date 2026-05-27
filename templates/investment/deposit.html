@@ -12,14 +12,17 @@
                         <label class="form-label fw-bold">{{ 'Select Payment Method' if lang == 'en' else 'اختر وسيلة الدفع' }}</label>
                         {% for pm in payment_methods %}
                         {% set ns = namespace(address='', network='') %}
-                        {% for line in pm.details.split('\n') %}
-                            {% if 'Deposit Address' in line %}
+                        {% if pm.details %}
+                        {% for raw in pm.details.split('\n') %}
+                            {% set line = raw.strip() %}
+                            {% if line.startswith('Address:') %}
                                 {% set ns.address = line.split(': ', 1)[1] %}
                             {% endif %}
-                            {% if 'Network' in line or 'network' in line %}
+                            {% if line.startswith('Network:') %}
                                 {% set ns.network = line.split(': ', 1)[1] %}
                             {% endif %}
                         {% endfor %}
+                        {% endif %}
                         <div class="pm-card mb-3 p-3 rounded" data-pm-id="{{ pm.id }}" style="cursor:pointer;border:2px solid var(--border-color);transition:all 0.2s;">
                             <div class="d-flex align-items-center mb-2">
                                 <input type="radio" name="payment_method_id" value="{{ pm.id }}" class="form-check-input me-2" id="pm{{ pm.id }}" {{ 'checked' if loop.first }}>

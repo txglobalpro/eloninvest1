@@ -134,6 +134,51 @@
             <a href="{{ url_for('auth.register') }}" class="btn btn-warning btn-lg px-5">{{ 'Create Free Account' if lang == 'en' else 'إنشاء حساب مجاني' }}</a>
         {% endif %}
     </div>
+
+    <!-- Telegram Banner -->
+    <div class="telegram-banner mb-5">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-7">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="telegram-icon-wrap">
+                        <i class="bi bi-telegram"></i>
+                    </div>
+                    <div>
+                        <span class="badge bg-info text-dark px-3 py-2" style="font-size:.75rem;border-radius:20px;">{{ 'Official Channel' if lang == 'en' else 'القناة الرسمية' }}</span>
+                    </div>
+                </div>
+                <h3 class="text-white fw-bold mb-2" style="font-size:1.8rem;">{{ 'Join Our Telegram Community' if lang == 'en' else 'انضم لمجتمعنا على تلغرام' }}</h3>
+                <p class="text-white-50 mb-3" style="max-width:550px;">{{ 'Get daily Elon Musk business news, market updates, investment tips, and exclusive announcements delivered straight to your Telegram.' if lang == 'en' else 'احصل على أخبار إيلون ماسك اليومية، تحديثات السوق، نصائح استثمارية، وإعلانات حصرية ترسل مباشرة إلى تلغرامك.' }}</p>
+                <ul class="list-unstyled mb-4">
+                    <li class="mb-2 text-white-50"><i class="bi bi-check-circle-fill text-info me-2"></i>{{ 'Daily news about Tesla, SpaceX, xAI & more' if lang == 'en' else 'أخبار يومية عن تسلا، سبيس إكس، xAI والمزيد' }}</li>
+                    <li class="mb-2 text-white-50"><i class="bi bi-check-circle-fill text-info me-2"></i>{{ 'Real-time market analysis & investment signals' if lang == 'en' else 'تحليلات السوق الفورية وإشارات استثمارية' }}</li>
+                    <li class="mb-2 text-white-50"><i class="bi bi-check-circle-fill text-info me-2"></i>{{ 'Exclusive promo codes & early access' if lang == 'en' else 'رموز ترويجية حصرية ووصول مبكر' }}</li>
+                </ul>
+                <a href="{{ telegram_url }}" target="_blank" class="btn btn-info btn-lg px-5 fw-bold" style="border-radius:50px;">
+                    <i class="bi bi-telegram me-2"></i>{{ 'Join Now — Free' if lang == 'en' else 'انضم الآن — مجاناً' }}
+                    <i class="bi bi-arrow-up-right ms-1"></i>
+                </a>
+            </div>
+            <div class="col-lg-5 text-center">
+                <div class="telegram-phone">
+                    <div class="phone-notch"></div>
+                    <div class="phone-header d-flex align-items-center gap-2 px-3 pt-3 pb-2">
+                        <div class="phone-avatar"><i class="bi bi-telegram"></i></div>
+                        <div class="text-start">
+                            <div class="fw-bold" style="font-size:.82rem;">ElonInvest Channel</div>
+                            <div style="font-size:.65rem;opacity:.6;">{{ 'online' if lang == 'en' else 'متصل' }}</div>
+                        </div>
+                    </div>
+                    <div class="phone-body px-3 pb-3">
+                        <div class="msg received">🚀 {{ 'Tesla hits new milestone in Q2 deliveries' if lang == 'en' else 'تسلا تحقق إنجازاً جديداً في توصيلات الربع الثاني' }}</div>
+                        <div class="msg received">📊 {{ 'SpaceX raises $2B in latest funding round' if lang == 'en' else 'سبيس إكس تجمع 2 مليار دولار في جولة تمويل جديدة' }}</div>
+                        <div class="msg sent">{{ 'How do I invest in these companies?' if lang == 'en' else 'كيف أستثمر في هذه الشركات؟' }}</div>
+                        <div class="msg received">💡 {{ 'Start with ElonInvest — daily returns up to 8%!' if lang == 'en' else 'ابدأ مع ElonInvest — عوائد يومية تصل إلى 8%!' }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div id="toast-container"></div>

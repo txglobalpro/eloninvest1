@@ -119,19 +119,15 @@
         <div id="chatbot-box">
             <div id="chatbot-header">
                 <div class="d-flex align-items-center gap-2">
-                    <div class="chatbot-avatar"><i class="bi bi-person-fill"></i></div>
+                    <div class="chatbot-avatar" id="chatAgentAvatar"><i class="bi bi-person-fill"></i></div>
                     <div>
-                        <div class="fw-bold" style="font-size:.82rem;">{{ 'Sarah' if lang == 'en' else 'سارة' }}</div>
-                        <div style="font-size:.65rem;opacity:.7;">{{ 'Customer Support' if lang == 'en' else 'دعم العملاء' }}</div>
+                        <div class="fw-bold" style="font-size:.82rem;" id="chatAgentName">{{ 'Support' if lang == 'en' else 'الدعم' }}</div>
+                        <div style="font-size:.65rem;opacity:.7;" id="chatAgentRole">{{ 'Customer Support' if lang == 'en' else 'دعم العملاء' }}</div>
                     </div>
                 </div>
                 <button class="btn-close btn-close-white" onclick="toggleChat()"></button>
             </div>
-            <div id="chatbot-msgs">
-                <div class="chatbot-msg bot">
-                    <div class="msg-bubble">{{ 'Hello! 👋 I\'m Sarah from customer support. How can I help you today?' if lang == 'en' else 'مرحباً! 👋 أنا سارة من فريق دعم العملاء. كيف يمكنني مساعدتك اليوم؟' }}</div>
-                </div>
-            </div>
+            <div id="chatbot-msgs"></div>
             <div id="chatbot-input">
                 <input type="text" id="chatbot-inp" placeholder="{{ 'Type a message...' if lang == 'en' else 'اكتب رسالة...' }}" onkeydown="if(event.key==='Enter')sendMsg()">
                 <button onclick="sendMsg()"><i class="bi bi-send-fill"></i></button>
@@ -141,7 +137,14 @@
 
     <script>
     var LANG = '{{ lang }}';
-    var typingTimeout;
+    var AGENTS = {{ ([{'name': 'Sarah','role': 'Senior Support'},{'name': 'Adam','role': 'Support Specialist'},{'name': 'Layla','role': 'Client Relations'},{'name': 'Omar','role': 'Technical Support'},{'name': 'Emma','role': 'Account Manager'},{'name': 'Yousef','role': 'Investment Advisor'}]) if lang == 'en' else ([{'name': 'سارة','role': 'دعم أول'},{'name': 'آدم','role': 'أخصائي دعم'},{'name': 'ليلى','role': 'علاقات العملاء'},{'name': 'عمر','role': 'دعم فني'},{'name': 'إيما','role': 'مدير حسابات'},{'name': 'يوسف','role': 'مستشار استثمار'}]) | tojson | safe }};
+
+    function pickAgent() {
+        var a = AGENTS[Math.floor(Math.random() * AGENTS.length)];
+        document.getElementById('chatAgentName').textContent = a.name;
+        document.getElementById('chatAgentRole').textContent = a.role;
+        return a;
+    }
 
     function toggleChat() {
         var box = document.getElementById('chatbot-box');
@@ -165,23 +168,20 @@
         msgs.scrollTop = msgs.scrollHeight;
     }
 
+    function agentGreeting(agent) {
+        if (LANG === 'ar') {
+            return 'مرحباً! 👋 أنا ' + agent.name + ' من فريق ' + agent.role + '. كيف يمكنني مساعدتك اليوم؟';
+        }
+        return 'Hello! 👋 I\\'m ' + agent.name + ' from ' + agent.role + '. How can I help you today?';
+    }
+
     function sendMsg() {
         var inp = document.getElementById('chatbot-inp');
         var text = inp.value.trim();
         if (!text) return;
         inp.value = '';
         addMsg(text, true);
-
-        var typing = document.createElement('div');
-        typing.className = 'chatbot-msg bot';
-        typing.id = 'typing-indicator';
-        var bubble = document.createElement('div');
-        bubble.className = 'msg-bubble';
-        bubble.innerHTML = '<span class="typing-dots"><span>.</span><span>.</span><span>.</span></span>';
-        typing.appendChild(bubble);
-        document.getElementById('chatbot-msgs').appendChild(typing);
-        var msgs = document.getElementById('chatbot-msgs');
-        msgs.scrollTop = msgs.scrollHeight;
+        showTyping();
 
         fetch('/api/chatbot', {
             method: 'POST',
@@ -190,16 +190,39 @@
         })
         .then(function(r) { return r.json(); })
         .then(function(d) {
-            var t = document.getElementById('typing-indicator');
-            if (t) t.remove();
+            hideTyping();
+            if (d.agent) {
+                document.getElementById('chatAgentName').textContent = d.agent.name;
+                document.getElementById('chatAgentRole').textContent = d.agent.role;
+            }
             addMsg(d.reply, false);
         })
         .catch(function() {
-            var t = document.getElementById('typing-indicator');
-            if (t) t.remove();
-            addMsg('{{ 'Sorry, something went wrong. Please try again.' if lang == 'en' else 'عذراً، حدث خطأ. حاول مرة أخرى.' }}', false);
+            hideTyping();
+            addMsg(LANG === 'ar' ? 'عذراً، حدث خطأ. حاول مرة أخرى.' : 'Sorry, something went wrong. Please try again.', false);
         });
     }
+
+    function showTyping() {
+        var div = document.createElement('div');
+        div.className = 'chatbot-msg bot';
+        div.id = 'typing-indicator';
+        var bubble = document.createElement('div');
+        bubble.className = 'msg-bubble';
+        bubble.innerHTML = '<span class="typing-dots"><span>.</span><span>.</span><span>.</span></span>';
+        div.appendChild(bubble);
+        document.getElementById('chatbot-msgs').appendChild(div);
+        var msgs = document.getElementById('chatbot-msgs');
+        msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function hideTyping() {
+        var t = document.getElementById('typing-indicator');
+        if (t) t.remove();
+    }
+
+    var initialAgent = pickAgent();
+    addMsg(agentGreeting(initialAgent), false);
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

@@ -52,9 +52,9 @@ def create_app(config_class=Config):
         data = request.get_json()
         msg = (data or {}).get('message', '').strip()
         if not msg:
-            return jsonify({'reply': 'Please type a message.' if session.get('lang', 'en') == 'en' else 'الرجاء كتابة رسالة.'})
-        reply = get_response(msg)
-        return jsonify({'reply': reply})
+            return jsonify({'reply': 'Please type a message.' if session.get('lang', 'en') == 'en' else 'الرجاء كتابة رسالة.', 'agent': {'name': 'Support', 'role': ''}})
+        result = get_response(msg)
+        return jsonify({'reply': result['reply'], 'agent': result['agent']})
 
     @app.before_request
     def before_request():

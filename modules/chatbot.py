@@ -3,6 +3,28 @@ import random
 import time
 from difflib import SequenceMatcher
 
+AGENTS_EN = [
+    {'name': 'Sarah', 'role': 'Senior Support'},
+    {'name': 'Adam', 'role': 'Support Specialist'},
+    {'name': 'Layla', 'role': 'Client Relations'},
+    {'name': 'Omar', 'role': 'Technical Support'},
+    {'name': 'Emma', 'role': 'Account Manager'},
+    {'name': 'Yousef', 'role': 'Investment Advisor'},
+]
+
+AGENTS_AR = [
+    {'name': 'سارة', 'role': 'دعم أول'},
+    {'name': 'آدم', 'role': 'أخصائي دعم'},
+    {'name': 'ليلى', 'role': 'علاقات العملاء'},
+    {'name': 'عمر', 'role': 'دعم فني'},
+    {'name': 'إيما', 'role': 'مدير حسابات'},
+    {'name': 'يوسف', 'role': 'مستشار استثمار'},
+]
+
+def get_agent(lang='en'):
+    agents = AGENTS_EN if lang == 'en' else AGENTS_AR
+    return random.choice(agents)
+
 GREETINGS = {
     'en': ['hello', 'hi', 'hey', 'greetings', 'good morning', 'good evening', 'howdy', 'what\'s up', 'yo', 'sup'],
     'ar': ['السلام عليكم', 'مرحبا', 'اهلا', 'هاي', 'هلا', 'صباح الخير', 'مساء الخير', 'تحياتي', 'الو'],
@@ -202,9 +224,16 @@ def find_best_match(text, lang):
 
 def get_response(message):
     lang = detect_lang(message)
+    agent = get_agent(lang)
     if is_greeting(message, lang):
-        return random.choice(GREETING_RESPONSES[lang])
-    responses = find_best_match(message, lang)
-    if responses:
-        return random.choice(responses)
-    return FALLBACK[lang]
+        reply = random.choice(GREETING_RESPONSES[lang])
+    else:
+        responses = find_best_match(message, lang)
+        if responses:
+            reply = random.choice(responses)
+        else:
+            reply = FALLBACK[lang]
+    # Replace agent name in greeting if present
+    if '{name}' in reply:
+        reply = reply.replace('{name}', agent['name'])
+    return {'reply': reply, 'agent': agent}

@@ -119,17 +119,17 @@
         <div id="chatbot-box">
             <div id="chatbot-header">
                 <div class="d-flex align-items-center gap-2">
-                    <div class="chatbot-avatar"><i class="bi bi-robot"></i></div>
+                    <div class="chatbot-avatar"><i class="bi bi-person-fill"></i></div>
                     <div>
-                        <div class="fw-bold" style="font-size:.82rem;">ElonInvest AI</div>
-                        <div style="font-size:.65rem;opacity:.7;">{{ 'Online' if lang == 'en' else 'متصل' }}</div>
+                        <div class="fw-bold" style="font-size:.82rem;">{{ 'Sarah' if lang == 'en' else 'سارة' }}</div>
+                        <div style="font-size:.65rem;opacity:.7;">{{ 'Customer Support' if lang == 'en' else 'دعم العملاء' }}</div>
                     </div>
                 </div>
                 <button class="btn-close btn-close-white" onclick="toggleChat()"></button>
             </div>
             <div id="chatbot-msgs">
                 <div class="chatbot-msg bot">
-                    <div class="msg-bubble">{{ 'Hi! 👋 I\'m ElonInvest AI assistant. Ask me anything about our platform!' if lang == 'en' else 'مرحباً! 👋 أنا مساعد ElonInvest الذكي. اسألني عن أي شيء في المنصة!' }}</div>
+                    <div class="msg-bubble">{{ 'Hello! 👋 I\'m Sarah from customer support. How can I help you today?' if lang == 'en' else 'مرحباً! 👋 أنا سارة من فريق دعم العملاء. كيف يمكنني مساعدتك اليوم؟' }}</div>
                 </div>
             </div>
             <div id="chatbot-input">

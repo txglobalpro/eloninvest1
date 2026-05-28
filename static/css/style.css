@@ -800,3 +800,27 @@ body {
 }@media (max-width:576px) {
     .telegram-banner { padding:1.5rem 1rem; }
 }
+
+/* Social Bar */
+.social-bar {
+    padding-top: 0.5rem;
+}
+.social-btn {
+    display:inline-flex;align-items:center;gap:8px;
+    padding:10px 22px;border-radius:50px;
+    background:var(--bg-card);
+    border:1px solid var(--border-color);
+    color:var(--text-primary);
+    text-decoration:none;
+    font-size:.85rem;font-weight:500;
+    transition:all .25s ease;
+    min-width:130px;justify-content:center;
+}
+.social-btn:hover {
+    background:var(--sc);
+    border-color:var(--sc);
+    color:#fff;
+    transform:translateY(-3px);
+    box-shadow:0 6px 20px rgba(0,0,0,0.3);
+}
+.social-btn i { font-size:1.15rem; }

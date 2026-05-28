@@ -47,7 +47,7 @@ def create_app(config_class=Config):
         from core.i18n import _
         def t(text):
             return _(text, lang)
-        return {'lang': lang, 't': t, 'telegram_url': app.config.get('TELEGRAM_CHANNEL_URL', 'https://t.me/eloniinvest')}
+        return {'lang': lang, 't': t, 'telegram_url': app.config.get('TELEGRAM_CHANNEL_URL', 'https://t.me/eloniinvest'), 'social_links': app.config.get('SOCIAL_LINKS', [])}
 
     from tasks import init_scheduler
     init_scheduler(app)

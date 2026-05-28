@@ -75,7 +75,24 @@ def create_app(config_class=Config):
             {'key': 'telegram', 'url': telegram_url, 'icon': 'bi-telegram', 'label': 'Telegram', 'color': '#08c'},
             {'key': 'website', 'url': app.config.get('WEBSITE_URL', '#'), 'icon': 'bi-globe2', 'label': 'Website', 'color': '#f0b90b'},
         ]
-        return {'lang': lang, 't': t, 'telegram_url': telegram_url, 'social_links': social_links}
+        chat_agents_en = [
+            {'name': 'Sarah', 'role': 'Senior Support'},
+            {'name': 'Adam', 'role': 'Support Specialist'},
+            {'name': 'Layla', 'role': 'Client Relations'},
+            {'name': 'Omar', 'role': 'Technical Support'},
+            {'name': 'Emma', 'role': 'Account Manager'},
+            {'name': 'Yousef', 'role': 'Investment Advisor'},
+        ]
+        chat_agents_ar = [
+            {'name': 'سارة', 'role': 'دعم أول'},
+            {'name': 'آدم', 'role': 'أخصائي دعم'},
+            {'name': 'ليلى', 'role': 'علاقات العملاء'},
+            {'name': 'عمر', 'role': 'دعم فني'},
+            {'name': 'إيما', 'role': 'مدير حسابات'},
+            {'name': 'يوسف', 'role': 'مستشار استثمار'},
+        ]
+        return {'lang': lang, 't': t, 'telegram_url': telegram_url, 'social_links': social_links,
+                'chat_agents': chat_agents_en if lang == 'en' else chat_agents_ar}
 
     from tasks import init_scheduler
     init_scheduler(app)

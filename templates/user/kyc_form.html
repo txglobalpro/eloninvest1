@@ -5,7 +5,18 @@
 </div>
 <form method="POST" action="{{ url_for('user.submit_kyc') }}" enctype="multipart/form-data" class="kyc-form">
     <div class="row g-3">
-        <div class="col-md-6">
+        <div class="col-md-4">
+            <label class="form-label">{{ 'Gender (as shown on ID)' if lang == 'en' else 'الجنس (كما في الهوية)' }}</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-gender-ambiguous"></i></span>
+                <select name="kyc_gender" class="form-select" required>
+                    <option value="">{{ 'Select...' if lang == 'en' else 'اختر...' }}</option>
+                    <option value="Male">{{ 'Male' if lang == 'en' else 'ذكر' }}</option>
+                    <option value="Female">{{ 'Female' if lang == 'en' else 'أنثى' }}</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-4">
             <label class="form-label">{{ 'Country (as shown on ID)' if lang == 'en' else 'البلد (كما في الهوية)' }}</label>
             <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-globe"></i></span>

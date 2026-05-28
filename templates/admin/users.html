@@ -127,6 +127,10 @@
                                     <strong id="kycDocEmail"></strong>
                                 </div>
                                 <div class="mb-2">
+                                    <small class="text-muted d-block">{{ 'Gender' if lang == 'en' else 'الجنس' }}</small>
+                                    <strong id="kycDocGender"></strong>
+                                </div>
+                                <div class="mb-2">
                                     <small class="text-muted d-block">{{ 'Country' if lang == 'en' else 'البلد' }}</small>
                                     <strong id="kycDocCountry"></strong>
                                 </div>
@@ -169,6 +173,7 @@
 <div id="kycData{{ u.id }}"
     data-username="{{ u.username }}"
     data-email="{{ u.email }}"
+    data-gender="{{ u.kyc_gender }}"
     data-country="{{ u.kyc_country }}"
     data-dob="{{ u.kyc_dob }}"
     data-age="{{ u.kyc_age }}"
@@ -193,6 +198,7 @@ function showKycDoc(userId) {
     var d = el.dataset;
     document.getElementById('kycDocUser').textContent = d.username;
     document.getElementById('kycDocEmail').textContent = d.email;
+    document.getElementById('kycDocGender').textContent = d.gender || '-';
     document.getElementById('kycDocCountry').textContent = d.country || '-';
     document.getElementById('kycDocDob').textContent = (d.dob || '-') + (d.age ? ' (' + d.age + ' {{ 'yrs' if lang == 'en' else 'سنة' }})' : '');
     document.getElementById('kycDocPhone').textContent = d.phone || '-';

@@ -64,6 +64,10 @@
                                     <span>{{ u.email }}</span>
                                 </div>
                                 <div class="mb-2 d-flex justify-content-between">
+                                    <small class="text-muted">{{ 'Gender' if lang == 'en' else 'الجنس' }}</small>
+                                    <span>{{ u.kyc_gender or '-' }}</span>
+                                </div>
+                                <div class="mb-2 d-flex justify-content-between">
                                     <small class="text-muted">{{ 'Country' if lang == 'en' else 'البلد' }}</small>
                                     <span>{{ u.kyc_country or '-' }}</span>
                                 </div>

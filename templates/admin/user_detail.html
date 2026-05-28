@@ -109,7 +109,11 @@
     <div class="card-header"><i class="bi bi-shield-check me-2"></i>{{ 'KYC Verification' if lang == 'en' else 'التحقق من الهوية' }}</div>
     <div class="card-body">
         <div class="row g-3">
-            <div class="col-md-3">
+            <div class="col-md-2">
+                <small class="text-muted d-block">{{ 'Gender' if lang == 'en' else 'الجنس' }}</small>
+                <strong>{{ user.kyc_gender or '-' }}</strong>
+            </div>
+            <div class="col-md-2">
                 <small class="text-muted d-block">{{ 'Country (as shown on ID)' if lang == 'en' else 'البلد (كما في الهوية)' }}</small>
                 <strong>{{ user.kyc_country or '-' }}</strong>
             </div>

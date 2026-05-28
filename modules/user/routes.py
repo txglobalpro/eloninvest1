@@ -49,11 +49,12 @@ def submit_kyc():
         flash('KYC already verified' if current_user.lang == 'en' else 'التحقق موثق بالفعل', 'info')
         return redirect(url_for('user.profile'))
     country = request.form.get('kyc_country', '').strip()
+    gender = request.form.get('kyc_gender', '').strip()
     dob_day = request.form.get('kyc_dob_day', '').strip()
     dob_month = request.form.get('kyc_dob_month', '').strip()
     dob_year = request.form.get('kyc_dob_year', '').strip()
     phone = request.form.get('kyc_phone', '').strip()
-    if not country or not dob_day or not dob_month or not dob_year or not phone:
+    if not country or not gender or not dob_day or not dob_month or not dob_year or not phone:
         flash('Please fill in all fields' if current_user.lang == 'en' else 'يرجى تعبئة جميع الحقول', 'danger')
         return redirect(url_for('user.profile'))
     try:
@@ -84,6 +85,7 @@ def submit_kyc():
     file.save(filepath)
     current_user.kyc_status = 'pending'
     current_user.kyc_country = country
+    current_user.kyc_gender = gender
     current_user.kyc_dob = dob_str
     current_user.kyc_age = age
     current_user.kyc_phone = phone

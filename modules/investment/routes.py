@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
-from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, jsonify
 from flask_login import login_required, current_user
 from core.extensions import db, verified_required
-from core.models import Plan, Investment, Transaction, PaymentMethod, NETWORK_OPTIONS
+from core.models import Plan, Investment, Transaction, PaymentMethod, NETWORK_OPTIONS, Referral, Reward
+from services.crypto_payment import CryptoVerifier
 
 investment_bp = Blueprint('investment', __name__, template_folder='../../templates/investment')
 
@@ -49,9 +50,47 @@ def deposit():
     if request.method == 'POST':
         amount = float(request.form.get('amount', 0))
         pm_id = request.form.get('payment_method_id', type=int)
+        use_trustwallet = request.form.get('use_trustwallet') == '1'
+        txid = request.form.get('txid', '').strip()
         if amount <= 0:
             flash('Invalid amount', 'danger')
             return redirect(url_for('investment.deposit'))
+
+        if use_trustwallet:
+            if not txid:
+                flash('Please enter the transaction hash (TXID) from your Trust Wallet', 'danger')
+                return redirect(url_for('investment.deposit'))
+            wallet = current_app.config.get('PLATFORM_USDT_TRC20', '')
+            result = CryptoVerifier.verify_txid(txid, 'TRC-20', wallet, amount)
+            if not result['valid']:
+                flash(f'Verification failed: {result.get("error", "Unknown error")}', 'danger')
+                return redirect(url_for('investment.deposit'))
+            tx = Transaction(
+                user_id=current_user.id, type='deposit', amount=amount,
+                status='completed', note=f'Trust Wallet auto-verified',
+                crypto_currency='USDT', crypto_network='TRC-20', txid=txid
+            )
+            user = current_user
+            user.balance = round(user.balance + amount, 2)
+            user.total_deposits = round(user.total_deposits + amount, 2)
+            if not user.first_deposit_date:
+                user.first_deposit_date = datetime.utcnow()
+            db.session.add(tx)
+            db.session.commit()
+            try:
+                from services.referral import distribute_referral_commission
+                app = current_app._get_current_object()
+                distribute_referral_commission(user, amount, app)
+                existing = Transaction.query.filter_by(user_id=user.id, type='deposit', status='completed').count()
+                if existing == 1:
+                    from services.rewards import grant_first_deposit_reward
+                    grant_first_deposit_reward(user, amount, app)
+            except Exception as e:
+                current_app.logger.error(f'Post-deposit processing error: {e}')
+            current_app.logger.info(f'User {user.username} auto-deposited ${amount} via Trust Wallet (TXID: {txid[:20]}...)')
+            flash(f'Deposit of ${amount:.2f} confirmed and credited!', 'success')
+            return redirect(url_for('user.dashboard'))
+
         pm = db.session.get(PaymentMethod, pm_id) if pm_id else None
         pm_label = pm.label if pm else 'N/A'
         tx = Transaction(user_id=current_user.id, type='deposit', amount=amount, status='pending', note=f'Deposit via {pm_label}')
@@ -61,7 +100,8 @@ def deposit():
         flash('Deposit request submitted. Awaiting admin approval.', 'success')
         return redirect(url_for('user.dashboard'))
     payment_methods = PaymentMethod.query.filter_by(is_active=True).all()
-    return render_template('investment/deposit.html', payment_methods=payment_methods)
+    wallet = current_app.config.get('PLATFORM_USDT_TRC20', '')
+    return render_template('investment/deposit.html', payment_methods=payment_methods, wallet_address=wallet)
 
 @investment_bp.route('/withdraw', methods=['GET', 'POST'])
 @login_required

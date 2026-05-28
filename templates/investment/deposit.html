@@ -2,93 +2,179 @@
 {% block title %}{{ 'Deposit' if lang == 'en' else 'إيداع' }}{% endblock %}
 {% block content %}
 <div class="row">
-    <div class="col-lg-7 mb-4">
-        <div class="card h-100">
-            <div class="card-body p-4">
-                <h3 class="mb-4"><i class="bi bi-arrow-down-circle text-success me-2"></i>{{ 'Make a Deposit' if lang == 'en' else 'قم بالإيداع' }}</h3>
-                {% if payment_methods %}
-                <form method="POST" id="depositForm">
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">{{ 'Select Payment Method' if lang == 'en' else 'اختر وسيلة الدفع' }}</label>
-                        {% for pm in payment_methods %}
-                        {% set ns = namespace(address='', network='') %}
-                        {% if pm.details %}
-                        {% for raw in pm.details.split('\n') %}
-                            {% set line = raw.strip() %}
-                            {% if line.startswith('Address:') %}
-                                {% set ns.address = line.split(': ', 1)[1] %}
-                            {% endif %}
-                            {% if line.startswith('Network:') %}
-                                {% set ns.network = line.split(': ', 1)[1] %}
-                            {% endif %}
-                        {% endfor %}
-                        {% endif %}
-                        {% set cur = pm.label.split(' ')[0] %}
-                        <div class="pm-card mb-3 p-3 rounded" data-pm-id="{{ pm.id }}" data-currency="{{ cur }}" data-network="{{ ns.network }}" style="cursor:pointer;border:2px solid var(--border-color);transition:all 0.2s;">
-                            <div class="d-flex align-items-center mb-2">
-                                <input type="radio" name="payment_method_id" value="{{ pm.id }}" class="form-check-input me-2" id="pm{{ pm.id }}" {{ 'checked' if loop.first }}>
-                                <span class="badge bg-{{ 'primary' if pm.type == 'crypto' else 'info' if pm.type == 'paypal' else 'secondary' if pm.type == 'bank' else 'success' }} me-2">{{ pm.type }}</span>
-                                <strong>{{ pm.label }}</strong>
+    <div class="col-12 mb-4">
+        <ul class="nav nav-tabs nav-fill border-0" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active btn btn-dark border-0 py-3" id="trust-tab" data-bs-toggle="tab" data-bs-target="#trust" type="button" role="tab" aria-selected="true">
+                    <img src="https://cryptologos.cc/logos/trust-wallet-twt-logo.svg" alt="Trust Wallet" style="width:24px;height:24px;" onerror="this.style.display='none'">
+                    <i class="bi bi-wallet2 ms-1"></i> Trust Wallet <span class="badge bg-success ms-1">{{ 'Auto' if lang == 'en' else 'تلقائي' }}</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link btn btn-dark border-0 py-3" id="manual-tab" data-bs-toggle="tab" data-bs-target="#manual" type="button" role="tab" aria-selected="false">
+                    <i class="bi bi-bank me-1"></i> {{ 'Manual Transfer' if lang == 'en' else 'تحويل يدوي' }}
+                </button>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="tab-content">
+    <div class="tab-pane fade show active" id="trust" role="tabpanel">
+        <div class="row">
+            <div class="col-lg-7 mb-4">
+                <div class="card h-100">
+                    <div class="card-body p-4">
+                        <h3 class="mb-3"><i class="bi bi-lightning-charge-fill text-warning me-2"></i>{{ 'Trust Wallet Auto-Deposit' if lang == 'en' else 'إيداع تلقائي عبر Trust Wallet' }}</h3>
+                        <div class="alert alert-success d-flex align-items-center" role="alert">
+                            <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                            <div><strong>{{ 'Instant Credit' if lang == 'en' else 'إضافة فورية' }}:</strong> {{ 'Enter the transaction hash (TXID) after sending USDT and your balance will be credited automatically.' if lang == 'en' else 'أدخل رمز المعاملة (TXID) بعد إرسال USDT وسيتم إضافة الرصيد تلقائياً.' }}</div>
+                        </div>
+                        <form method="POST" id="trustForm">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">{{ 'Amount (USD)' if lang == 'en' else 'المبلغ (دولار)' }}</label>
+                                <input type="number" step="0.01" name="amount" class="form-control form-control-lg" min="1" placeholder="{{ 'Enter amount in USD' if lang == 'en' else 'أدخل المبلغ بالدولار' }}" required>
                             </div>
-                            {% if ns.network %}
-                            <div class="mb-2">
-                                <span class="badge bg-warning text-dark"><i class="bi bi-diagram-3 me-1"></i>{{ ns.network }}</span>
-                            </div>
-                            {% endif %}
-                            {% if ns.address %}
-                            <div class="mb-2">
-                                <label class="small text-muted">{{ 'Deposit Address' if lang == 'en' else 'عنوان الإيداع' }}:</label>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">{{ 'Send to this USDT (TRC-20) address' if lang == 'en' else 'أرسل إلى عنوان USDT (TRC-20) هذا' }}</label>
                                 <div class="input-group">
-                                    <input type="text" class="form-control form-control-sm font-monospace" value="{{ ns.address }}" readonly id="addr{{ pm.id }}">
-                                    <button type="button" class="btn btn-sm btn-outline-success" onclick="copyAddr('addr{{ pm.id }}')"><i class="bi bi-clipboard"></i></button>
+                                    <input type="text" class="form-control form-control-sm font-monospace" value="{{ wallet_address }}" readonly id="trustWalletAddr">
+                                    <button type="button" class="btn btn-outline-success" onclick="copyAddr('trustWalletAddr')"><i class="bi bi-clipboard"></i></button>
                                 </div>
+                                <small class="text-muted">{{ 'Only send USDT on TRC-20 network. Wrong network = lost funds.' if lang == 'en' else 'أرسل USDT فقط على شبكة TRC-20. الشبكة الخاطئة = فقدان الأموال.' }}</small>
                             </div>
-                            {% endif %}
-                            {% if not ns.address and not ns.network %}
-                            <pre class="text-muted small mb-0 mt-1" style="white-space:pre-wrap;word-break:break-word;">{{ pm.details }}</pre>
-                            {% endif %}
-                        </div>
-                        {% endfor %}
+                            <div class="mb-3 text-center">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={{ wallet_address }}" alt="QR Code" class="rounded border border-warning p-1" style="width:160px;height:160px;" onerror="this.style.display='none'">
+                                <p class="text-muted small mt-1">{{ 'Scan with Trust Wallet' if lang == 'en' else 'امسح باستخدام Trust Wallet' }}</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">{{ 'Transaction Hash (TXID)' if lang == 'en' else 'رمز المعاملة (TXID)' }}</label>
+                                <input type="text" name="txid" class="form-control form-control-lg font-monospace" placeholder="{{ 'Paste the TXID here after sending' if lang == 'en' else 'الصق TXID هنا بعد الإرسال' }}" required>
+                                <small class="text-muted">{{ 'Found in your Trust Wallet under transaction history' if lang == 'en' else 'موجود في محفظة Trust Wallet في سجل المعاملات' }}</small>
+                            </div>
+                            <input type="hidden" name="use_trustwallet" value="1">
+                            <button type="submit" class="btn btn-warning w-100 py-3 fw-bold" id="trustSubmitBtn">
+                                <i class="bi bi-check2-circle me-2"></i>{{ 'Verify & Credit Automatically' if lang == 'en' else 'تحقق وأضف الرصيد تلقائياً' }}
+                            </button>
+                        </form>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">{{ 'Amount (USD)' if lang == 'en' else 'المبلغ (دولار)' }}</label>
-                        <input type="number" step="0.01" name="amount" class="form-control form-control-lg" min="1" placeholder="{{ 'Enter amount' if lang == 'en' else 'أدخل المبلغ' }}" required>
-                    </div>
-                    <div class="alert alert-info d-flex align-items-center" role="alert">
-                        <i class="bi bi-info-circle-fill me-2 fs-5"></i>
-                        <div>
-                            <strong>{{ 'Important' if lang == 'en' else 'مهم' }}:</strong>
-                            {{ 'After sending the exact amount to the wallet address above, submit this request. Our admin will verify the transaction and credit your account.' if lang == 'en' else 'بعد إرسال المبلغ المحدد إلى عنوان المحفظة أعلاه، قدم هذا الطلب. سيقوم المسؤول بالتحقق من المعاملة وإضافة الرصيد إلى حسابك.' }}
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-success w-100 py-3">
-                        <i class="bi bi-send-check me-2"></i>{{ 'Submit Deposit Request' if lang == 'en' else 'تقديم طلب الإيداع' }}
-                    </button>
-                </form>
-                {% else %}
-                <div class="text-center py-5">
-                    <i class="bi bi-credit-card text-muted" style="font-size:3rem;"></i>
-                    <p class="text-muted mt-2">{{ 'No payment methods available. Contact support.' if lang == 'en' else 'لا توجد وسائل دفع متاحة. اتصل بالدعم.' }}</p>
                 </div>
-                {% endif %}
+            </div>
+            <div class="col-lg-5 mb-4">
+                <div class="card h-100">
+                    <div class="card-header"><i class="bi bi-phone me-2"></i>{{ 'How to Deposit with Trust Wallet' if lang == 'en' else 'كيفية الإيداع عبر Trust Wallet' }}</div>
+                    <div class="card-body">
+                        <ol class="list-group list-group-numbered list-group-flush bg-transparent">
+                            <li class="list-group-item bg-transparent text-light">{{ 'Open Trust Wallet and tap "Send"' if lang == 'en' else 'افتح Trust Wallet واضغط على "إرسال"' }}</li>
+                            <li class="list-group-item bg-transparent text-light">{{ 'Select USDT and choose network TRC-20' if lang == 'en' else 'اختر USDT واختر شبكة TRC-20' }}</li>
+                            <li class="list-group-item bg-transparent text-light">{{ 'Copy the wallet address above or scan the QR code' if lang == 'en' else 'انسخ عنوان المحفظة أعلاه أو امسح رمز QR' }}</li>
+                            <li class="list-group-item bg-transparent text-light">{{ 'Enter the exact amount in USDT (1 USDT = $1 USD)' if lang == 'en' else 'أدخل المبلغ بالضبط في USDT (1 USDT = 1 دولار)' }}</li>
+                            <li class="list-group-item bg-transparent text-light">{{ 'Confirm and send the transaction' if lang == 'en' else 'قم بتأكيد وإرسال المعاملة' }}</li>
+                            <li class="list-group-item bg-transparent text-light">{{ 'Copy the TXID from transaction history and paste it above' if lang == 'en' else 'انسخ TXID من سجل المعاملات وألصقه أعلاه' }}</li>
+                            <li class="list-group-item bg-transparent text-success fw-bold">{{ 'Balance credited instantly after verification!' if lang == 'en' else 'يتم إضافة الرصيد فوراً بعد التحقق!' }}</li>
+                        </ol>
+                        <hr>
+                        <div class="alert alert-warning d-flex align-items-center mb-0" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <small>{{ 'Only send USDT on' if lang == 'en' else 'أرسل USDT فقط على' }} <strong>TRC-20</strong>. {{ 'Sending on the wrong network may result in permanent loss of funds.' if lang == 'en' else 'الإرسال على شبكة خاطئة قد يؤدي إلى فقدان الأموال بشكل دائم.' }}</small>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-lg-5 mb-4">
-        <div class="card h-100">
-            <div class="card-header"><i class="bi bi-shield-check me-2"></i>{{ 'How to Deposit' if lang == 'en' else 'كيفية الإيداع' }}</div>
-            <div class="card-body">
-                <ol class="list-group list-group-numbered list-group-flush bg-transparent" id="instructionList">
-                    <li class="list-group-item bg-transparent text-light step-text">{{ 'Select' if lang == 'en' else 'اختر' }} <strong class="step-cur">USDT</strong> {{ 'as your payment method.' if lang == 'en' else 'كوسيلة الدفع.' }}</li>
-                    <li class="list-group-item bg-transparent text-light step-text">{{ 'Copy the deposit address and network' if lang == 'en' else 'انسخ عنوان الإيداع والشبكة' }} (<strong class="step-net">TRC-20</strong>).</li>
-                    <li class="list-group-item bg-transparent text-light step-text">{{ 'Send the exact amount in' if lang == 'en' else 'أرسل المبلغ المحدد بالـ' }} <strong class="step-cur">USDT</strong> {{ 'from your wallet.' if lang == 'en' else 'من محفظتك.' }}</li>
-                    <li class="list-group-item bg-transparent text-light step-text">{{ 'Submit this form with the same amount.' if lang == 'en' else 'قدم هذا الطلب بنفس المبلغ.' }}</li>
-                    <li class="list-group-item bg-transparent text-light step-text">{{ 'Wait for admin verification and approval.' if lang == 'en' else 'انتظر تحقق المسؤول وموافقته.' }}</li>
-                </ol>
-                <hr>
-                <div class="alert alert-warning d-flex align-items-center mb-0" role="alert" id="warningAlert">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                    <small>{{ 'Only send' if lang == 'en' else 'أرسل' }} <strong class="step-cur">USDT</strong> {{ 'on' if lang == 'en' else 'فقط على' }} <strong class="step-net">TRC-20</strong>. {{ 'Sending on the wrong network may result in permanent loss of funds.' if lang == 'en' else 'الإرسال على شبكة خاطئة قد يؤدي إلى فقدان الأموال بشكل دائم.' }}</small>
+
+    <div class="tab-pane fade" id="manual" role="tabpanel">
+        <div class="row">
+            <div class="col-lg-7 mb-4">
+                <div class="card h-100">
+                    <div class="card-body p-4">
+                        <h3 class="mb-4"><i class="bi bi-arrow-down-circle text-success me-2"></i>{{ 'Make a Deposit' if lang == 'en' else 'قم بالإيداع' }}</h3>
+                        {% if payment_methods %}
+                        <form method="POST" id="depositForm">
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">{{ 'Select Payment Method' if lang == 'en' else 'اختر وسيلة الدفع' }}</label>
+                                {% for pm in payment_methods %}
+                                {% set ns = namespace(address='', network='') %}
+                                {% if pm.details %}
+                                {% for raw in pm.details.split('\n') %}
+                                    {% set line = raw.strip() %}
+                                    {% if line.startswith('Address:') %}
+                                        {% set ns.address = line.split(': ', 1)[1] %}
+                                    {% endif %}
+                                    {% if line.startswith('Network:') %}
+                                        {% set ns.network = line.split(': ', 1)[1] %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% endif %}
+                                {% set cur = pm.label.split(' ')[0] %}
+                                <div class="pm-card mb-3 p-3 rounded" data-pm-id="{{ pm.id }}" data-currency="{{ cur }}" data-network="{{ ns.network }}" style="cursor:pointer;border:2px solid var(--border-color);transition:all 0.2s;">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <input type="radio" name="payment_method_id" value="{{ pm.id }}" class="form-check-input me-2" id="pm{{ pm.id }}" {{ 'checked' if loop.first }}>
+                                        <span class="badge bg-{{ 'primary' if pm.type == 'crypto' else 'info' if pm.type == 'paypal' else 'secondary' if pm.type == 'bank' else 'success' }} me-2">{{ pm.type }}</span>
+                                        <strong>{{ pm.label }}</strong>
+                                    </div>
+                                    {% if ns.network %}
+                                    <div class="mb-2">
+                                        <span class="badge bg-warning text-dark"><i class="bi bi-diagram-3 me-1"></i>{{ ns.network }}</span>
+                                    </div>
+                                    {% endif %}
+                                    {% if ns.address %}
+                                    <div class="mb-2">
+                                        <label class="small text-muted">{{ 'Deposit Address' if lang == 'en' else 'عنوان الإيداع' }}:</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control form-control-sm font-monospace" value="{{ ns.address }}" readonly id="addr{{ pm.id }}">
+                                            <button type="button" class="btn btn-sm btn-outline-success" onclick="copyAddr('addr{{ pm.id }}')"><i class="bi bi-clipboard"></i></button>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    {% if not ns.address and not ns.network %}
+                                    <pre class="text-muted small mb-0 mt-1" style="white-space:pre-wrap;word-break:break-word;">{{ pm.details }}</pre>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">{{ 'Amount (USD)' if lang == 'en' else 'المبلغ (دولار)' }}</label>
+                                <input type="number" step="0.01" name="amount" class="form-control form-control-lg" min="1" placeholder="{{ 'Enter amount' if lang == 'en' else 'أدخل المبلغ' }}" required>
+                            </div>
+                            <div class="alert alert-info d-flex align-items-center" role="alert">
+                                <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+                                <div>
+                                    <strong>{{ 'Important' if lang == 'en' else 'مهم' }}:</strong>
+                                    {{ 'After sending the exact amount to the wallet address above, submit this request. Our admin will verify the transaction and credit your account.' if lang == 'en' else 'بعد إرسال المبلغ المحدد إلى عنوان المحفظة أعلاه، قدم هذا الطلب. سيقوم المسؤول بالتحقق من المعاملة وإضافة الرصيد إلى حسابك.' }}
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100 py-3">
+                                <i class="bi bi-send-check me-2"></i>{{ 'Submit Deposit Request' if lang == 'en' else 'تقديم طلب الإيداع' }}
+                            </button>
+                        </form>
+                        {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-credit-card text-muted" style="font-size:3rem;"></i>
+                            <p class="text-muted mt-2">{{ 'No payment methods available. Contact support.' if lang == 'en' else 'لا توجد وسائل دفع متاحة. اتصل بالدعم.' }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5 mb-4">
+                <div class="card h-100">
+                    <div class="card-header"><i class="bi bi-shield-check me-2"></i>{{ 'How to Deposit' if lang == 'en' else 'كيفية الإيداع' }}</div>
+                    <div class="card-body">
+                        <ol class="list-group list-group-numbered list-group-flush bg-transparent" id="instructionList">
+                            <li class="list-group-item bg-transparent text-light step-text">{{ 'Select' if lang == 'en' else 'اختر' }} <strong class="step-cur">USDT</strong> {{ 'as your payment method.' if lang == 'en' else 'كوسيلة الدفع.' }}</li>
+                            <li class="list-group-item bg-transparent text-light step-text">{{ 'Copy the deposit address and network' if lang == 'en' else 'انسخ عنوان الإيداع والشبكة' }} (<strong class="step-net">TRC-20</strong>).</li>
+                            <li class="list-group-item bg-transparent text-light step-text">{{ 'Send the exact amount in' if lang == 'en' else 'أرسل المبلغ المحدد بالـ' }} <strong class="step-cur">USDT</strong> {{ 'from your wallet.' if lang == 'en' else 'من محفظتك.' }}</li>
+                            <li class="list-group-item bg-transparent text-light step-text">{{ 'Submit this form with the same amount.' if lang == 'en' else 'قدم هذا الطلب بنفس المبلغ.' }}</li>
+                            <li class="list-group-item bg-transparent text-light step-text">{{ 'Wait for admin verification and approval.' if lang == 'en' else 'انتظر تحقق المسؤول وموافقته.' }}</li>
+                        </ol>
+                        <hr>
+                        <div class="alert alert-warning d-flex align-items-center mb-0" role="alert" id="warningAlert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <small>{{ 'Only send' if lang == 'en' else 'أرسل' }} <strong class="step-cur">USDT</strong> {{ 'on' if lang == 'en' else 'فقط على' }} <strong class="step-net">TRC-20</strong>. {{ 'Sending on the wrong network may result in permanent loss of funds.' if lang == 'en' else 'الإرسال على شبكة خاطئة قد يؤدي إلى فقدان الأموال بشكل دائم.' }}</small>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -132,5 +218,11 @@ function copyAddr(id) {
     btn.innerHTML = '<i class="bi bi-check-lg"></i>';
     setTimeout(function() { btn.innerHTML = orig; }, 2000);
 }
+
+document.getElementById('trustForm')?.addEventListener('submit', function(e) {
+    var btn = document.getElementById('trustSubmitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>{{ 'Verifying on Blockchain...' if lang == 'en' else 'جارٍ التحقق على البلوكشين...' }}';
+});
 </script>
 {% endblock %}

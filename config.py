@@ -24,6 +24,11 @@ class Config:
         {'key': 'telegram', 'url': os.environ.get('TELEGRAM_CHANNEL_URL', 'https://t.me/eloniinvest'), 'icon': 'bi-telegram', 'label': 'Telegram', 'color': '#08c'},
     ]
 
+    PLATFORM_USDT_TRC20 = os.environ.get('PLATFORM_USDT_TRC20', 'TYdsoYhYabq9e4kByamzACpYj5PzP3Q5e')
+    PLATFORM_USDT_BEP20 = os.environ.get('PLATFORM_USDT_BEP20', '')
+    PLATFORM_BTC = os.environ.get('PLATFORM_BTC', '')
+    PLATFORM_ETH = os.environ.get('PLATFORM_ETH', '')
+
     UPLOAD_FOLDER = os.path.join(basedir, 'static/uploads/kyc')
 
     WTF_CSRF_ENABLED = True

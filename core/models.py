@@ -115,6 +115,9 @@ class Transaction(db.Model):
     withdraw_method = db.Column(db.String(50), nullable=True)
     withdraw_network = db.Column(db.String(50), nullable=True)
     withdraw_address = db.Column(db.String(255), nullable=True)
+    crypto_currency = db.Column(db.String(20), nullable=True)
+    crypto_network = db.Column(db.String(20), nullable=True)
+    txid = db.Column(db.String(128), nullable=True)
     created_at = db.Column(db.DateTime, default=lambda: datetime.utcnow())
 
     user = db.relationship('User', backref='transactions')

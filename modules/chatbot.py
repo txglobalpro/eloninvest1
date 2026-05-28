@@ -31,8 +31,8 @@ GREETINGS = {
 }
 
 FALLBACK = {
-    'en': "I'm sorry, I didn't quite get that. Could you rephrase? You can ask me about our investment plans, how deposits work, withdrawals, referral rewards, or anything else about the platform and I'll be happy to help! 😊",
-    'ar': 'عذراً، لم أفهم تماماً. هل يمكنك إعادة الصياغة؟ يمكنك سؤالي عن خطط الاستثمار، كيفية الإيداع، السحب، مكافآت الإحالة، أو أي شيء آخر عن المنصة وسأكون سعيدة بمساعدتك! 😊',
+    'en': "I'm sorry, I don't have an answer for that. Let me transfer you to a specialist — please email **txglobalpro@gmail.com** and our support team will help you right away! 😊",
+    'ar': 'عذراً، ليس لدي إجابة لهذا السؤال. دعوني أحولك إلى مختص — يرجى مراسلة **txglobalpro@gmail.com** وفريق الدعم سيساعدك فوراً! 😊',
 }
 
 GREETING_RESPONSES = {
@@ -101,8 +101,8 @@ TOPICS = {
         },
         'admin|support|contact|help|question|issue|problem|complaint|ticket': {
             'response': [
-                "I'm here to help! 😊 If you need further assistance:\n\n📧 **Email**: support@eloninvest.com\n💬 **Telegram**: Join our channel for updates\n👤 **Admin**: The platform admin can also help\n\nFeel free to reach out anytime!",
-                "Need to talk to someone? Here are the ways to reach us 📬\n\n• Email: support@eloninvest.com\n• Telegram: @eloniinvest\n\nI can also help with most questions right here! Just ask 😊",
+                "For further assistance, you can:\n\n📧 **Email**: txglobalpro@gmail.com\n💬 **Telegram**: @eloniinvest\n\nOur team will get back to you promptly! 😊",
+                "Need to talk to someone? 📬\n\n• Email: txglobalpro@gmail.com\n• Telegram: @eloniinvest\n\nI can also help with most questions right here! Just ask 😊",
             ],
             'keywords': ['admin', 'support', 'contact', 'help', 'question', 'issue', 'problem'],
         },
@@ -173,8 +173,8 @@ TOPICS = {
         },
         'مسؤول|دعم|اتصال|مساعدة|استفسار|مشكلة|شكوى|تواصل': {
             'response': [
-                'أنا هنا لمساعدتك! 😊 إذا تحتاج تواصل إضافي:\n\n📧 **البريد**: support@eloninvest.com\n💬 **تلغرام**: @eloniinvest\n\nتقدر تراسلني أنا كمان وأنا أساعدك في أي وقت!',
-                'طرق التواصل 📬\n\n• إيميل: support@eloninvest.com\n• تلغرام: @eloniinvest\n\nأنا موجودة هنا إذا احتجت أي مساعدة. فقط اسأل! 😊',
+                'لمزيد من المساعدة:\n\n📧 **البريد**: txglobalpro@gmail.com\n💬 **تلغرام**: @eloniinvest\n\nفريقنا سيرد عليك قريباً! 😊',
+                'طرق التواصل 📬\n\n• إيميل: txglobalpro@gmail.com\n• تلغرام: @eloniinvest\n\nأنا موجودة هنا إذا احتجت أي مساعدة! 😊',
             ],
             'keywords': ['مسؤول', 'دعم', 'اتصال', 'مساعدة', 'استفسار', 'مشكلة', 'شكوى'],
         },

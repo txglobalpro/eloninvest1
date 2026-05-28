@@ -74,7 +74,6 @@ def create_app(config_class=Config):
         telegram_url = app.config.get('TELEGRAM_CHANNEL_URL', 'https://t.me/eloniinvest')
         social_links = [
             {'key': 'telegram', 'url': telegram_url, 'icon': 'bi-telegram', 'label': 'Telegram', 'color': '#08c'},
-            {'key': 'website', 'url': app.config.get('WEBSITE_URL', '#'), 'icon': 'bi-globe2', 'label': 'Website', 'color': '#f0b90b'},
         ]
         chat_agents_en = [
             {'name': 'Sarah', 'role': 'Senior Support'},

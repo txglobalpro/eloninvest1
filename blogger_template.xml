@@ -67,11 +67,12 @@ a:hover { opacity: .85; }
   justify-content: space-between;
   height: var(--header-height);
 }
-.site-title { display: flex; align-items: center; gap: 10px; }
-.site-title h1 { font-size: 22px; font-weight: 800; }
-.site-title h1 a { color: var(--text-primary); }
-.site-title .logo-icon { color: var(--accent-gold); font-size: 24px; }
-.Header .description { display: none; }
+.header-inner .Header { display: flex; align-items: center; gap: 10px; }
+.header-inner .Header h1 { font-size: 22px; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 8px; }
+.header-inner .Header h1 a { color: var(--text-primary); }
+.header-inner .Header h1 a::before { content: '⚡'; color: var(--accent-gold); font-size: 24px; }
+.header-inner .Header .description, .header-inner .Header .titlewrapper .description { display: none; }
+.header-inner .Header img { max-height: 40px; width: auto; vertical-align: middle; }
 
 /* Nav */
 #nav-wrapper { display: flex; align-items: center; gap: 5px; }
@@ -367,19 +368,6 @@ a:hover { opacity: .85; }
 
   <b:template-skin>
     <b:variable default='1200px' name='content.width'/>
-    <b:section id='main' maxwidgets='1' showaddelement='no'>
-      <b:widget id='Blog1' locked='true' title='Blog Posts' type='Blog' version='2'>
-        <b:widget-settings>
-          <b:widget-setting name='blogStyle'>classic</b:widget-setting>
-          <b:widget-setting name='showShareButtons'>true</b:widget-setting>
-          <b:widget-setting name='showAuthor'>false</b:widget-setting>
-          <b:widget-setting name='showBacklinks'>false</b:widget-setting>
-          <b:widget-setting name='showLocation'>false</b:widget-setting>
-          <b:widget-setting name='showTimestamp'>true</b:widget-setting>
-          <b:widget-setting name='showCommentLink'>true</b:widget-setting>
-        </b:widget-settings>
-      </b:widget>
-    </b:section>
   </b:template-skin>
 </head>
 
@@ -388,16 +376,34 @@ a:hover { opacity: .85; }
 <!-- HEADER -->
 <div id='header-wrapper'>
   <div class='header-inner'>
-    <div class='site-title'>
-      <span class='logo-icon'>⚡</span>
-      <h1><a expr:href='data:blog.homepageUrl'><data:blog.title/></a></h1>
-    </div>
+    <b:section id='header' maxwidgets='1' showaddelement='no'>
+      <b:widget id='Header1' locked='true' title='ElonInvest Blog (Header)' type='Header' version='2'>
+        <b:widget-settings>
+          <b:widget-setting name='displayUrl'/>
+          <b:widget-setting name='displayHeight'>0</b:widget-setting>
+          <b:widget-setting name='sectionWidth'>100%</b:widget-setting>
+          <b:widget-setting name='useImage'>false</b:widget-setting>
+          <b:widget-setting name='shrinkToFit'>true</b:widget-setting>
+          <b:widget-setting name='displayWidth'>0</b:widget-setting>
+          <b:widget-setting name='imagePlacement'>BEFORE</b:widget-setting>
+        </b:widget-settings>
+      </b:widget>
+    </b:section>
     <button class='nav-toggle' onclick='document.getElementById("nav-wrapper").classList.toggle("open")'>☰</button>
     <nav id='nav-wrapper'>
       <a expr:href='data:blog.homepageUrl'>Home</a>
       <a href='https://eloninvest.onrender.com'>Invest Now</a>
       <a href='https://t.me/eloniinvest'>Telegram</a>
-      <b:include data='top' name='page-sitemap'/>
+      <b:section id='pages' maxwidgets='1' showaddelement='no'>
+        <b:widget id='PageList1' locked='true' title='Pages' type='PageList' version='2'>
+          <b:widget-settings>
+            <b:widget-setting name='showHomeLink'>false</b:widget-setting>
+            <b:widget-setting name='showNewPageLink'>true</b:widget-setting>
+            <b:widget-setting name='sorting'>ALPHA</b:widget-setting>
+            <b:widget-setting name='selectedLinks'/>
+          </b:widget-settings>
+        </b:widget>
+      </b:section>
     </nav>
   </div>
 </div>
@@ -412,8 +418,8 @@ a:hover { opacity: .85; }
 <!-- MAIN CONTENT -->
 <div class='content-wrapper'>
   <main class='blog-posts'>
-    <b:section id='posts' maxwidgets='1' showaddelement='no'>
-      <b:widget id='Blog2' locked='true' title='Blog Posts' type='Blog' version='2'>
+    <b:section id='main' maxwidgets='1' showaddelement='yes'>
+      <b:widget id='Blog1' locked='true' title='Blog Posts' type='Blog' version='2'>
         <b:widget-settings>
           <b:widget-setting name='blogStyle'>classic</b:widget-setting>
           <b:widget-setting name='showShareButtons'>true</b:widget-setting>
@@ -430,41 +436,23 @@ a:hover { opacity: .85; }
   <!-- SIDEBAR -->
   <aside class='sidebar'>
     <b:section id='sidebar' maxwidgets='5' showaddelement='yes'>
-      <!-- Platform CTA -->
-      <div class='widget platform-cta'>
-        <h3>⚡ Start Investing Today</h3>
-        <p>Join ElonInvest and earn daily returns on Tesla, SpaceX, Neuralink, and more.</p>
-        <a href='https://eloninvest.onrender.com'>Get Started →</a>
-      </div>
-
-      <b:widget id='PopularPosts1' locked='false' title='Trending Posts' type='PopularPosts' version='2'>
+      <b:widget id='HTML3' locked='false' title='Start Investing' type='HTML' version='2'>
         <b:widget-settings>
-          <b:widget-setting name='numItemsToShow'>4</b:widget-setting>
-          <b:widget-setting name='showThumbnails'>true</b:widget-setting>
-          <b:widget-setting name='showSnippets'>true</b:widget-setting>
-          <b:widget-setting name='timeRange'>LAST_WEEK</b:widget-setting>
+          <b:widget-setting name='content'>&lt;div class="platform-cta"&gt;
+  &lt;h3&gt;⚡ Start Investing Today&lt;/h3&gt;
+  &lt;p&gt;Join ElonInvest and earn daily returns on Tesla, SpaceX, Neuralink, and more.&lt;/p&gt;
+  &lt;a href="https://eloninvest.onrender.com" style="display:inline-block;background:#000;color:#f0b90b;padding:10px 28px;border-radius:50px;font-weight:700;font-size:14px;"&gt;Get Started →&lt;/a&gt;
+&lt;/div&gt;</b:widget-setting>
         </b:widget-settings>
       </b:widget>
-
-      <b:widget id='Label1' locked='false' title='Categories' type='Label' version='2'>
+      <b:widget id='HTML4' locked='false' title='Connect With Us' type='HTML' version='2'>
         <b:widget-settings>
-          <b:widget-setting name='sorting'>ALPHA</b:widget-setting>
-          <b:widget-setting name='display'>CLOUD</b:widget-setting>
-          <b:widget-setting name='selectedLabelsList'/>
-          <b:widget-setting name='showType'>ALL</b:widget-setting>
-          <b:widget-setting name='showFreqNumbers'>false</b:widget-setting>
+          <b:widget-setting name='content'>&lt;div style="display:flex;gap:10px;flex-wrap:wrap;"&gt;
+  &lt;a href="https://t.me/eloniinvest" style="background:#08c;color:#fff;padding:8px 16px;border-radius:8px;font-size:13px;" target="_blank"&gt;📱 Telegram&lt;/a&gt;
+  &lt;a href="https://eloninvest.onrender.com" style="background:#f0b90b;color:#000;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;" target="_blank"&gt;🌐 Platform&lt;/a&gt;
+&lt;/div&gt;</b:widget-setting>
         </b:widget-settings>
       </b:widget>
-
-      <div class='widget'>
-        <h2>Connect With Us</h2>
-        <div class='widget-content' style='display:flex;gap:10px;flex-wrap:wrap;'>
-          <a href='https://t.me/eloniinvest' style='background:#08c;color:#fff;padding:8px 16px;border-radius:8px;font-size:13px;' target='_blank'>📱 Telegram</a>
-          <a href='https://eloninvest.onrender.com' style='background:var(--accent-gold);color:#000;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;' target='_blank'>🌐 Platform</a>
-        </div>
-      </div>
-
-      <b:widget id='Subscribe1' locked='false' title='Follow by Email' type='Subscribe' version='2'/>
     </b:section>
   </aside>
 </div>

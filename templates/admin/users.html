@@ -17,7 +17,7 @@
                     <th>{{ 'Plan' if lang == 'en' else 'الخطة' }}</th>
                     <th>KYC</th>
                     <th>{{ 'Joined' if lang == 'en' else 'تاريخ التسجيل' }}</th>
-                    <th style="min-width:280px;">{{ 'Actions' if lang == 'en' else 'إجراءات' }}</th>
+                    <th style="min-width:320px;">{{ 'Actions' if lang == 'en' else 'إجراءات' }}</th>
                 </tr></thead>
                 <tbody>
                     {% for u in users %}
@@ -55,6 +55,11 @@
                             {% else %}
                             <span class="badge bg-secondary">{{ 'None' if lang == 'en' else 'لا يوجد' }}</span>
                             {% endif %}
+                            {% if u.kyc_id_path %}
+                            <button type="button" class="btn btn-sm btn-outline-light ms-1 py-0 px-1" onclick="showKycDoc({{ u.id }})" title="{{ 'View Document' if lang == 'en' else 'عرض الوثيقة' }}">
+                                <i class="bi bi-file-earmark-text"></i>
+                            </button>
+                            {% endif %}
                         </td>
                         <td>{{ u.created_at.strftime('%Y-%m-%d') }}</td>
                         <td>
@@ -70,7 +75,7 @@
                                     <input type="hidden" name="action" value="approve_kyc">
                                     <button type="submit" class="btn btn-sm btn-success" title="{{ 'Approve KYC' if lang == 'en' else 'قبول التحقق' }}"><i class="bi bi-check-lg"></i></button>
                                 </form>
-                                <form method="POST" action="{{ url_for('admin.kyc_action', user_id=u.id) }}" class="d-inline-flex gap-1 align-items-center" id="rejectForm{{ u.id }}">
+                                <form method="POST" action="{{ url_for('admin.kyc_action', user_id=u.id) }}" class="d-inline-flex gap-1 align-items-center">
                                     <input type="hidden" name="action" value="reject_kyc">
                                     <input type="text" name="reject_reason" class="form-control form-control-sm" style="width:100px;" placeholder="{{ 'Reason' if lang == 'en' else 'السبب' }}" required>
                                     <button type="submit" class="btn btn-sm btn-danger" title="{{ 'Reject KYC' if lang == 'en' else 'رفض التحقق' }}"><i class="bi bi-x-lg"></i></button>
@@ -92,9 +97,130 @@
         </div>
     </div>
 </div>
+
+<!-- KYC Document Modal -->
+<div class="modal fade" id="kycDocModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-file-earmark-text me-2"></i><span id="kycDocModalTitle">{{ 'KYC Document' if lang == 'en' else 'وثيقة التحقق' }}</span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-7">
+                        <div id="kycDocPreview" class="text-center p-3 bg-dark rounded">
+                            <i class="bi bi-file-earmark text-secondary" style="font-size:4rem;"></i>
+                            <p class="text-muted mt-2">{{ 'Loading...' if lang == 'en' else 'جارٍ التحميل...' }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="card bg-dark h-100">
+                            <div class="card-body">
+                                <h6 class="card-title border-bottom pb-2 mb-3">{{ 'Applicant Details' if lang == 'en' else 'بيانات مقدم الطلب' }}</h6>
+                                <div class="mb-2">
+                                    <small class="text-muted d-block">{{ 'Username' if lang == 'en' else 'اسم المستخدم' }}</small>
+                                    <strong id="kycDocUser"></strong>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted d-block">{{ 'Email' if lang == 'en' else 'البريد' }}</small>
+                                    <strong id="kycDocEmail"></strong>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted d-block">{{ 'Country' if lang == 'en' else 'البلد' }}</small>
+                                    <strong id="kycDocCountry"></strong>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted d-block">{{ 'Date of Birth' if lang == 'en' else 'تاريخ الميلاد' }}</small>
+                                    <strong id="kycDocDob"></strong>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted d-block">{{ 'Phone' if lang == 'en' else 'الهاتف' }}</small>
+                                    <strong id="kycDocPhone" dir="ltr"></strong>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted d-block">{{ 'Status' if lang == 'en' else 'الحالة' }}</small>
+                                    <strong id="kycDocStatus"></strong>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted d-block">{{ 'Submitted' if lang == 'en' else 'تاريخ التقديم' }}</small>
+                                    <strong id="kycDocDate"></strong>
+                                </div>
+                                <div class="mb-2" id="kycDocReasonRow" style="display:none;">
+                                    <small class="text-muted d-block">{{ 'Rejection Reason' if lang == 'en' else 'سبب الرفض' }}</small>
+                                    <strong id="kycDocReason" class="text-danger"></strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-light btn-sm" data-bs-dismiss="modal">{{ 'Close' if lang == 'en' else 'إغلاق' }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden KYC data for JS -->
+<div id="kycDataStore" style="display:none;">
+{% for u in users if u.kyc_id_path %}
+{% set ext = u.kyc_id_path.rsplit('.', 1)[1]|lower %}
+<div id="kycData{{ u.id }}"
+    data-username="{{ u.username }}"
+    data-email="{{ u.email }}"
+    data-country="{{ u.kyc_country }}"
+    data-dob="{{ u.kyc_dob }}"
+    data-age="{{ u.kyc_age }}"
+    data-phone="{{ u.kyc_phone }}"
+    data-status="{{ u.kyc_status }}"
+    data-date="{{ u.kyc_submitted_at.strftime('%Y-%m-%d %H:%M') if u.kyc_submitted_at else '' }}"
+    data-reason="{{ u.kyc_review_notes }}"
+    data-path="{{ url_for('static', filename=u.kyc_id_path.replace('static/', '')) }}"
+    data-ext="{{ ext }}"
+></div>
+{% endfor %}
+</div>
 {% endblock %}
 {% block scripts %}
+{{ super() }}
 <script>
+var kycDataStore = document.getElementById('kycDataStore');
+
+function showKycDoc(userId) {
+    var el = document.getElementById('kycData' + userId);
+    if (!el) return;
+    var d = el.dataset;
+    document.getElementById('kycDocUser').textContent = d.username;
+    document.getElementById('kycDocEmail').textContent = d.email;
+    document.getElementById('kycDocCountry').textContent = d.country || '-';
+    document.getElementById('kycDocDob').textContent = (d.dob || '-') + (d.age ? ' (' + d.age + ' {{ 'yrs' if lang == 'en' else 'سنة' }})' : '');
+    document.getElementById('kycDocPhone').textContent = d.phone || '-';
+    var statusBadge = '';
+    if (d.status === 'approved') statusBadge = '<span class="badge bg-success"><i class="bi bi-patch-check-fill me-1"></i>{{ 'Verified' if lang == 'en' else 'موثق' }}</span>';
+    else if (d.status === 'pending') statusBadge = '<span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i>{{ 'Pending' if lang == 'en' else 'قيد المراجعة' }}</span>';
+    else if (d.status === 'rejected') statusBadge = '<span class="badge bg-danger"><i class="bi bi-x-octagon me-1"></i>{{ 'Rejected' if lang == 'en' else 'مرفوض' }}</span>';
+    else statusBadge = d.status;
+    document.getElementById('kycDocStatus').innerHTML = statusBadge;
+    document.getElementById('kycDocDate').textContent = d.date || '-';
+    var reasonRow = document.getElementById('kycDocReasonRow');
+    var reasonEl = document.getElementById('kycDocReason');
+    if (d.reason) {
+        reasonEl.textContent = d.reason;
+        reasonRow.style.display = '';
+    } else {
+        reasonRow.style.display = 'none';
+    }
+    var preview = document.getElementById('kycDocPreview');
+    if (['png','jpg','jpeg','gif','webp'].indexOf(d.ext) > -1) {
+        preview.innerHTML = '<img src="' + d.path + '" class="img-fluid rounded" style="max-height:400px;">';
+    } else {
+        preview.innerHTML = '<div class="text-center py-5"><i class="bi bi-file-earmark-pdf text-danger" style="font-size:4rem;"></i><p class="mt-2"><a href="' + d.path + '" target="_blank" class="btn btn-outline-light btn-sm"><i class="bi bi-download me-1"></i>{{ 'View PDF' if lang == 'en' else 'عرض PDF' }}</a></p></div>';
+    }
+    var modal = new bootstrap.Modal(document.getElementById('kycDocModal'));
+    modal.show();
+}
+
 function filterUsers() {
     var input = document.getElementById('userSearch');
     var filter = input.value.toLowerCase();

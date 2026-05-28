@@ -50,7 +50,7 @@
                             <div class="mb-3">
                                 <label class="form-label fw-bold">{{ 'Transaction Hash (TXID)' if lang == 'en' else 'رمز المعاملة (TXID)' }}</label>
                                 <input type="text" name="txid" class="form-control form-control-lg font-monospace" placeholder="{{ 'Paste the TXID here after sending' if lang == 'en' else 'الصق TXID هنا بعد الإرسال' }}" required>
-                                <small class="text-muted">{{ 'Found in your Trust Wallet under transaction history' if lang == 'en' else 'موجود في محفظة Trust Wallet في سجل المعاملات' }}</small>
+                                <small class="text-muted">{{ 'Found in your Trust Wallet under transaction history' if lang == 'en' else 'موجود في Trust Wallet في سجل المعاملات' }}</small>
                             </div>
                             <input type="hidden" name="use_trustwallet" value="1">
                             <button type="submit" class="btn btn-warning w-100 py-3 fw-bold" id="trustSubmitBtn">

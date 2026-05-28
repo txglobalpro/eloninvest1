@@ -20,9 +20,11 @@ class Config:
     TELEGRAM_CHANNEL_ID = os.environ.get('TELEGRAM_CHANNEL_ID', '@eloniinvest')
     TELEGRAM_CHANNEL_URL = os.environ.get('TELEGRAM_CHANNEL_URL', 'https://t.me/eloniinvest')
 
+    WEBSITE_URL = os.environ.get('WEBSITE_URL', 'https://eloninvest.blogspot.com/')
+
     SOCIAL_LINKS = [
         {'key': 'telegram', 'url': os.environ.get('TELEGRAM_CHANNEL_URL', 'https://t.me/eloniinvest'), 'icon': 'bi-telegram', 'label': 'Telegram', 'color': '#08c'},
-        {'key': 'website', 'url': os.environ.get('WEBSITE_URL', '#'), 'icon': 'bi-globe2', 'label': 'Website', 'color': '#f0b90b'},
+        {'key': 'website', 'url': WEBSITE_URL, 'icon': 'bi-globe2', 'label': 'Website', 'color': '#f0b90b'},
     ]
 
     UPLOAD_FOLDER = os.path.join(basedir, 'static/uploads/kyc')

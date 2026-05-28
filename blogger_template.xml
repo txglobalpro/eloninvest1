@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html b:css='false' b:defaultwidgetversion='2' b:layout_version='1.0.0' b:responsive='true' b:templateVersion='1.0.0' expr:dir='data:blog.languageDirection' xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
+<head>
+  <meta charset='UTF-8'/>
+  <meta content='width=device-width, initial-scale=1, maximum-scale=1' name='viewport'/>
+  <meta content='IE=edge' http-equiv='X-UA-Compatible'/>
+  <b:if cond='data:blog.metaDescription'>
+    <meta expr:content='data:blog.metaDescription' name='description'/>
+  </b:if>
+  <b:include data='blog' name='all-head-content'/>
+
+  <b:skin><![CDATA[
+/* ============================================
+   ElonInvest - Blogger Premium Template
+   Inspired by ElonInvest Platform
+   Dark Theme + Gold Accents
+   ============================================ */
+
+:root {
+  --bg-dark: #0d0d0d;
+  --bg-card: #1a1a2e;
+  --bg-card-hover: #222240;
+  --bg-nav: #111118;
+  --text-primary: #e8e8e8;
+  --text-secondary: #999;
+  --text-muted: #666;
+  --accent-gold: #f0b90b;
+  --accent-gold-light: #fcd34d;
+  --accent-gold-dark: #b8860b;
+  --border-color: #2a2a3e;
+  --shadow: 0 4px 20px rgba(0,0,0,0.4);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --font-main: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --header-height: 64px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: var(--font-main);
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  line-height: 1.7;
+  font-size: 15px;
+}
+
+a { color: var(--accent-gold); text-decoration: none; transition: opacity .2s; }
+a:hover { opacity: .85; }
+
+/* ===== HEADER ===== */
+#header-wrapper {
+  background: var(--bg-nav);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  backdrop-filter: blur(12px);
+}
+.header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--header-height);
+}
+.site-title { display: flex; align-items: center; gap: 10px; }
+.site-title h1 { font-size: 22px; font-weight: 800; }
+.site-title h1 a { color: var(--text-primary); }
+.site-title .logo-icon { color: var(--accent-gold); font-size: 24px; }
+.Header .description { display: none; }
+
+/* Nav */
+#nav-wrapper { display: flex; align-items: center; gap: 5px; }
+#nav-wrapper a {
+  color: var(--text-secondary);
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  transition: all .2s;
+}
+#nav-wrapper a:hover, #nav-wrapper a.active {
+  color: var(--accent-gold);
+  background: rgba(240,185,11,0.08);
+}
+.nav-toggle { display: none; background: none; border: none; color: var(--text-primary); font-size: 24px; cursor: pointer; padding: 8px; }
+
+/* Mobile Nav */
+@media (max-width: 768px) {
+  .nav-toggle { display: block; }
+  #nav-wrapper {
+    display: none;
+    position: absolute;
+    top: var(--header-height);
+    left: 0;
+    right: 0;
+    background: var(--bg-nav);
+    flex-direction: column;
+    padding: 15px;
+    border-bottom: 1px solid var(--border-color);
+  }
+  #nav-wrapper.open { display: flex; }
+  #nav-wrapper a { width: 100%; padding: 12px 14px; }
+}
+
+/* ===== HERO ===== */
+.hero-section {
+  background: linear-gradient(135deg, #0d0d0d 0%, #1a1a2e 50%, #0d0d0d 100%);
+  text-align: center;
+  padding: 80px 20px 60px;
+  border-bottom: 1px solid var(--border-color);
+}
+.hero-section h2 {
+  font-size: clamp(28px, 5vw, 48px);
+  font-weight: 800;
+  margin-bottom: 15px;
+  background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-section p {
+  color: var(--text-secondary);
+  font-size: 18px;
+  max-width: 700px;
+  margin: 0 auto 25px;
+}
+.hero-section .hero-btn {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-dark));
+  color: #000;
+  font-weight: 700;
+  padding: 12px 36px;
+  border-radius: 50px;
+  font-size: 16px;
+  transition: transform .2s, box-shadow .2s;
+}
+.hero-section .hero-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(240,185,11,0.3);
+}
+
+/* ===== MAIN LAYOUT ===== */
+.content-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px 20px;
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 30px;
+}
+@media (max-width: 900px) {
+  .content-wrapper { grid-template-columns: 1fr; }
+}
+
+/* ===== BLOG POSTS ===== */
+.blog-posts { min-height: 400px; }
+.blog-posts h3.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--accent-gold);
+  display: inline-block;
+}
+.date-outer { margin-bottom: 25px; }
+
+.post {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: transform .2s, box-shadow .2s;
+  margin-bottom: 25px;
+  border: 1px solid var(--border-color);
+}
+.post:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+}
+
+.post-thumb {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+  background: #222;
+}
+.post-thumb-placeholder {
+  width: 100%;
+  height: 220px;
+  background: linear-gradient(135deg, #1a1a2e, #222240);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  color: var(--accent-gold);
+}
+
+.post-body { padding: 22px; }
+
+.post-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.post-title a { color: var(--text-primary); }
+.post-title a:hover { color: var(--accent-gold); }
+
+.post-meta {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.post-snippet { color: var(--text-secondary); font-size: 14px; line-height: 1.7; margin-bottom: 15px; }
+
+.post-readmore {
+  display: inline-block;
+  color: var(--accent-gold);
+  font-weight: 600;
+  font-size: 13px;
+}
+.post-readmore:hover { text-decoration: underline; }
+
+.post-labels a {
+  display: inline-block;
+  background: rgba(240,185,11,0.1);
+  color: var(--accent-gold);
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  margin: 2px;
+}
+
+/* Full Post Page */
+.post-body-content { padding: 30px 0; }
+.post-body-content img { max-width: 100%; border-radius: var(--radius-sm); margin: 15px 0; }
+
+/* ===== SIDEBAR ===== */
+.sidebar { position: sticky; top: calc(var(--header-height) + 20px); align-self: start; }
+.sidebar .widget {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid var(--border-color);
+}
+.sidebar .widget h2 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 15px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--accent-gold);
+}
+.sidebar .widget-content ul { list-style: none; }
+.sidebar .widget-content li { padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.sidebar .widget-content li a { color: var(--text-secondary); font-size: 14px; }
+.sidebar .widget-content li a:hover { color: var(--accent-gold); }
+
+/* Platform CTA */
+.platform-cta {
+  background: linear-gradient(135deg, var(--accent-gold-dark), var(--accent-gold));
+  color: #000;
+  border-radius: var(--radius);
+  padding: 25px 20px;
+  text-align: center;
+}
+.platform-cta h3 { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+.platform-cta p { font-size: 13px; opacity: .85; margin-bottom: 15px; }
+.platform-cta a {
+  display: inline-block;
+  background: #000;
+  color: var(--accent-gold);
+  padding: 10px 28px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* Popular Posts */
+.PopularPosts .item-thumbnail { float: none !important; margin: 0 0 10px !important; }
+.PopularPosts .item-thumbnail img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+.PopularPosts .item-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.PopularPosts .item-snippet { font-size: 12px; color: var(--text-muted); }
+.PopularPosts li { padding: 12px 0 !important; }
+
+/* Label Cloud */
+.cloud-label-widget-content .label-size a {
+  display: inline-block;
+  background: rgba(240,185,11,0.08);
+  color: var(--accent-gold) !important;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  margin: 3px;
+  border: 1px solid rgba(240,185,11,0.15);
+}
+.cloud-label-widget-content .label-count { display: none; }
+
+/* ===== FOOTER ===== */
+#footer-wrapper {
+  background: var(--bg-nav);
+  border-top: 1px solid var(--border-color);
+  padding: 30px 20px;
+  text-align: center;
+  margin-top: 40px;
+}
+.footer-inner { max-width: 1200px; margin: 0 auto; }
+.footer-links { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 15px; }
+.footer-links a { color: var(--text-secondary); font-size: 13px; }
+.footer-links a:hover { color: var(--accent-gold); }
+.footer-copy { color: var(--text-muted); font-size: 13px; }
+
+/* ===== PAGER ===== */
+.blog-pager { display: flex; justify-content: space-between; gap: 15px; margin: 30px 0; }
+.blog-pager a {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 10px 24px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  transition: all .2s;
+}
+.blog-pager a:hover {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-dark); }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #555; }
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.post { animation: fadeInUp .4s ease-out; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+  .header-inner { padding: 0 15px; }
+  .content-wrapper { padding: 20px 15px; }
+  .post-thumb, .post-thumb-placeholder { height: 180px; }
+  .post-body { padding: 16px; }
+  .post-title { font-size: 18px; }
+  .hero-section { padding: 50px 15px 40px; }
+  .sidebar { position: static; }
+}
+]]></b:skin>
+
+  <b:template-skin>
+    <b:variable default='1200px' name='content.width'/>
+    <b:section id='main' maxwidgets='1' showaddelement='no'>
+      <b:widget id='Blog1' locked='true' title='Blog Posts' type='Blog' version='2'>
+        <b:widget-settings>
+          <b:widget-setting name='blogStyle'>classic</b:widget-setting>
+          <b:widget-setting name='showShareButtons'>true</b:widget-setting>
+          <b:widget-setting name='showAuthor'>false</b:widget-setting>
+          <b:widget-setting name='showBacklinks'>false</b:widget-setting>
+          <b:widget-setting name='showLocation'>false</b:widget-setting>
+          <b:widget-setting name='showTimestamp'>true</b:widget-setting>
+          <b:widget-setting name='showCommentLink'>true</b:widget-setting>
+        </b:widget-settings>
+      </b:widget>
+    </b:section>
+  </b:template-skin>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div id='header-wrapper'>
+  <div class='header-inner'>
+    <div class='site-title'>
+      <span class='logo-icon'>⚡</span>
+      <h1><a expr:href='data:blog.homepageUrl'><data:blog.title/></a></h1>
+    </div>
+    <button class='nav-toggle' onclick='document.getElementById("nav-wrapper").classList.toggle("open")'>☰</button>
+    <nav id='nav-wrapper'>
+      <a expr:href='data:blog.homepageUrl'>Home</a>
+      <a href='https://eloninvest.onrender.com'>Invest Now</a>
+      <a href='https://t.me/eloniinvest'>Telegram</a>
+      <b:include data='top' name='page-sitemap'/>
+    </nav>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class='hero-section'>
+  <h2>Invest in the Future with ElonInvest</h2>
+  <p>Explore expert insights on Tesla, SpaceX, AI, crypto, and cutting-edge investment strategies. Your gateway to the next generation of wealth.</p>
+  <a class='hero-btn' href='https://eloninvest.onrender.com'>Start Investing →</a>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class='content-wrapper'>
+  <main class='blog-posts'>
+    <b:section id='posts' maxwidgets='1' showaddelement='no'>
+      <b:widget id='Blog2' locked='true' title='Blog Posts' type='Blog' version='2'>
+        <b:widget-settings>
+          <b:widget-setting name='blogStyle'>classic</b:widget-setting>
+          <b:widget-setting name='showShareButtons'>true</b:widget-setting>
+          <b:widget-setting name='showAuthor'>false</b:widget-setting>
+          <b:widget-setting name='showBacklinks'>false</b:widget-setting>
+          <b:widget-setting name='showLocation'>false</b:widget-setting>
+          <b:widget-setting name='showTimestamp'>true</b:widget-setting>
+          <b:widget-setting name='showCommentLink'>true</b:widget-setting>
+        </b:widget-settings>
+      </b:widget>
+    </b:section>
+  </main>
+
+  <!-- SIDEBAR -->
+  <aside class='sidebar'>
+    <b:section id='sidebar' maxwidgets='5' showaddelement='yes'>
+      <!-- Platform CTA -->
+      <div class='widget platform-cta'>
+        <h3>⚡ Start Investing Today</h3>
+        <p>Join ElonInvest and earn daily returns on Tesla, SpaceX, Neuralink, and more.</p>
+        <a href='https://eloninvest.onrender.com'>Get Started →</a>
+      </div>
+
+      <b:widget id='PopularPosts1' locked='false' title='Trending Posts' type='PopularPosts' version='2'>
+        <b:widget-settings>
+          <b:widget-setting name='numItemsToShow'>4</b:widget-setting>
+          <b:widget-setting name='showThumbnails'>true</b:widget-setting>
+          <b:widget-setting name='showSnippets'>true</b:widget-setting>
+          <b:widget-setting name='timeRange'>LAST_WEEK</b:widget-setting>
+        </b:widget-settings>
+      </b:widget>
+
+      <b:widget id='Label1' locked='false' title='Categories' type='Label' version='2'>
+        <b:widget-settings>
+          <b:widget-setting name='sorting'>ALPHA</b:widget-setting>
+          <b:widget-setting name='display'>CLOUD</b:widget-setting>
+          <b:widget-setting name='selectedLabelsList'/>
+          <b:widget-setting name='showType'>ALL</b:widget-setting>
+          <b:widget-setting name='showFreqNumbers'>false</b:widget-setting>
+        </b:widget-settings>
+      </b:widget>
+
+      <div class='widget'>
+        <h2>Connect With Us</h2>
+        <div class='widget-content' style='display:flex;gap:10px;flex-wrap:wrap;'>
+          <a href='https://t.me/eloniinvest' style='background:#08c;color:#fff;padding:8px 16px;border-radius:8px;font-size:13px;' target='_blank'>📱 Telegram</a>
+          <a href='https://eloninvest.onrender.com' style='background:var(--accent-gold);color:#000;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;' target='_blank'>🌐 Platform</a>
+        </div>
+      </div>
+
+      <b:widget id='Subscribe1' locked='false' title='Follow by Email' type='Subscribe' version='2'/>
+    </b:section>
+  </aside>
+</div>
+
+<!-- FOOTER -->
+<div id='footer-wrapper'>
+  <div class='footer-inner'>
+    <div class='footer-links'>
+      <a expr:href='data:blog.homepageUrl'>Home</a>
+      <a href='https://eloninvest.onrender.com/about'>About Us</a>
+      <a href='https://eloninvest.onrender.com/privacy'>Privacy Policy</a>
+      <a href='https://eloninvest.onrender.com/terms'>Terms of Service</a>
+      <a href='https://t.me/eloniinvest'>Telegram</a>
+    </div>
+    <div class='footer-copy'>
+      © <data:blog.title/>. All rights reserved. | Powered by <a href='https://eloninvest.onrender.com'>ElonInvest</a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -15,6 +15,37 @@
 </div>
 
 <div class="container">
+    <!-- Team Section -->
+    <div class="row mb-5 pt-4">
+        <div class="col-12 text-center mb-4">
+            <h3 class="text-white fw-bold"><i class="bi bi-people-fill text-warning me-2"></i>{{ 'Our Management Team' if lang == 'en' else 'فريق الإدارة' }}</h3>
+            <p class="text-muted mx-auto" style="max-width:600px;">{{ 'Meet the experienced professionals behind ElonInvest, dedicated to maximizing your investment returns.' if lang == 'en' else 'تعرف على المحترفين ذوي الخبرة الذين يقفون وراء ElonInvest، المكرسين لتعظيم عوائد استثمارك.' }}</p>
+        </div>
+        {% set team = [
+            {'name': 'Dr. Alexander Morgan', 'name_ar': 'د. ألكسندر مورغان', 'title': 'Chief Investment Officer', 'title_ar': 'كبير مسؤولي الاستثمار', 'img': 1, 'country': '🇬🇧 London, UK', 'bio': 'Ph.D. in Financial Economics from Cambridge. Former Managing Director at Goldman Sachs (15 years). Managed $2.8B in tech-focused hedge funds with consistent 18%+ annual returns.', 'bio_ar': 'دكتوراه في الاقتصاد المالي من كامبريدج. مدير إداري سابق في جولدمان ساكس لمدة 15 عاماً. أدار صندوق تحوط بقيمة 2.8 مليار دولار في شركات التقنية بعوائد سنوية تجاوزت 18%.'},
+            {'name': 'Sarah Chen', 'name_ar': 'سارة تشن', 'title': 'Head of Portfolio Management', 'title_ar': 'رئيسة إدارة المحافظ', 'img': 5, 'country': '🇸🇬 Singapore', 'bio': 'MBA from Harvard Business School. CFA charterholder with 12+ years in asset management. Led a $4.1B tech portfolio at BlackRock, outperforming benchmarks by 340 bps annually.', 'bio_ar': 'ماجستير إدارة الأعمال من هارفارد. حاملة شهادة CFA مع أكثر من 12 عاماً في إدارة الأصول. قادت محفظة تقنية بقيمة 4.1 مليار دولار في بلاك روك بتفوق على المؤشرات بنسبة 3.4% سنوياً.'},
+            {'name': 'Dr. Omar Al-Farsi', 'name_ar': 'د. عمر الفارسي', 'title': 'Director of Risk Management', 'title_ar': 'مدير إدارة المخاطر', 'img': 14, 'country': '🇦🇪 Abu Dhabi, UAE', 'bio': 'Ph.D. in Quantitative Finance from Oxford. FRM certified. Former Chief Risk Officer at Abu Dhabi Investment Authority (ADIA). Developed proprietary risk models protecting $12B in assets.', 'bio_ar': 'دكتوراه في المالية الكمية من أكسفورد. حاصل على شهادة FRM. كان كبير مسؤولي المخاطر في هيئة الاستثمار بأبو ظبي. طور نماذج مخاطر مبتكرة تحمي أصولاً بقيمة 12 مليار دولار.'},
+            {'name': 'Emily Watson', 'name_ar': 'إيميلي واتسون', 'title': 'Senior Financial Analyst', 'title_ar': 'محللة مالية أولى', 'img': 25, 'country': '🇺🇸 New York, USA', 'bio': 'MSc in Financial Engineering from MIT. 8 years of experience in quantitative analysis at JP Morgan. Specializes in predictive modeling for emerging tech markets with 92% accuracy rate.', 'bio_ar': 'ماجستير في الهندسة المالية من MIT. 8 سنوات من الخبرة في التحليل الكمي في جي بي مورغان. متخصصة في النمذجة التنبؤية لأسواق التقنية الناشئة بدقة تصل إلى 92%.'},
+            {'name': 'Marcus Johnson', 'name_ar': 'ماركوس جونسون', 'title': 'Head of Trading Operations', 'title_ar': 'رئيس عمليات التداول', 'img': 37, 'country': '🇨🇦 Toronto, Canada', 'bio': 'MBA in Finance from University of Toronto. 14 years of trading experience including 6 years as VP of Trading at Citadel Securities. Executed trades worth over $50B across global markets.', 'bio_ar': 'ماجستير إدارة الأعمال في المالية من جامعة تورنتو. 14 عاماً من الخبرة في التداول منها 6 أعوام كنائب رئيس التداول في سيتادل سيكيوريتيز. نفذ صفقات بقيمة تجاوزت 50 مليار دولار في الأسواق العالمية.'},
+            {'name': 'Dr. Layla Hassan', 'name_ar': 'د. ليلى حسن', 'title': 'Chief Compliance Officer', 'title_ar': 'كبير مسؤولي الامتثال', 'img': 44, 'country': '🇩🇪 Frankfurt, Germany', 'bio': 'Ph.D. in International Finance from LSE. 15+ years in regulatory compliance at Deutsche Bank and BaFin. Ensures full compliance with FCA, CySEC, and DFSA regulations for investor protection.', 'bio_ar': 'دكتوراه في المالية الدولية من كلية لندن للاقتصاد. أكثر من 15 عاماً في الامتثال التنظيمي في دويتشه بنك وهيئة الرقابة المالية الألمانية. تضمن الامتثال الكامل للوائح FCA و CySEC و DFSA لحماية المستثمرين.'},
+        ] %}
+        <div class="row g-4 justify-content-center">
+            {% for member in team %}
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card card border-0 p-4 h-100 text-center">
+                    <div class="d-flex justify-content-center mb-3">
+                        <img src="https://i.pravatar.cc/160?img={{ member.img }}" alt="{{ member.name if lang == 'en' else member.name_ar }}" class="rounded-circle border border-2 border-warning" style="width:120px;height:120px;object-fit:cover;">
+                    </div>
+                    <h5 class="text-white mb-1">{{ member.name if lang == 'en' else member.name_ar }}</h5>
+                    <small class="text-warning fw-semibold d-block mb-1">{{ member.title if lang == 'en' else member.title_ar }}</small>
+                    <small class="text-muted d-block mb-2">{{ member.country }}</small>
+                    <p class="text-muted small mb-0" style="line-height:1.6;">{{ member.bio if lang == 'en' else member.bio_ar }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
     <div class="row g-4 py-5">
         <div class="col-md-4">
             <div class="feature-card card border-0 p-4 h-100">

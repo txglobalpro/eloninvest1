@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}{{ 'About Us' if lang == 'en' else 'من نحن' }}{% endblock %}
+{% block content %}
+<div class="page-hero mb-5 text-center">
+  <div class="container">
+    <span class="badge bg-warning text-dark px-4 py-2 mb-3" style="border-radius:20px;">{{ 'Who We Are' if lang == 'en' else 'من نحن' }}</span>
+    <h1 class="display-5 fw-bold text-white">{{ 'About ElonInvest' if lang == 'en' else 'عن ElonInvest' }}</h1>
+    <p class="text-white-50 mx-auto" style="max-width:600px;">{{ 'Your gateway to premium tech investment opportunities.' if lang == 'en' else 'بوابتك للفرص الاستثمارية المتميزة في قطاع التقنية.' }}</p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row g-4 mb-5">
+    <div class="col-lg-6">
+      <div class="card border-0 p-4 h-100">
+        <h4 class="text-white fw-bold mb-3"><i class="bi bi-bullseye text-warning me-2"></i>{{ 'Our Mission' if lang == 'en' else 'مهمتنا' }}</h4>
+        <p class="text-white-50" style="line-height:1.8;">{{ "ElonInvest was founded to democratize access to high-growth tech investment opportunities. We believe that everyone deserves the chance to invest in the world's most innovative companies without the traditional barriers of entry. Our platform simplifies the investment process while maximizing returns through carefully curated investment plans." if lang == 'en' else "تأسست ElonInvest لإتاحة الفرصة للجميع للاستثمار في الشركات التقنية عالية النمو دون الحواجز التقليدية. منصتنا تبسط عملية الاستثمار مع تعظيم العوائد من خلال خطط استثمارية منتقاة بعناية." }}</p>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card border-0 p-4 h-100">
+        <h4 class="text-white fw-bold mb-3"><i class="bi bi-eye text-success me-2"></i>{{ 'Our Vision' if lang == 'en' else 'رؤيتنا' }}</h4>
+        <p class="text-white-50" style="line-height:1.8;">{{ "To become the world's leading investment platform for tech innovation, connecting millions of investors with the companies shaping tomorrow. We envision a future where anyone, anywhere, can participate in the growth of transformative technologies and build sustainable wealth." if lang == 'en' else "أن نصبح المنصة الاستثمارية الرائدة عالمياً في مجال الابتكار التقني، ونربط الملايين من المستثمرين بالشركات التي تشكل المستقبل. نتصور مستقبلاً يستطيع فيه أي شخص، في أي مكان، المشاركة في نمو التقنيات التحويلية." }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 p-5 mb-5 text-center">
+    <h3 class="text-white fw-bold mb-4"><i class="bi bi-heart-fill text-danger me-2"></i>{{ 'Our Values' if lang == 'en' else 'قيمنا' }}</h3>
+    <div class="row g-4">
+      <div class="col-md-3">
+        <div class="p-3">
+          <div style="font-size:2rem;color:var(--accent-gold);">🔒</div>
+          <h6 class="text-white mt-2">{{ 'Transparency' if lang == 'en' else 'الشفافية' }}</h6>
+          <small class="text-white-50">{{ 'Every transaction is clear and verifiable.' if lang == 'en' else 'كل معاملة واضحة وقابلة للتحقق.' }}</small>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="p-3">
+          <div style="font-size:2rem;color:var(--accent-gold);">⚡</div>
+          <h6 class="text-white mt-2">{{ 'Innovation' if lang == 'en' else 'الابتكار' }}</h6>
+          <small class="text-white-50">{{ 'We embrace cutting-edge technology.' if lang == 'en' else 'نتبنى أحدث التقنيات.' }}</small>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="p-3">
+          <div style="font-size:2rem;color:var(--accent-gold);">🤝</div>
+          <h6 class="text-white mt-2">{{ 'Trust' if lang == 'en' else 'الثقة' }}</h6>
+          <small class="text-white-50">{{ 'Built on integrity and reliability.' if lang == 'en' else 'مبنية على النزاهة والموثوقية.' }}</small>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="p-3">
+          <div style="font-size:2rem;color:var(--accent-gold);">🌍</div>
+          <h6 class="text-white mt-2">{{ 'Accessibility' if lang == 'en' else 'الوصولية' }}</h6>
+          <small class="text-white-50">{{ 'Investment opportunities for everyone.' if lang == 'en' else 'فرص استثمارية للجميع.' }}</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 p-5 mb-5">
+    <h3 class="text-white fw-bold mb-4"><i class="bi bi-people-fill text-info me-2"></i>{{ 'Why Choose Us' if lang == 'en' else 'لماذا تختارنا' }}</h3>
+    <div class="row g-3">
+      <div class="col-md-6"><div class="d-flex align-items-center gap-3 p-3"><i class="bi bi-check-circle-fill text-success fs-4"></i><div><h6 class="text-white mb-1">{{ 'Daily Profit Distribution' if lang == 'en' else 'توزيع أرباح يومي' }}</h6><small class="text-white-50">{{ 'Earn returns every single day on your investments.' if lang == 'en' else 'احصل على عوائد يومية على استثماراتك.' }}</small></div></div></div>
+      <div class="col-md-6"><div class="d-flex align-items-center gap-3 p-3"><i class="bi bi-check-circle-fill text-success fs-4"></i><div><h6 class="text-white mb-1">{{ 'Multiple Investment Plans' if lang == 'en' else 'خطط استثمارية متعددة' }}</h6><small class="text-white-50">{{ 'Choose from 5 plans tailored to different budgets.' if lang == 'en' else 'اختر من 5 خطط تناسب مختلف الميزانيات.' }}</small></div></div></div>
+      <div class="col-md-6"><div class="d-flex align-items-center gap-3 p-3"><i class="bi bi-check-circle-fill text-success fs-4"></i><div><h6 class="text-white mb-1">{{ 'Referral Rewards' if lang == 'en' else 'مكافآت الإحالة' }}</h6><small class="text-white-50">{{ 'Earn up to 5% commission from your network.' if lang == 'en' else 'اربح حتى 5% عمولة من شبكتك.' }}</small></div></div></div>
+      <div class="col-md-6"><div class="d-flex align-items-center gap-3 p-3"><i class="bi bi-check-circle-fill text-success fs-4"></i><div><h6 class="text-white mb-1">{{ '24/7 Support' if lang == 'en' else 'دعم على مدار الساعة' }}</h6><small class="text-white-50">{{ 'Our team is always ready to assist you.' if lang == 'en' else 'فريقنا جاهز دائماً لمساعدتك.' }}</small></div></div></div>
+    </div>
+  </div>
+
+  <div class="card border-0 p-5 mb-5 text-center" style="background:linear-gradient(135deg,rgba(240,185,11,0.08),rgba(240,185,11,0.02));">
+    <h3 class="text-white fw-bold mb-3">{{ 'Start Your Investment Journey Today' if lang == 'en' else 'ابدأ رحلتك الاستثمارية اليوم' }}</h3>
+    <p class="text-white-50 mx-auto mb-4" style="max-width:500px;">{{ 'Join thousands of successful investors already growing their wealth with ElonInvest.' if lang == 'en' else 'انضم إلى آلاف المستثمرين الناجحين الذين ينمون ثرواتهم مع ElonInvest.' }}</p>
+    <a href="{{ url_for('auth.register') }}" class="btn btn-warning btn-lg px-5 fw-bold">{{ 'Get Started Free' if lang == 'en' else 'ابدأ مجاناً' }}</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Terms of Service' if lang == 'en' else 'اتفاقية الاستخدام' }}{% endblock %}
+{% block content %}
+<div class="page-hero mb-5 text-center">
+  <div class="container">
+    <span class="badge bg-warning text-dark px-4 py-2 mb-3" style="border-radius:20px;">{{ 'Terms' if lang == 'en' else 'الشروط' }}</span>
+    <h1 class="display-5 fw-bold text-white">{{ 'Terms of Service' if lang == 'en' else 'اتفاقية الاستخدام' }}</h1>
+    <p class="text-white-50 mx-auto" style="max-width:600px;">{{ 'Please read these terms carefully before using our platform.' if lang == 'en' else 'يرجى قراءة هذه الشروط بعناية قبل استخدام منصتنا.' }}</p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="card border-0 p-5 mb-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <h4 class="text-white fw-bold mb-3">{{ '1. Acceptance of Terms' if lang == 'en' else '1. الموافقة على الشروط' }}</h4>
+        <p class="text-white-50 mb-4" style="line-height:1.8;">{{ 'By registering for and using ElonInvest, you agree to be bound by these Terms of Service. If you do not agree with any part of these terms, you must not use our platform. We reserve the right to update these terms at any time, and continued use constitutes acceptance of changes.' if lang == 'en' else 'باستخدامك لمنصة ElonInvest، فإنك توافق على الالتزام باتفاقية الاستخدام هذه. إذا كنت لا توافق على أي جزء من هذه الشروط، يجب عليك عدم استخدام منصتنا. نحتفظ بالحق في تحديث هذه الشروط في أي وقت، والاستمرار في الاستخدام يعني الموافقة على التغييرات.' }}</p>
+
+        <h4 class="text-white fw-bold mb-3">{{ '2. Eligibility' if lang == 'en' else '2. الأهلية' }}</h4>
+        <p class="text-white-50 mb-4" style="line-height:1.8;">{{ 'You must be at least 18 years old to use our platform. By registering, you confirm that you have the legal capacity to enter into binding contracts. We reserve the right to verify your identity and reject applications at our discretion.' if lang == 'en' else 'يجب أن يكون عمرك 18 عاماً على الأقل لاستخدام منصتنا. بالتسجيل، أنت تؤكد أن لديك الأهلية القانونية لإبرام عقود ملزمة. نحتفظ بالحق في التحقق من هويتك ورفض الطلبات حسب تقديرنا.' }}</p>
+
+        <h4 class="text-white fw-bold mb-3">{{ '3. Account Responsibilities' if lang == 'en' else '3. مسؤوليات الحساب' }}</h4>
+        <p class="text-white-50 mb-4" style="line-height:1.8;">{{ 'You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You must notify us immediately of any unauthorized use. We are not liable for any loss or damage from your failure to protect your account.' if lang == 'en' else 'أنت مسؤول عن الحفاظ على سرية بيانات حسابك وعن جميع الأنشطة التي تحدث من خلال حسابك. يجب عليك إبلاغنا فوراً عن أي استخدام غير مصرح به. لسنا مسؤولين عن أي خسارة أو ضرر ناتج عن فشلك في حماية حسابك.' }}</p>
+
+        <h4 class="text-white fw-bold mb-3">{{ '4. Investment Terms' if lang == 'en' else '4. شروط الاستثمار' }}</h4>
+        <p class="text-white-50 mb-4" style="line-height:1.8;">{{ 'All investments are subject to the specific terms of each investment plan. Returns are calculated daily and credited to your account. Early withdrawal may be subject to penalties as outlined in each plan. Past performance does not guarantee future results.' if lang == 'en' else 'جميع الاستثمارات تخضع للشروط المحددة لكل خطة استثمارية. يتم احتساب العوائد يومياً وإضافتها إلى حسابك. قد يخضع السحب المبكر لعقوبات كما هو موضح في كل خطة. الأداء السابق لا يضمن النتائج المستقبلية.' }}</p>
+
+        <h4 class="text-white fw-bold mb-3">{{ '5. Deposits & Withdrawals' if lang == 'en' else '5. الإيداع والسحب' }}</h4>
+        <p class="text-white-50 mb-4" style="line-height:1.8;">{{ 'Deposits must be made using approved payment methods. Withdrawal requests are processed within the specified timeframe. We reserve the right to verify transactions and request additional documentation for large withdrawals to comply with anti-money laundering regulations.' if lang == 'en' else 'يجب أن تتم الإيداعات باستخدام طرق الدفع المعتمدة. تتم معالجة طلبات السحب خلال الإطار الزمني المحدد. نحتفظ بالحق في التحقق من المعاملات وطلب وثائق إضافية للسحوبات الكبيرة للامتثال للوائح مكافحة غسل الأموال.' }}</p>
+
+        <h4 class="text-white fw-bold mb-3">{{ '6. Prohibited Activities' if lang == 'en' else '6. الأنشطة المحظورة' }}</h4>
+        <p class="text-white-50 mb-4" style="line-height:1.8;">{{ 'You agree not to engage in any fraudulent, abusive, or illegal activities on our platform. This includes but is not limited to money laundering, fraud, identity theft, and any form of market manipulation. Violation may result in immediate account termination and legal action.' if lang == 'en' else 'أنت توافق على عدم الانخراط في أي أنشطة احتيالية أو مسيئة أو غير قانونية على منصتنا. يشمل ذلك على سبيل المثال لا الحصر غسل الأموال والاحتيال وسرقة الهوية وأي شكل من أشكال التلاعب بالسوق. قد يؤدي المخالفة إلى إنهاء الحساب فوراً واتخاذ إجراءات قانونية.' }}</p>
+
+        <h4 class="text-white fw-bold mb-3">{{ '7. Limitation of Liability' if lang == 'en' else '7. حدود المسؤولية' }}</h4>
+        <p class="text-white-50 mb-4" style="line-height:1.8;">{{ 'ElonInvest shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of the platform. Our total liability is limited to the amount of fees paid by you in the 12 months preceding the claim.' if lang == 'en' else 'لا تتحمل ElonInvest المسؤولية عن أي أضرار غير مباشرة أو عرضية أو خاصة أو تبعية ناشئة عن استخدامك للمنصة. تقتصر مسؤوليتنا الإجمالية على مبلغ الرسوم المدفوعة من قبلك في الـ 12 شهراً السابقة للمطالبة.' }}</p>
+
+        <h4 class="text-white fw-bold mb-3">{{ '8. Termination' if lang == 'en' else '8. إنهاء الاستخدام' }}</h4>
+        <p class="text-white-50 mb-4" style="line-height:1.8;">{{ 'We reserve the right to suspend or terminate your account at any time for violation of these terms or for any reason we deem necessary. You may also terminate your account at any time by contacting support. Upon termination, your rights to use the platform cease immediately.' if lang == 'en' else 'نحتفظ بالحق في تعليق أو إنهاء حسابك في أي وقت لانتهاك هذه الشروط أو لأي سبب نراه ضرورياً. يمكنك أيضاً إنهاء حسابك في أي وقت بالاتصال بالدعم. عند الإنهاء، تتوقف حقوقك في استخدام المنصة فوراً.' }}</p>
+
+        <h4 class="text-white fw-bold mb-3">{{ '9. Governing Law' if lang == 'en' else '9. القانون الحاكم' }}</h4>
+        <p class="text-white-50" style="line-height:1.8;">{{ 'These terms shall be governed by and construed in accordance with international financial regulations. Any disputes shall be resolved through binding arbitration in accordance with the rules of the International Chamber of Commerce.' if lang == 'en' else 'تخضع هذه الشروط للوائح المالية الدولية ويتم تفسيقها وفقاً لها. يتم حل أي نزاعات من خلال التحكيم الملزم وفقاً لقواعد الغرفة التجارية الدولية.' }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

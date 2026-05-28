@@ -33,6 +33,18 @@ def create_app(config_class=Config):
     def index():
         return render_template('index.html')
 
+    @app.route('/about')
+    def about():
+        return render_template('pages/about.html')
+
+    @app.route('/privacy')
+    def privacy():
+        return render_template('pages/privacy.html')
+
+    @app.route('/terms')
+    def terms():
+        return render_template('pages/terms.html')
+
     @app.before_request
     def before_request():
         lang = request.args.get('lang')

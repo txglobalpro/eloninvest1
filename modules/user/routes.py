@@ -1,10 +1,17 @@
+import os
 from datetime import datetime
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required, current_user
+from werkzeug.utils import secure_filename
 from core.extensions import db
 from core.models import Investment, Transaction, Referral
 
 user_bp = Blueprint('user', __name__, template_folder='../../templates/user')
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'pdf'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @user_bp.route('/dashboard')
 @login_required
@@ -29,3 +36,42 @@ def profile():
     investments_count = Investment.query.filter_by(user_id=current_user.id).count()
     transactions_count = Transaction.query.filter_by(user_id=current_user.id).count()
     return render_template('user/profile.html', referrals_count=referrals_count, investments_count=investments_count, transactions_count=transactions_count)
+
+@user_bp.route('/profile/kyc', methods=['POST'])
+@login_required
+def submit_kyc():
+    if current_user.kyc_status == 'pending':
+        flash('KYC already under review' if current_user.lang == 'en' else 'التحقق قيد المراجعة بالفعل', 'warning')
+        return redirect(url_for('user.profile'))
+    if current_user.kyc_status == 'approved':
+        flash('KYC already verified' if current_user.lang == 'en' else 'التحقق موثق بالفعل', 'info')
+        return redirect(url_for('user.profile'))
+    country = request.form.get('kyc_country', '').strip()
+    age = request.form.get('kyc_age', type=int)
+    phone = request.form.get('kyc_phone', '').strip()
+    if not country or not age or not phone:
+        flash('Please fill in all fields' if current_user.lang == 'en' else 'يرجى تعبئة جميع الحقول', 'danger')
+        return redirect(url_for('user.profile'))
+    if 'kyc_id' not in request.files:
+        flash('Please upload an ID document' if current_user.lang == 'en' else 'يرجى رفع وثيقة الهوية', 'danger')
+        return redirect(url_for('user.profile'))
+    file = request.files['kyc_id']
+    if not file or not file.filename or not allowed_file(file.filename):
+        flash('Invalid file type. Allowed: PNG, JPG, JPEG, GIF, WebP, PDF' if current_user.lang == 'en' else 'نوع ملف غير صالح. المسموح: PNG, JPG, JPEG, GIF, WebP, PDF', 'danger')
+        return redirect(url_for('user.profile'))
+    upload_dir = os.path.join(current_app.root_path, 'static', 'uploads', 'kyc')
+    os.makedirs(upload_dir, exist_ok=True)
+    ext = file.filename.rsplit('.', 1)[1].lower()
+    filename = f'kyc_{current_user.id}_{datetime.utcnow().strftime("%Y%m%d%H%M%S")}.{ext}'
+    filepath = os.path.join(upload_dir, filename)
+    file.save(filepath)
+    current_user.kyc_status = 'pending'
+    current_user.kyc_country = country
+    current_user.kyc_age = age
+    current_user.kyc_phone = phone
+    current_user.kyc_id_path = f'static/uploads/kyc/{filename}'
+    current_user.kyc_submitted_at = datetime.utcnow()
+    current_user.kyc_review_notes = ''
+    db.session.commit()
+    flash('KYC submitted successfully! Awaiting review.' if current_user.lang == 'en' else 'تم تقديم طلب التحقق بنجاح! في انتظار المراجعة.', 'success')
+    return redirect(url_for('user.profile'))

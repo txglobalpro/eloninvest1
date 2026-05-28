@@ -10,7 +10,12 @@
                 <i class="bi bi-person-fill"></i>
             </div>
             <div class="profile-cover-info">
-                <h4 class="mb-1">{{ current_user.username }}</h4>
+                <h4 class="mb-1">
+                    {{ current_user.username }}
+                    {% if current_user.kyc_status == 'approved' %}
+                    <span class="badge bg-success ms-1" style="font-size:0.5em;vertical-align:middle;"><i class="bi bi-patch-check-fill me-1"></i>{{ 'Verified' if lang == 'en' else 'موثق' }}</span>
+                    {% endif %}
+                </h4>
                 <p class="mb-0"><i class="bi bi-envelope me-1"></i>{{ current_user.email }}</p>
                 <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>{{ 'Member since' if lang == 'en' else 'عضو منذ' }} {{ current_user.created_at.strftime('%Y-%m-%d') }}</small>
             </div>
@@ -81,6 +86,18 @@
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="payment-tab" data-bs-toggle="tab" data-bs-target="#payment" type="button" role="tab">
                             <i class="bi bi-credit-card-2-front me-1"></i>{{ 'Payment Info' if lang == 'en' else 'معلومات الدفع' }}
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="kyc-tab" data-bs-toggle="tab" data-bs-target="#kyc" type="button" role="tab">
+                            <i class="bi bi-shield-check me-1"></i>{{ 'KYC Verification' if lang == 'en' else 'التحقق من الهوية' }}
+                            {% if current_user.kyc_status == 'approved' %}
+                            <span class="badge bg-success ms-1"><i class="bi bi-check-lg"></i></span>
+                            {% elif current_user.kyc_status == 'pending' %}
+                            <span class="badge bg-warning ms-1"><i class="bi bi-clock"></i></span>
+                            {% elif current_user.kyc_status == 'rejected' %}
+                            <span class="badge bg-danger ms-1"><i class="bi bi-x-lg"></i></span>
+                            {% endif %}
                         </button>
                     </li>
                 </ul>
@@ -221,6 +238,43 @@
                             </div>
                             <button type="submit" class="btn btn-warning px-4"><i class="bi bi-check-lg me-1"></i>{{ 'Save Changes' if lang == 'en' else 'حفظ التغييرات' }}</button>
                         </form>
+                    </div>
+
+                    <!-- Tab 4: KYC Verification -->
+                    <div class="tab-pane fade" id="kyc" role="tabpanel">
+                        {% if current_user.kyc_status == 'approved' %}
+                        <div class="text-center py-4">
+                            <div class="display-1 text-success mb-3"><i class="bi bi-patch-check-fill"></i></div>
+                            <h4 class="text-success">{{ 'Identity Verified' if lang == 'en' else 'تم التحقق من الهوية' }}</h4>
+                            <p class="text-muted">{{ 'Your identity has been verified successfully.' if lang == 'en' else 'تم التحقق من هويتك بنجاح.' }}</p>
+                            <div class="d-flex justify-content-center gap-4 mt-3">
+                                <div><small class="text-muted d-block">{{ 'Country' if lang == 'en' else 'البلد' }}</small><strong>{{ current_user.kyc_country }}</strong></div>
+                                <div><small class="text-muted d-block">{{ 'Age' if lang == 'en' else 'العمر' }}</small><strong>{{ current_user.kyc_age }}</strong></div>
+                                <div><small class="text-muted d-block">{{ 'Phone' if lang == 'en' else 'الهاتف' }}</small><strong>{{ current_user.kyc_phone }}</strong></div>
+                            </div>
+                        </div>
+                        {% elif current_user.kyc_status == 'pending' %}
+                        <div class="text-center py-4">
+                            <div class="display-1 text-warning mb-3"><i class="bi bi-clock-history"></i></div>
+                            <h4 class="text-warning">{{ 'Under Review' if lang == 'en' else 'قيد المراجعة' }}</h4>
+                            <p class="text-muted">{{ 'Your documents are being reviewed. We will notify you once verified.' if lang == 'en' else 'يتم مراجعة مستنداتك. سنخطرك حال اكتمال التحقق.' }}</p>
+                        </div>
+                        {% elif current_user.kyc_status == 'rejected' %}
+                        <div class="text-center py-4">
+                            <div class="display-1 text-danger mb-3"><i class="bi bi-x-octagon-fill"></i></div>
+                            <h4 class="text-danger">{{ 'Verification Rejected' if lang == 'en' else 'تم رفض التحقق' }}</h4>
+                            {% if current_user.kyc_review_notes %}
+                            <div class="alert alert-danger d-inline-block px-4">
+                                <strong>{{ 'Reason' if lang == 'en' else 'السبب' }}:</strong> {{ current_user.kyc_review_notes }}
+                            </div>
+                            {% endif %}
+                            <p class="text-muted">{{ 'Please resubmit with correct documents.' if lang == 'en' else 'يرجى إعادة التقديم بوثائق صحيحة.' }}</p>
+                            <hr class="my-4">
+                            {% include "user/kyc_form.html" %}
+                        </div>
+                        {% else %}
+                        {% include "user/kyc_form.html" %}
+                        {% endif %}
                     </div>
 
                 </div>

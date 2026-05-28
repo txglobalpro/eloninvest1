@@ -1,0 +1,102 @@
+<div class="text-center mb-3">
+    <div class="display-1 text-warning mb-3"><i class="bi bi-shield-plus"></i></div>
+    <h4>{{ 'Verify Your Identity' if lang == 'en' else 'تحقق من هويتك' }}</h4>
+    <p class="text-muted">{{ 'Upload your ID document and fill in your details to get the verified badge.' if lang == 'en' else 'ارفع وثيقة هويتك واملأ بياناتك للحصول على شارة التحقق.' }}</p>
+</div>
+<form method="POST" action="{{ url_for('user.submit_kyc') }}" enctype="multipart/form-data" class="kyc-form">
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">{{ 'Country (as shown on ID)' if lang == 'en' else 'البلد (كما في الهوية)' }}</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-globe"></i></span>
+                <input type="text" name="kyc_country" class="form-control" placeholder="{{ 'e.g. United States' if lang == 'en' else 'مثال: مصر' }}" required>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">{{ 'Age (as shown on ID)' if lang == 'en' else 'العمر (كما في الهوية)' }}</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+                <input type="number" name="kyc_age" class="form-control" min="18" max="120" placeholder="25" required>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">{{ 'Phone Number' if lang == 'en' else 'رقم الهاتف' }}</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                <input type="tel" name="kyc_phone" class="form-control" placeholder="+1234567890" required>
+            </div>
+        </div>
+        <div class="col-12">
+            <label class="form-label">{{ 'Upload ID (Passport, National ID, or Driver\'s License)' if lang == 'en' else 'ارفع الهوية (جواز سفر، بطاقة شخصية، أو رخصة قيادة)' }}</label>
+            <div class="upload-zone" id="uploadZone">
+                <i class="bi bi-cloud-arrow-up fs-1 d-block mb-2"></i>
+                <p class="mb-1">{{ 'Drag & drop or click to upload' if lang == 'en' else 'اسحب وأفلت أو اضغط للرفع' }}</p>
+                <small class="text-muted">{{ 'PNG, JPG, PDF up to 5MB' if lang == 'en' else 'PNG, JPG, PDF حتى 5 ميغابايت' }}</small>
+                <input type="file" name="kyc_id" id="kycIdInput" accept=".png,.jpg,.jpeg,.gif,.webp,.pdf" required hidden>
+            </div>
+            <div id="filePreview" class="mt-2 d-none">
+                <div class="alert alert-info py-2 px-3 mb-0 d-flex align-items-center gap-2">
+                    <i class="bi bi-file-earmark-check fs-5"></i>
+                    <span id="fileName" class="small"></span>
+                    <button type="button" class="btn-close ms-auto" onclick="resetFileInput()"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="mt-4">
+        <button type="submit" class="btn btn-warning px-5 w-100">
+            <i class="bi bi-shield-check me-2"></i>{{ 'Submit Verification' if lang == 'en' else 'تقديم طلب التحقق' }}
+        </button>
+    </div>
+</form>
+
+<style>
+.upload-zone {
+    border: 2px dashed var(--border-color, #444);
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: rgba(255,255,255,0.02);
+}
+.upload-zone:hover, .upload-zone.dragover {
+    border-color: var(--accent-warning, #f0b90b);
+    background: rgba(240,185,11,0.05);
+}
+.upload-zone i { color: var(--accent-warning, #f0b90b); }
+</style>
+
+<script>
+document.getElementById('uploadZone').addEventListener('click', function() {
+    document.getElementById('kycIdInput').click();
+});
+document.getElementById('kycIdInput').addEventListener('change', function(e) {
+    if (e.target.files && e.target.files[0]) {
+        document.getElementById('fileName').textContent = e.target.files[0].name;
+        document.getElementById('filePreview').classList.remove('d-none');
+    }
+});
+function resetFileInput() {
+    document.getElementById('kycIdInput').value = '';
+    document.getElementById('filePreview').classList.add('d-none');
+}
+document.getElementById('uploadZone').addEventListener('dragover', function(e) {
+    e.preventDefault();
+    this.classList.add('dragover');
+});
+document.getElementById('uploadZone').addEventListener('dragleave', function(e) {
+    e.preventDefault();
+    this.classList.remove('dragover');
+});
+document.getElementById('uploadZone').addEventListener('drop', function(e) {
+    e.preventDefault();
+    this.classList.remove('dragover');
+    var files = e.dataTransfer.files;
+    if (files.length > 0) {
+        document.getElementById('kycIdInput').files = files;
+        document.getElementById('fileName').textContent = files[0].name;
+        document.getElementById('filePreview').classList.remove('d-none');
+    }
+});
+</script>

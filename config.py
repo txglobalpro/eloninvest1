@@ -25,5 +25,7 @@ class Config:
         {'key': 'website', 'url': os.environ.get('WEBSITE_URL', '#'), 'icon': 'bi-globe2', 'label': 'Website', 'color': '#f0b90b'},
     ]
 
+    UPLOAD_FOLDER = os.path.join(basedir, 'static/uploads/kyc')
+
     WTF_CSRF_ENABLED = True
     LANGUAGES = {'en': 'English', 'ar': 'العربية'}

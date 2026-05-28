@@ -241,6 +241,29 @@ def user_detail(user_id):
             user.email_verified = not user.email_verified
             flash(f'Email verification toggled for {user.username}', 'success')
 
+        elif action == 'approve_kyc':
+            if user.kyc_status == 'pending':
+                user.kyc_status = 'approved'
+                user.kyc_reviewed_at = datetime.utcnow()
+                flash(f'KYC approved for {user.username}', 'success')
+            else:
+                flash('KYC is not pending', 'warning')
+
+        elif action == 'reject_kyc':
+            if user.kyc_status == 'pending':
+                user.kyc_status = 'rejected'
+                user.kyc_reviewed_at = datetime.utcnow()
+                user.kyc_review_notes = request.form.get('reject_reason', '')
+                flash(f'KYC rejected for {user.username}', 'warning')
+            else:
+                flash('KYC is not pending', 'warning')
+
+        elif action == 'reset_kyc':
+            user.kyc_status = 'none'
+            user.kyc_reviewed_at = None
+            user.kyc_review_notes = ''
+            flash(f'KYC reset for {user.username}', 'info')
+
         db.session.commit()
         return redirect(url_for('admin.user_detail', user_id=user.id))
 

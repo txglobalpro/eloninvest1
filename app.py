@@ -45,6 +45,17 @@ def create_app(config_class=Config):
     def terms():
         return render_template('pages/terms.html')
 
+    @app.route('/api/chatbot', methods=['POST'])
+    def chatbot():
+        from modules.chatbot import get_response
+        from flask import request, jsonify
+        data = request.get_json()
+        msg = (data or {}).get('message', '').strip()
+        if not msg:
+            return jsonify({'reply': 'Please type a message.' if session.get('lang', 'en') == 'en' else 'الرجاء كتابة رسالة.'})
+        reply = get_response(msg)
+        return jsonify({'reply': reply})
+
     @app.before_request
     def before_request():
         lang = request.args.get('lang')

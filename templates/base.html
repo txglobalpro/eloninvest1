@@ -97,7 +97,7 @@
             <div class="social-bar mb-4">
                 <span class="social-label mb-3 d-block text-muted small text-uppercase">{{ 'Follow Us' if lang == 'en' else 'تابعنا' }}</span>
                 <div class="d-flex justify-content-center gap-3 flex-wrap">
-                    {% for link in social_links %}
+                    {% for link in social_links | default([]) %}
                     <a href="{{ link.url }}" target="_blank" class="social-btn" style="--sc:{{ link.color }}" title="{{ link.label }}">
                         <i class="bi {{ link.icon }}"></i>
                         <span>{{ link.label }}</span>

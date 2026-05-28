@@ -23,6 +23,25 @@
                 <input type="text" name="kyc_country" class="form-control" placeholder="{{ 'e.g. United States' if lang == 'en' else 'مثال: مصر' }}" required>
             </div>
         </div>
+        <div class="col-md-4">
+            <label class="form-label">{{ 'ID Type' if lang == 'en' else 'نوع الوثيقة' }}</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-card-text"></i></span>
+                <select name="kyc_doc_type" id="kycDocType" class="form-select" required>
+                    <option value="">{{ 'Select document type...' if lang == 'en' else 'اختر نوع الوثيقة...' }}</option>
+                    <option value="drivers_license">{{ "Driver's License" if lang == 'en' else 'رخصة قيادة' }}</option>
+                    <option value="national_id">{{ 'National ID' if lang == 'en' else 'بطاقة شخصية' }}</option>
+                    <option value="passport">{{ 'Passport' if lang == 'en' else 'جواز سفر' }}</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="alert alert-warning py-2 px-3 small mb-0">
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                <strong>{{ 'Important' if lang == 'en' else 'تنبيه' }}:</strong>
+                {{ 'Make sure the photos are clear and well-lit. Blurry or dark images may cause verification delays.' if lang == 'en' else 'تأكد من أن الصور واضحة والإضاءة جيدة. الصور الضبابية أو المظلمة قد تؤخر عملية التحقق.' }}
+            </div>
+        </div>
         <div class="col-md-6">
             <label class="form-label">{{ 'Date of Birth (as shown on ID)' if lang == 'en' else 'تاريخ الميلاد (كما في الهوية)' }}</label>
             <div class="row g-1">
@@ -59,25 +78,45 @@
                 <input type="tel" name="kyc_phone" class="form-control" placeholder="+1234567890" required>
             </div>
         </div>
+
+        <!-- Upload: Front Image (always) -->
         <div class="col-12">
-            <label class="form-label">{{ 'Upload ID (Passport, National ID, or Driver\'s License)' if lang == 'en' else 'ارفع الهوية (جواز سفر، بطاقة شخصية، أو رخصة قيادة)' }}</label>
-            <div class="upload-zone" id="uploadZone">
+            <label class="form-label" id="frontLabel">{{ 'Upload ID (Front / Data Page)' if lang == 'en' else 'ارفع وجه الوثيقة الأمامي / صفحة البيانات' }}</label>
+            <div class="upload-zone" id="uploadZoneFront">
                 <i class="bi bi-cloud-arrow-up fs-1 d-block mb-2"></i>
                 <p class="mb-1">{{ 'Drag & drop or click to upload' if lang == 'en' else 'اسحب وأفلت أو اضغط للرفع' }}</p>
-                <small class="text-muted">{{ 'PNG, JPG, PDF up to 5MB' if lang == 'en' else 'PNG, JPG, PDF حتى 5 ميغابايت' }}</small>
-                <input type="file" name="kyc_id" id="kycIdInput" accept=".png,.jpg,.jpeg,.gif,.webp,.pdf" required hidden>
+                <small class="text-muted">{{ 'PNG, JPG up to 5MB. Good lighting required.' if lang == 'en' else 'PNG, JPG حتى 5 ميغابايت. الإضاءة الجيدة مطلوبة.' }}</small>
+                <input type="file" name="kyc_id_front" id="kycFrontInput" accept=".png,.jpg,.jpeg,.gif,.webp" required hidden>
             </div>
-            <div id="filePreview" class="mt-2 d-none">
+            <div id="frontPreview" class="mt-2 d-none">
                 <div class="alert alert-info py-2 px-3 mb-0 d-flex align-items-center gap-2">
                     <i class="bi bi-file-earmark-check fs-5"></i>
-                    <span id="fileName" class="small"></span>
-                    <button type="button" class="btn-close ms-auto" onclick="resetFileInput()"></button>
+                    <span id="frontFileName" class="small"></span>
+                    <button type="button" class="btn-close ms-auto" onclick="resetFront()"></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload: Back Image (only for drivers_license & national_id) -->
+        <div class="col-12" id="backUploadRow" style="display:none;">
+            <label class="form-label">{{ 'Upload ID (Back Side)' if lang == 'en' else 'ارفع وجه الوثيقة الخلفي' }}</label>
+            <div class="upload-zone" id="uploadZoneBack">
+                <i class="bi bi-cloud-arrow-up fs-1 d-block mb-2"></i>
+                <p class="mb-1">{{ 'Drag & drop or click to upload' if lang == 'en' else 'اسحب وأفلت أو اضغط للرفع' }}</p>
+                <small class="text-muted">{{ 'PNG, JPG up to 5MB. Show the back side clearly.' if lang == 'en' else 'PNG, JPG حتى 5 ميغابايت. أظهر الوجه الخلفي بوضوح.' }}</small>
+                <input type="file" name="kyc_id_back" id="kycBackInput" accept=".png,.jpg,.jpeg,.gif,.webp" hidden>
+            </div>
+            <div id="backPreview" class="mt-2 d-none">
+                <div class="alert alert-info py-2 px-3 mb-0 d-flex align-items-center gap-2">
+                    <i class="bi bi-file-earmark-check fs-5"></i>
+                    <span id="backFileName" class="small"></span>
+                    <button type="button" class="btn-close ms-auto" onclick="resetBack()"></button>
                 </div>
             </div>
         </div>
     </div>
     <div class="mt-4">
-        <button type="submit" class="btn btn-warning px-5 w-100">
+        <button type="submit" class="btn btn-warning px-5 w-100" id="kycSubmitBtn">
             <i class="bi bi-shield-check me-2"></i>{{ 'Submit Verification' if lang == 'en' else 'تقديم طلب التحقق' }}
         </button>
     </div>
@@ -87,7 +126,7 @@
 .upload-zone {
     border: 2px dashed var(--border-color, #444);
     border-radius: 12px;
-    padding: 40px 20px;
+    padding: 30px 20px;
     text-align: center;
     cursor: pointer;
     transition: all 0.3s;
@@ -101,35 +140,67 @@
 </style>
 
 <script>
-document.getElementById('uploadZone').addEventListener('click', function() {
-    document.getElementById('kycIdInput').click();
-});
-document.getElementById('kycIdInput').addEventListener('change', function(e) {
-    if (e.target.files && e.target.files[0]) {
-        document.getElementById('fileName').textContent = e.target.files[0].name;
-        document.getElementById('filePreview').classList.remove('d-none');
+var docType = document.getElementById('kycDocType');
+var backRow = document.getElementById('backUploadRow');
+var backInput = document.getElementById('kycBackInput');
+var frontLabel = document.getElementById('frontLabel');
+var submitBtn = document.getElementById('kycSubmitBtn');
+
+docType.addEventListener('change', function() {
+    var val = this.value;
+    if (val === 'drivers_license' || val === 'national_id') {
+        backRow.style.display = '';
+        backInput.required = true;
+        if (val === 'drivers_license') {
+            frontLabel.innerHTML = '{{ "Upload Driver License (Front)" if lang == "en" else "ارفع رخصة القيادة (أمامي)" }}';
+        } else {
+            frontLabel.innerHTML = '{{ "Upload National ID (Front)" if lang == "en" else "ارفع البطاقة الشخصية (أمامي)" }}';
+        }
+    } else if (val === 'passport') {
+        backRow.style.display = 'none';
+        backInput.required = false;
+        frontLabel.innerHTML = '{{ "Upload Passport (Data Page)" if lang == "en" else "ارفع جواز السفر (صفحة البيانات)" }}';
+    } else {
+        backRow.style.display = 'none';
+        backInput.required = false;
     }
 });
-function resetFileInput() {
-    document.getElementById('kycIdInput').value = '';
-    document.getElementById('filePreview').classList.add('d-none');
+
+setupUpload('uploadZoneFront', 'kycFrontInput', 'frontFileName', 'frontPreview');
+setupUpload('uploadZoneBack', 'kycBackInput', 'backFileName', 'backPreview');
+
+function setupUpload(zoneId, inputId, fileNameId, previewId) {
+    var zone = document.getElementById(zoneId);
+    var input = document.getElementById(inputId);
+    var preview = document.getElementById(previewId);
+    var nameEl = document.getElementById(fileNameId);
+    if (!zone || !input) return;
+    zone.addEventListener('click', function() { input.click(); });
+    input.addEventListener('change', function(e) {
+        if (e.target.files && e.target.files[0]) {
+            nameEl.textContent = e.target.files[0].name;
+            preview.classList.remove('d-none');
+        }
+    });
+    zone.addEventListener('dragover', function(e) { e.preventDefault(); this.classList.add('dragover'); });
+    zone.addEventListener('dragleave', function(e) { e.preventDefault(); this.classList.remove('dragover'); });
+    zone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+        if (e.dataTransfer.files.length > 0) {
+            input.files = e.dataTransfer.files;
+            nameEl.textContent = e.dataTransfer.files[0].name;
+            preview.classList.remove('d-none');
+        }
+    });
 }
-document.getElementById('uploadZone').addEventListener('dragover', function(e) {
-    e.preventDefault();
-    this.classList.add('dragover');
-});
-document.getElementById('uploadZone').addEventListener('dragleave', function(e) {
-    e.preventDefault();
-    this.classList.remove('dragover');
-});
-document.getElementById('uploadZone').addEventListener('drop', function(e) {
-    e.preventDefault();
-    this.classList.remove('dragover');
-    var files = e.dataTransfer.files;
-    if (files.length > 0) {
-        document.getElementById('kycIdInput').files = files;
-        document.getElementById('fileName').textContent = files[0].name;
-        document.getElementById('filePreview').classList.remove('d-none');
-    }
-});
+
+function resetFront() {
+    document.getElementById('kycFrontInput').value = '';
+    document.getElementById('frontPreview').classList.add('d-none');
+}
+function resetBack() {
+    document.getElementById('kycBackInput').value = '';
+    document.getElementById('backPreview').classList.add('d-none');
+}
 </script>

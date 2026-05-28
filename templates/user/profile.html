@@ -252,6 +252,9 @@
                                 <div><small class="text-muted d-block">{{ 'Country' if lang == 'en' else 'البلد' }}</small><strong>{{ current_user.kyc_country }}</strong></div>
                                 <div><small class="text-muted d-block">{{ 'Date of Birth' if lang == 'en' else 'تاريخ الميلاد' }}</small><strong>{{ current_user.kyc_dob }}</strong></div>
                                 <div><small class="text-muted d-block">{{ 'Phone' if lang == 'en' else 'الهاتف' }}</small><strong>{{ current_user.kyc_phone }}</strong></div>
+                                <div><small class="text-muted d-block">{{ 'ID Type' if lang == 'en' else 'نوع الوثيقة' }}</small>
+                                    <strong>{% if current_user.kyc_doc_type == 'drivers_license' %}{{ "Driver's License" if lang == 'en' else 'رخصة قيادة' }}{% elif current_user.kyc_doc_type == 'national_id' %}{{ 'National ID' if lang == 'en' else 'بطاقة شخصية' }}{% elif current_user.kyc_doc_type == 'passport' %}{{ 'Passport' if lang == 'en' else 'جواز سفر' }}{% else %}{{ current_user.kyc_doc_type }}{% endif %}</strong>
+                                </div>
                             </div>
                         </div>
                         {% elif current_user.kyc_status == 'pending' %}

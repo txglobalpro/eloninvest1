@@ -50,12 +50,16 @@ def submit_kyc():
         return redirect(url_for('user.profile'))
     country = request.form.get('kyc_country', '').strip()
     gender = request.form.get('kyc_gender', '').strip()
+    doc_type = request.form.get('kyc_doc_type', '').strip()
     dob_day = request.form.get('kyc_dob_day', '').strip()
     dob_month = request.form.get('kyc_dob_month', '').strip()
     dob_year = request.form.get('kyc_dob_year', '').strip()
     phone = request.form.get('kyc_phone', '').strip()
-    if not country or not gender or not dob_day or not dob_month or not dob_year or not phone:
+    if not country or not gender or not doc_type or not dob_day or not dob_month or not dob_year or not phone:
         flash('Please fill in all fields' if current_user.lang == 'en' else 'يرجى تعبئة جميع الحقول', 'danger')
+        return redirect(url_for('user.profile'))
+    if doc_type not in ('drivers_license', 'national_id', 'passport'):
+        flash('Invalid document type' if current_user.lang == 'en' else 'نوع وثيقة غير صالح', 'danger')
         return redirect(url_for('user.profile'))
     try:
         dob_str = f'{dob_year}-{int(dob_month):02d}-{int(dob_day):02d}'
@@ -70,26 +74,42 @@ def submit_kyc():
     except ValueError:
         flash('Invalid date' if current_user.lang == 'en' else 'تاريخ غير صالح', 'danger')
         return redirect(url_for('user.profile'))
-    if 'kyc_id' not in request.files:
-        flash('Please upload an ID document' if current_user.lang == 'en' else 'يرجى رفع وثيقة الهوية', 'danger')
+    if 'kyc_id_front' not in request.files:
+        flash('Please upload the front image of your ID' if current_user.lang == 'en' else 'يرجى رفع الصورة الأمامية للوثيقة', 'danger')
         return redirect(url_for('user.profile'))
-    file = request.files['kyc_id']
-    if not file or not file.filename or not allowed_file(file.filename):
-        flash('Invalid file type. Allowed: PNG, JPG, JPEG, GIF, WebP, PDF' if current_user.lang == 'en' else 'نوع ملف غير صالح. المسموح: PNG, JPG, JPEG, GIF, WebP, PDF', 'danger')
+    front = request.files['kyc_id_front']
+    if not front or not front.filename or not allowed_file(front.filename):
+        flash('Invalid front file type. Allowed: PNG, JPG, JPEG, GIF, WebP' if current_user.lang == 'en' else 'نوع ملف الصورة الأمامية غير صالح. المسموح: PNG, JPG, JPEG, GIF, WebP', 'danger')
         return redirect(url_for('user.profile'))
     upload_dir = os.path.join(current_app.root_path, 'static', 'uploads', 'kyc')
     os.makedirs(upload_dir, exist_ok=True)
-    ext = file.filename.rsplit('.', 1)[1].lower()
-    filename = f'kyc_{current_user.id}_{datetime.utcnow().strftime("%Y%m%d%H%M%S")}.{ext}'
-    filepath = os.path.join(upload_dir, filename)
-    file.save(filepath)
+    ts = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+    ext_f = front.filename.rsplit('.', 1)[1].lower()
+    front_name = f'kyc_{current_user.id}_{ts}_front.{ext_f}'
+    front.save(os.path.join(upload_dir, front_name))
+
+    back_name = ''
+    if doc_type in ('drivers_license', 'national_id'):
+        if 'kyc_id_back' not in request.files:
+            flash('Please upload the back image of your ID' if current_user.lang == 'en' else 'يرجى رفع الصورة الخلفية للوثيقة', 'danger')
+            return redirect(url_for('user.profile'))
+        back = request.files['kyc_id_back']
+        if not back or not back.filename or not allowed_file(back.filename):
+            flash('Invalid back file type. Allowed: PNG, JPG, JPEG, GIF, WebP' if current_user.lang == 'en' else 'نوع ملف الصورة الخلفية غير صالح. المسموح: PNG, JPG, JPEG, GIF, WebP', 'danger')
+            return redirect(url_for('user.profile'))
+        ext_b = back.filename.rsplit('.', 1)[1].lower()
+        back_name = f'kyc_{current_user.id}_{ts}_back.{ext_b}'
+        back.save(os.path.join(upload_dir, back_name))
+
     current_user.kyc_status = 'pending'
     current_user.kyc_country = country
     current_user.kyc_gender = gender
+    current_user.kyc_doc_type = doc_type
     current_user.kyc_dob = dob_str
     current_user.kyc_age = age
     current_user.kyc_phone = phone
-    current_user.kyc_id_path = f'static/uploads/kyc/{filename}'
+    current_user.kyc_id_path = f'static/uploads/kyc/{front_name}'
+    current_user.kyc_id_back_path = f'static/uploads/kyc/{back_name}' if back_name else ''
     current_user.kyc_submitted_at = datetime.utcnow()
     current_user.kyc_review_notes = ''
     db.session.commit()

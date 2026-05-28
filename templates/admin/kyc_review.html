@@ -33,26 +33,31 @@
                 <div class="row g-4">
                     <!-- Document Preview -->
                     <div class="col-md-7">
-                        <label class="form-label text-muted small">{{ 'Uploaded Document' if lang == 'en' else 'الوثيقة المرفوعة' }}</label>
-                        {% if u.kyc_id_path and ext in ['png','jpg','jpeg','gif','webp'] %}
-                        <a href="{{ url_for('static', filename=u.kyc_id_path.replace('static/', '')) }}" target="_blank">
-                            <img src="{{ url_for('static', filename=u.kyc_id_path.replace('static/', '')) }}" class="img-fluid rounded w-100" style="max-height:350px;object-fit:contain;border:1px solid var(--border-color);background:#000;">
-                        </a>
-                        {% elif u.kyc_id_path %}
-                        <div class="text-center py-5 bg-dark rounded">
-                            <i class="bi bi-file-earmark-pdf text-danger" style="font-size:4rem;"></i>
-                            <p class="mt-2">
-                                <a href="{{ url_for('static', filename=u.kyc_id_path.replace('static/', '')) }}" target="_blank" class="btn btn-outline-light btn-sm">
-                                    <i class="bi bi-download me-1"></i>{{ 'View PDF' if lang == 'en' else 'عرض PDF' }}
+                        <label class="form-label text-muted small">{{ 'Uploaded Documents' if lang == 'en' else 'الوثائق المرفوعة' }}</label>
+                        <div class="d-flex gap-3 flex-wrap">
+                            {% if u.kyc_id_path %}
+                            <div>
+                                <small class="text-muted d-block mb-1">{{ 'Front' if lang == 'en' else 'أمامي' }}</small>
+                                <a href="{{ url_for('static', filename=u.kyc_id_path.replace('static/', '')) }}" target="_blank">
+                                    <img src="{{ url_for('static', filename=u.kyc_id_path.replace('static/', '')) }}" class="img-fluid rounded" style="max-height:300px;border:1px solid var(--border-color);background:#000;">
                                 </a>
-                            </p>
+                            </div>
+                            {% endif %}
+                            {% if u.kyc_id_back_path %}
+                            <div>
+                                <small class="text-muted d-block mb-1">{{ 'Back' if lang == 'en' else 'خلفي' }}</small>
+                                <a href="{{ url_for('static', filename=u.kyc_id_back_path.replace('static/', '')) }}" target="_blank">
+                                    <img src="{{ url_for('static', filename=u.kyc_id_back_path.replace('static/', '')) }}" class="img-fluid rounded" style="max-height:300px;border:1px solid var(--border-color);background:#000;">
+                                </a>
+                            </div>
+                            {% endif %}
+                            {% if not u.kyc_id_path and not u.kyc_id_back_path %}
+                            <div class="text-center w-100 py-5 bg-dark rounded">
+                                <i class="bi bi-file-earmark-x text-muted" style="font-size:4rem;"></i>
+                                <p class="text-muted mt-2">{{ 'No document uploaded' if lang == 'en' else 'لا توجد وثيقة مرفوعة' }}</p>
+                            </div>
+                            {% endif %}
                         </div>
-                        {% else %}
-                        <div class="text-center py-5 bg-dark rounded">
-                            <i class="bi bi-file-earmark-x text-muted" style="font-size:4rem;"></i>
-                            <p class="text-muted mt-2">{{ 'No document uploaded' if lang == 'en' else 'لا توجد وثيقة مرفوعة' }}</p>
-                        </div>
-                        {% endif %}
                     </div>
                     <!-- User Data -->
                     <div class="col-md-5">
@@ -70,6 +75,10 @@
                                 <div class="mb-2 d-flex justify-content-between">
                                     <small class="text-muted">{{ 'Country' if lang == 'en' else 'البلد' }}</small>
                                     <span>{{ u.kyc_country or '-' }}</span>
+                                </div>
+                                <div class="mb-2 d-flex justify-content-between">
+                                    <small class="text-muted">{{ 'ID Type' if lang == 'en' else 'نوع الوثيقة' }}</small>
+                                    <span>{% if u.kyc_doc_type == 'drivers_license' %}{{ "Driver's License" if lang == 'en' else 'رخصة قيادة' }}{% elif u.kyc_doc_type == 'national_id' %}{{ 'National ID' if lang == 'en' else 'بطاقة شخصية' }}{% elif u.kyc_doc_type == 'passport' %}{{ 'Passport' if lang == 'en' else 'جواز سفر' }}{% else %}{{ u.kyc_doc_type or '-' }}{% endif %}</span>
                                 </div>
                                 <div class="mb-2 d-flex justify-content-between">
                                     <small class="text-muted">{{ 'Date of Birth' if lang == 'en' else 'تاريخ الميلاد' }}</small>

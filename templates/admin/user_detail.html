@@ -118,6 +118,10 @@
                 <strong>{{ user.kyc_country or '-' }}</strong>
             </div>
             <div class="col-md-2">
+                <small class="text-muted d-block">{{ 'ID Type' if lang == 'en' else 'نوع الوثيقة' }}</small>
+                <strong>{% if user.kyc_doc_type == 'drivers_license' %}{{ "Driver's License" if lang == 'en' else 'رخصة قيادة' }}{% elif user.kyc_doc_type == 'national_id' %}{{ 'National ID' if lang == 'en' else 'بطاقة شخصية' }}{% elif user.kyc_doc_type == 'passport' %}{{ 'Passport' if lang == 'en' else 'جواز سفر' }}{% else %}{{ user.kyc_doc_type or '-' }}{% endif %}</strong>
+            </div>
+            <div class="col-md-2">
                 <small class="text-muted d-block">{{ 'Date of Birth' if lang == 'en' else 'تاريخ الميلاد' }}</small>
                 <strong>{{ user.kyc_dob or '-' }}</strong>
                 {% if user.kyc_age %}<small class="text-muted">({{ user.kyc_age }} {{ 'years' if lang == 'en' else 'سنة' }})</small>{% endif %}
@@ -137,17 +141,21 @@
         </div>
         {% if user.kyc_id_path %}
         <div class="mt-3">
-            <label class="form-label text-muted small">{{ 'Uploaded Document' if lang == 'en' else 'الوثيقة المرفوعة' }}</label>
-            <div>
-                {% set ext = user.kyc_id_path.rsplit('.', 1)[1]|lower %}
-                {% if ext in ['png','jpg','jpeg','gif','webp'] %}
-                <a href="{{ url_for('static', filename=user.kyc_id_path.replace('static/', '')) }}" target="_blank">
-                    <img src="{{ url_for('static', filename=user.kyc_id_path.replace('static/', '')) }}" class="img-fluid rounded" style="max-height:300px;border:1px solid var(--border-color);">
-                </a>
-                {% else %}
-                <a href="{{ url_for('static', filename=user.kyc_id_path.replace('static/', '')) }}" target="_blank" class="btn btn-outline-light btn-sm">
-                    <i class="bi bi-file-earmark-pdf me-1"></i>{{ 'View PDF' if lang == 'en' else 'عرض PDF' }}
-                </a>
+            <label class="form-label text-muted small">{{ 'Uploaded Documents' if lang == 'en' else 'الوثائق المرفوعة' }}</label>
+            <div class="d-flex gap-3 flex-wrap">
+                <div>
+                    <small class="text-muted d-block mb-1">{{ 'Front' if lang == 'en' else 'أمامي' }}</small>
+                    <a href="{{ url_for('static', filename=user.kyc_id_path.replace('static/', '')) }}" target="_blank">
+                        <img src="{{ url_for('static', filename=user.kyc_id_path.replace('static/', '')) }}" class="img-fluid rounded" style="max-height:250px;border:1px solid var(--border-color);">
+                    </a>
+                </div>
+                {% if user.kyc_id_back_path %}
+                <div>
+                    <small class="text-muted d-block mb-1">{{ 'Back' if lang == 'en' else 'خلفي' }}</small>
+                    <a href="{{ url_for('static', filename=user.kyc_id_back_path.replace('static/', '')) }}" target="_blank">
+                        <img src="{{ url_for('static', filename=user.kyc_id_back_path.replace('static/', '')) }}" class="img-fluid rounded" style="max-height:250px;border:1px solid var(--border-color);">
+                    </a>
+                </div>
                 {% endif %}
             </div>
         </div>

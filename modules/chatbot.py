@@ -222,9 +222,10 @@ def find_best_match(text, lang):
                 return data['response']
     return None
 
-def get_response(message):
+def get_response(message, agent=None):
     lang = detect_lang(message)
-    agent = get_agent(lang)
+    if not agent:
+        agent = get_agent(lang)
     if is_greeting(message, lang):
         reply = random.choice(GREETING_RESPONSES[lang])
     else:
@@ -233,7 +234,7 @@ def get_response(message):
             reply = random.choice(responses)
         else:
             reply = FALLBACK[lang]
-    # Replace agent name in greeting if present
     if '{name}' in reply:
         reply = reply.replace('{name}', agent['name'])
-    return {'reply': reply, 'agent': agent}
+    typing_delay = min(max(len(reply) * 30, 600), 2500)
+    return {'reply': reply, 'agent': agent, 'typing_delay': typing_delay}

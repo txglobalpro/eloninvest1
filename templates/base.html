@@ -139,7 +139,10 @@
     var EN = {{ chat_agents | tojson | safe }};
     var lang = document.documentElement.lang || 'en';
     var agents = EN;
-    var currAgent = agents[Math.floor(Math.random() * agents.length)];
+    var currAgent = JSON.parse(localStorage.getItem('botAgent')) || agents[Math.floor(Math.random() * agents.length)];
+    if (!localStorage.getItem('botAgent')) {
+        localStorage.setItem('botAgent', JSON.stringify(currAgent));
+    }
     document.getElementById('botName').textContent = currAgent.name;
     document.getElementById('botRole').textContent = currAgent.role;
 
@@ -177,16 +180,21 @@
         document.getElementById('botMsgs').appendChild(ty);
         document.getElementById('botMsgs').scrollTop = document.getElementById('botMsgs').scrollHeight;
 
-        fetch('/api/chatbot', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({message:t})})
+        fetch('/api/chatbot', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({message:t, agent:currAgent})})
         .then(function(r) { return r.json(); })
         .then(function(d) {
-            var tyEl = document.getElementById('botTyping');
-            if (tyEl) tyEl.remove();
-            if (d.agent) {
-                document.getElementById('botName').textContent = d.agent.name;
-                document.getElementById('botRole').textContent = d.agent.role;
-            }
-            botAddMsg(d.reply, false);
+            var delay = d.typing_delay || 800;
+            setTimeout(function() {
+                var tyEl = document.getElementById('botTyping');
+                if (tyEl) tyEl.remove();
+                if (d.agent) {
+                    document.getElementById('botName').textContent = d.agent.name;
+                    document.getElementById('botRole').textContent = d.agent.role;
+                    currAgent = d.agent;
+                    localStorage.setItem('botAgent', JSON.stringify(d.agent));
+                }
+                botAddMsg(d.reply, false);
+            }, delay);
         })
         .catch(function() {
             var tyEl = document.getElementById('botTyping');

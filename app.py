@@ -51,10 +51,11 @@ def create_app(config_class=Config):
         from flask import request, jsonify
         data = request.get_json()
         msg = (data or {}).get('message', '').strip()
+        agent = (data or {}).get('agent')
         if not msg:
-            return jsonify({'reply': 'Please type a message.' if session.get('lang', 'en') == 'en' else 'الرجاء كتابة رسالة.', 'agent': {'name': 'Support', 'role': ''}})
-        result = get_response(msg)
-        return jsonify({'reply': result['reply'], 'agent': result['agent']})
+            return jsonify({'reply': 'Please type a message.' if session.get('lang', 'en') == 'en' else 'الرجاء كتابة رسالة.', 'agent': agent or {'name': 'Support', 'role': ''}, 'typing_delay': 300})
+        result = get_response(msg, agent)
+        return jsonify(result)
 
     @app.before_request
     def before_request():

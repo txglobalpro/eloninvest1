@@ -28,6 +28,7 @@ def index():
         'total_profits': db.session.query(func.coalesce(func.sum(Transaction.amount), 0)).filter_by(type='profit', status='completed').scalar(),
         'pending_withdrawals': Transaction.query.filter_by(type='withdraw', status='pending').count(),
         'pending_deposits': Transaction.query.filter_by(type='deposit', status='pending').count(),
+        'pending_kyc': User.query.filter_by(kyc_status='pending').count(),
     }
     return render_template('admin/index.html', stats=stats)
 
@@ -37,6 +38,13 @@ def index():
 def users():
     all_users = User.query.order_by(User.created_at.desc()).all()
     return render_template('admin/users.html', users=all_users)
+
+@admin_bp.route('/kyc-review')
+@login_required
+@admin_required
+def kyc_review():
+    kyc_users = User.query.filter(User.kyc_status != 'none').order_by(User.kyc_submitted_at.desc()).all()
+    return render_template('admin/kyc_review.html', kyc_users=kyc_users)
 
 @admin_bp.route('/users/<int:user_id>/balance', methods=['POST'])
 @login_required

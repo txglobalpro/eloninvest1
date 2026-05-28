@@ -55,7 +55,7 @@
                             {% else %}
                             <span class="badge bg-secondary">{{ 'None' if lang == 'en' else 'لا يوجد' }}</span>
                             {% endif %}
-                            {% if u.kyc_id_path %}
+                            {% if u.kyc_status != 'none' %}
                             <button type="button" class="btn btn-sm btn-outline-light ms-1 py-0 px-1" onclick="showKycDoc({{ u.id }})" title="{{ 'View Document' if lang == 'en' else 'عرض الوثيقة' }}">
                                 <i class="bi bi-file-earmark-text"></i>
                             </button>
@@ -164,8 +164,8 @@
 
 <!-- Hidden KYC data for JS -->
 <div id="kycDataStore" style="display:none;">
-{% for u in users if u.kyc_id_path %}
-{% set ext = u.kyc_id_path.rsplit('.', 1)[1]|lower %}
+{% for u in users if u.kyc_status != 'none' %}
+{% set ext = (u.kyc_id_path.rsplit('.', 1)[1]|lower) if u.kyc_id_path else '' %}
 <div id="kycData{{ u.id }}"
     data-username="{{ u.username }}"
     data-email="{{ u.email }}"
@@ -176,7 +176,7 @@
     data-status="{{ u.kyc_status }}"
     data-date="{{ u.kyc_submitted_at.strftime('%Y-%m-%d %H:%M') if u.kyc_submitted_at else '' }}"
     data-reason="{{ u.kyc_review_notes }}"
-    data-path="{{ url_for('static', filename=u.kyc_id_path.replace('static/', '')) }}"
+    data-path="{% if u.kyc_id_path %}{{ url_for('static', filename=u.kyc_id_path.replace('static/', '')) }}{% endif %}"
     data-ext="{{ ext }}"
 ></div>
 {% endfor %}
@@ -212,7 +212,9 @@ function showKycDoc(userId) {
         reasonRow.style.display = 'none';
     }
     var preview = document.getElementById('kycDocPreview');
-    if (['png','jpg','jpeg','gif','webp'].indexOf(d.ext) > -1) {
+    if (!d.path) {
+        preview.innerHTML = '<div class="text-center py-5"><i class="bi bi-file-earmark-x text-muted" style="font-size:4rem;"></i><p class="text-muted mt-2">{{ 'No document uploaded' if lang == 'en' else 'لا توجد وثيقة مرفوعة' }}</p></div>';
+    } else if (['png','jpg','jpeg','gif','webp'].indexOf(d.ext) > -1) {
         preview.innerHTML = '<img src="' + d.path + '" class="img-fluid rounded" style="max-height:400px;">';
     } else {
         preview.innerHTML = '<div class="text-center py-5"><i class="bi bi-file-earmark-pdf text-danger" style="font-size:4rem;"></i><p class="mt-2"><a href="' + d.path + '" target="_blank" class="btn btn-outline-light btn-sm"><i class="bi bi-download me-1"></i>{{ 'View PDF' if lang == 'en' else 'عرض PDF' }}</a></p></div>';

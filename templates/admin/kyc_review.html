@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}KYC {{ 'Review' if lang == 'en' else 'مراجعة التحقق' }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0"><i class="bi bi-shield-check text-warning me-2"></i>{{ 'KYC Review' if lang == 'en' else 'مراجعة طلبات التحقق' }}</h3>
+    <div>
+        <a href="{{ url_for('admin.users') }}" class="btn btn-outline-light btn-sm me-1"><i class="bi bi-people me-1"></i>{{ 'Users' if lang == 'en' else 'المستخدمين' }}</a>
+        <a href="{{ url_for('admin.index') }}" class="btn btn-outline-light btn-sm"><i class="bi bi-speedometer2 me-1"></i>{{ 'Dashboard' if lang == 'en' else 'الرئيسية' }}</a>
+    </div>
+</div>
+
+{% if kyc_users %}
+<div class="row g-3">
+    {% for u in kyc_users %}
+    {% set ext = (u.kyc_id_path.rsplit('.', 1)[1]|lower) if u.kyc_id_path else '' %}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="bi bi-person-circle me-1"></i><strong>{{ u.username }}</strong>
+                    <small class="text-muted ms-2">(#{{ u.id }})</small>
+                    {% if u.kyc_status == 'pending' %}
+                    <span class="badge bg-warning text-dark ms-2"><i class="bi bi-clock me-1"></i>{{ 'Pending' if lang == 'en' else 'قيد المراجعة' }}</span>
+                    {% elif u.kyc_status == 'approved' %}
+                    <span class="badge bg-success ms-2"><i class="bi bi-patch-check-fill me-1"></i>{{ 'Verified' if lang == 'en' else 'موثق' }}</span>
+                    {% elif u.kyc_status == 'rejected' %}
+                    <span class="badge bg-danger ms-2"><i class="bi bi-x-octagon me-1"></i>{{ 'Rejected' if lang == 'en' else 'مرفوض' }}</span>
+                    {% endif %}
+                </div>
+                <small class="text-muted">{{ u.kyc_submitted_at.strftime('%Y-%m-%d %H:%M') if u.kyc_submitted_at else '' }}</small>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <!-- Document Preview -->
+                    <div class="col-md-7">
+                        <label class="form-label text-muted small">{{ 'Uploaded Document' if lang == 'en' else 'الوثيقة المرفوعة' }}</label>
+                        {% if u.kyc_id_path and ext in ['png','jpg','jpeg','gif','webp'] %}
+                        <a href="{{ url_for('static', filename=u.kyc_id_path.replace('static/', '')) }}" target="_blank">
+                            <img src="{{ url_for('static', filename=u.kyc_id_path.replace('static/', '')) }}" class="img-fluid rounded w-100" style="max-height:350px;object-fit:contain;border:1px solid var(--border-color);background:#000;">
+                        </a>
+                        {% elif u.kyc_id_path %}
+                        <div class="text-center py-5 bg-dark rounded">
+                            <i class="bi bi-file-earmark-pdf text-danger" style="font-size:4rem;"></i>
+                            <p class="mt-2">
+                                <a href="{{ url_for('static', filename=u.kyc_id_path.replace('static/', '')) }}" target="_blank" class="btn btn-outline-light btn-sm">
+                                    <i class="bi bi-download me-1"></i>{{ 'View PDF' if lang == 'en' else 'عرض PDF' }}
+                                </a>
+                            </p>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-5 bg-dark rounded">
+                            <i class="bi bi-file-earmark-x text-muted" style="font-size:4rem;"></i>
+                            <p class="text-muted mt-2">{{ 'No document uploaded' if lang == 'en' else 'لا توجد وثيقة مرفوعة' }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <!-- User Data -->
+                    <div class="col-md-5">
+                        <label class="form-label text-muted small">{{ 'Applicant Details' if lang == 'en' else 'بيانات مقدم الطلب' }}</label>
+                        <div class="card bg-dark">
+                            <div class="card-body py-3">
+                                <div class="mb-2 d-flex justify-content-between">
+                                    <small class="text-muted">{{ 'Email' if lang == 'en' else 'البريد' }}</small>
+                                    <span>{{ u.email }}</span>
+                                </div>
+                                <div class="mb-2 d-flex justify-content-between">
+                                    <small class="text-muted">{{ 'Country' if lang == 'en' else 'البلد' }}</small>
+                                    <span>{{ u.kyc_country or '-' }}</span>
+                                </div>
+                                <div class="mb-2 d-flex justify-content-between">
+                                    <small class="text-muted">{{ 'Date of Birth' if lang == 'en' else 'تاريخ الميلاد' }}</small>
+                                    <span>{{ u.kyc_dob or '-' }}{% if u.kyc_age %} ({{ u.kyc_age }}){% endif %}</span>
+                                </div>
+                                <div class="mb-2 d-flex justify-content-between">
+                                    <small class="text-muted">{{ 'Phone' if lang == 'en' else 'الهاتف' }}</small>
+                                    <span dir="ltr">{{ u.kyc_phone or '-' }}</span>
+                                </div>
+                                <div class="mb-2 d-flex justify-content-between">
+                                    <small class="text-muted">{{ 'Submitted' if lang == 'en' else 'تاريخ التقديم' }}</small>
+                                    <span>{{ u.kyc_submitted_at.strftime('%Y-%m-%d %H:%M') if u.kyc_submitted_at else '-' }}</span>
+                                </div>
+                                {% if u.kyc_status == 'rejected' and u.kyc_review_notes %}
+                                <div class="d-flex justify-content-between">
+                                    <small class="text-muted">{{ 'Rejection Reason' if lang == 'en' else 'سبب الرفض' }}</small>
+                                    <span class="text-danger">{{ u.kyc_review_notes }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <!-- Actions -->
+                        <div class="mt-3 d-flex gap-2 flex-wrap">
+                            {% if u.kyc_status == 'pending' %}
+                            <form method="POST" action="{{ url_for('admin.kyc_action', user_id=u.id) }}" class="d-inline">
+                                <input type="hidden" name="action" value="approve_kyc">
+                                <button type="submit" class="btn btn-success"><i class="bi bi-check-lg me-1"></i>{{ 'Approve' if lang == 'en' else 'قبول' }}</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('admin.kyc_action', user_id=u.id) }}" class="d-inline-flex gap-2 align-items-center flex-grow-1">
+                                <input type="hidden" name="action" value="reject_kyc">
+                                <input type="text" name="reject_reason" class="form-control form-control-sm" placeholder="{{ 'Reason...' if lang == 'en' else 'السبب...' }}" required style="min-width:120px;">
+                                <button type="submit" class="btn btn-danger btn-sm flex-shrink-0"><i class="bi bi-x-lg me-1"></i>{{ 'Reject' if lang == 'en' else 'رفض' }}</button>
+                            </form>
+                            {% else %}
+                            <a href="{{ url_for('admin.user_detail', user_id=u.id) }}" class="btn btn-outline-light btn-sm"><i class="bi bi-person-gear me-1"></i>{{ 'User Profile' if lang == 'en' else 'صفحة المستخدم' }}</a>
+                            <form method="POST" action="{{ url_for('admin.kyc_action', user_id=u.id) }}" class="d-inline">
+                                <input type="hidden" name="action" value="reset_kyc">
+                                <button type="submit" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-counterclockwise me-1"></i>{{ 'Reset' if lang == 'en' else 'إعادة تعيين' }}</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-5">
+    <div class="display-1 text-muted mb-3"><i class="bi bi-shield-check"></i></div>
+    <h5>{{ 'No KYC submissions yet' if lang == 'en' else 'لا توجد طلبات تحقق حتى الآن' }}</h5>
+    <p class="text-muted">{{ 'When users submit their identity documents, they will appear here.' if lang == 'en' else 'عندما يقدم المستخدمون وثائق هويتهم، ستظهر هنا.' }}</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -38,6 +38,7 @@
                 <a href="{{ url_for('admin.users') }}" class="btn btn-primary w-100 mb-2"><i class="bi bi-people-fill me-1"></i>{{ 'Manage Users' if lang == 'en' else 'إدارة المستخدمين' }}</a>
                 <a href="{{ url_for('admin.transactions') }}" class="btn btn-warning w-100 mb-2"><i class="bi bi-arrow-left-right me-1"></i>{{ 'Manage Transactions' if lang == 'en' else 'إدارة المعاملات' }}</a>
                 <a href="{{ url_for('admin.plans') }}" class="btn btn-info w-100 mb-2"><i class="bi bi-pie-chart-fill me-1"></i>{{ 'Manage Plans' if lang == 'en' else 'إدارة الخطط' }}</a>
+                <a href="{{ url_for('admin.kyc_review') }}" class="btn btn-secondary w-100 mb-2"><i class="bi bi-shield-check me-1"></i>KYC {{ 'Review' if lang == 'en' else 'مراجعة' }}</a>
                 <a href="{{ url_for('admin.payment_methods') }}" class="btn btn-success w-100"><i class="bi bi-credit-card-2-front me-1"></i>{{ 'Payment Methods' if lang == 'en' else 'وسائل الدفع' }}</a>
             </div>
         </div>
@@ -48,6 +49,7 @@
             <div class="card-body">
                 <p>{{ 'Pending withdrawals' if lang == 'en' else 'سحوبات معلقة' }}: <strong>{{ stats.pending_withdrawals }}</strong></p>
                 <p>{{ 'Pending deposits' if lang == 'en' else 'إيداعات معلقة' }}: <strong>{{ stats.pending_deposits }}</strong></p>
+                <p><a href="{{ url_for('admin.kyc_review') }}" class="text-warning text-decoration-none"><i class="bi bi-shield-check me-1"></i>{{ 'Pending KYC' if lang == 'en' else 'تحقق هوية معلق' }}: <strong>{{ stats.pending_kyc }}</strong></a></p>
             </div>
         </div>
     </div>

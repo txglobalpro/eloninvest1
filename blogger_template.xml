@@ -396,7 +396,6 @@ a:hover { opacity: .85; }
           <b:widget-settings>
             <b:widget-setting name='showHomeLink'>false</b:widget-setting>
             <b:widget-setting name='showNewPageLink'>true</b:widget-setting>
-            <b:widget-setting name='sorting'>ALPHA</b:widget-setting>
             <b:widget-setting name='selectedLinks'/>
           </b:widget-settings>
         </b:widget>

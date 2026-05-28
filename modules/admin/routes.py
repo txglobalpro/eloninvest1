@@ -148,6 +148,38 @@ def ban_user(user_id):
     flash(f'User {user.username} {"banned" if user.is_banned else "unbanned"}', 'success')
     return redirect(url_for('admin.users'))
 
+@admin_bp.route('/users/<int:user_id>/kyc', methods=['POST'])
+@login_required
+@admin_required
+def kyc_action(user_id):
+    user = db.session.get(User, user_id)
+    if not user:
+        flash('User not found', 'danger')
+        return redirect(url_for('admin.users'))
+    action = request.form.get('action', '')
+    if action == 'approve_kyc':
+        if user.kyc_status == 'pending':
+            user.kyc_status = 'approved'
+            user.kyc_reviewed_at = datetime.utcnow()
+            flash(f'KYC approved for {user.username}', 'success')
+        else:
+            flash('KYC is not pending', 'warning')
+    elif action == 'reject_kyc':
+        if user.kyc_status == 'pending':
+            user.kyc_status = 'rejected'
+            user.kyc_reviewed_at = datetime.utcnow()
+            user.kyc_review_notes = request.form.get('reject_reason', '')
+            flash(f'KYC rejected for {user.username}', 'warning')
+        else:
+            flash('KYC is not pending', 'warning')
+    elif action == 'reset_kyc':
+        user.kyc_status = 'none'
+        user.kyc_reviewed_at = None
+        user.kyc_review_notes = ''
+        flash(f'KYC reset for {user.username}', 'info')
+    db.session.commit()
+    return redirect(url_for('admin.users'))
+
 @admin_bp.route('/users/<int:user_id>/delete', methods=['POST'])
 @login_required
 @admin_required

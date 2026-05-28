@@ -15,9 +15,9 @@
                     <th>{{ 'Email' if lang == 'en' else 'البريد' }}</th>
                     <th>{{ 'Balance' if lang == 'en' else 'الرصيد' }}</th>
                     <th>{{ 'Plan' if lang == 'en' else 'الخطة' }}</th>
-                    <th>{{ 'Payment' if lang == 'en' else 'الدفع' }}</th>
+                    <th>KYC</th>
                     <th>{{ 'Joined' if lang == 'en' else 'تاريخ التسجيل' }}</th>
-                    <th>{{ 'Actions' if lang == 'en' else 'إجراءات' }}</th>
+                    <th style="min-width:280px;">{{ 'Actions' if lang == 'en' else 'إجراءات' }}</th>
                 </tr></thead>
                 <tbody>
                     {% for u in users %}
@@ -45,18 +45,45 @@
                                 </span>
                             {% else %}<small class="text-muted">-</small>{% endif %}
                         </td>
-                        <td><small class="text-muted">{{ u.payment_method[:20] ~ '...' if u.payment_method and u.payment_method|length > 20 else u.payment_method or '-' }}</small></td>
+                        <td>
+                            {% if u.kyc_status == 'approved' %}
+                            <span class="badge bg-success"><i class="bi bi-patch-check-fill me-1"></i>{{ 'Verified' if lang == 'en' else 'موثق' }}</span>
+                            {% elif u.kyc_status == 'pending' %}
+                            <span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i>{{ 'Pending' if lang == 'en' else 'قيد المراجعة' }}</span>
+                            {% elif u.kyc_status == 'rejected' %}
+                            <span class="badge bg-danger"><i class="bi bi-x-octagon me-1"></i>{{ 'Rejected' if lang == 'en' else 'مرفوض' }}</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ 'None' if lang == 'en' else 'لا يوجد' }}</span>
+                            {% endif %}
+                        </td>
                         <td>{{ u.created_at.strftime('%Y-%m-%d') }}</td>
                         <td>
-                            <a href="{{ url_for('admin.user_detail', user_id=u.id) }}" class="btn btn-sm btn-primary"><i class="bi bi-eye me-1"></i>{{ 'Manage' if lang == 'en' else 'إدارة' }}</a>
-                            <form method="POST" action="{{ url_for('admin.ban_user', user_id=u.id) }}" class="d-inline">
-                                <button type="submit" class="btn btn-sm btn-{{ 'success' if u.is_banned else 'warning' }}">
-                                    <i class="bi bi-{{ 'unlock' if u.is_banned else 'lock' }}"></i>
-                                </button>
-                            </form>
-                            <form method="POST" action="{{ url_for('admin.delete_user', user_id=u.id) }}" class="d-inline" onsubmit="return confirm('{{ 'Delete this user permanently?' if lang == 'en' else 'حذف هذا المستخدم نهائياً؟' }}')">
-                                <button type="submit" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
-                            </form>
+                            <div class="d-flex flex-wrap gap-1 align-items-center">
+                                <a href="{{ url_for('admin.user_detail', user_id=u.id) }}" class="btn btn-sm btn-primary"><i class="bi bi-eye"></i></a>
+                                <form method="POST" action="{{ url_for('admin.ban_user', user_id=u.id) }}" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-{{ 'success' if u.is_banned else 'warning' }}" title="{{ 'Unban' if u.is_banned else 'Ban' }}">
+                                        <i class="bi bi-{{ 'unlock' if u.is_banned else 'lock' }}"></i>
+                                    </button>
+                                </form>
+                                {% if u.kyc_status == 'pending' %}
+                                <form method="POST" action="{{ url_for('admin.kyc_action', user_id=u.id) }}" class="d-inline">
+                                    <input type="hidden" name="action" value="approve_kyc">
+                                    <button type="submit" class="btn btn-sm btn-success" title="{{ 'Approve KYC' if lang == 'en' else 'قبول التحقق' }}"><i class="bi bi-check-lg"></i></button>
+                                </form>
+                                <form method="POST" action="{{ url_for('admin.kyc_action', user_id=u.id) }}" class="d-inline-flex gap-1 align-items-center" id="rejectForm{{ u.id }}">
+                                    <input type="hidden" name="action" value="reject_kyc">
+                                    <input type="text" name="reject_reason" class="form-control form-control-sm" style="width:100px;" placeholder="{{ 'Reason' if lang == 'en' else 'السبب' }}" required>
+                                    <button type="submit" class="btn btn-sm btn-danger" title="{{ 'Reject KYC' if lang == 'en' else 'رفض التحقق' }}"><i class="bi bi-x-lg"></i></button>
+                                </form>
+                                {% elif u.kyc_status in ['approved','rejected'] %}
+                                <a href="{{ url_for('admin.user_detail', user_id=u.id) }}#kyc" class="btn btn-sm btn-outline-info" title="{{ 'View KYC' if lang == 'en' else 'عرض KYC' }}">
+                                    <i class="bi bi-shield-check"></i>
+                                </a>
+                                {% endif %}
+                                <form method="POST" action="{{ url_for('admin.delete_user', user_id=u.id) }}" class="d-inline" onsubmit="return confirm('{{ 'Delete this user permanently?' if lang == 'en' else 'حذف هذا المستخدم نهائياً؟' }}')">
+                                    <button type="submit" class="btn btn-sm btn-danger" title="{{ 'Delete' if lang == 'en' else 'حذف' }}"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}

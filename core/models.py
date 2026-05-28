@@ -30,6 +30,7 @@ class User(UserMixin, db.Model):
     payment_method = db.Column(db.Text, default='')
     kyc_status = db.Column(db.String(20), default='none')
     kyc_country = db.Column(db.String(100), default='')
+    kyc_dob = db.Column(db.String(10), default='')
     kyc_age = db.Column(db.Integer, nullable=True)
     kyc_phone = db.Column(db.String(30), default='')
     kyc_id_path = db.Column(db.String(255), default='')

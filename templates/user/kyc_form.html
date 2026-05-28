@@ -12,11 +12,33 @@
                 <input type="text" name="kyc_country" class="form-control" placeholder="{{ 'e.g. United States' if lang == 'en' else 'مثال: مصر' }}" required>
             </div>
         </div>
-        <div class="col-md-3">
-            <label class="form-label">{{ 'Age (as shown on ID)' if lang == 'en' else 'العمر (كما في الهوية)' }}</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-calendar"></i></span>
-                <input type="number" name="kyc_age" class="form-control" min="18" max="120" placeholder="25" required>
+        <div class="col-md-6">
+            <label class="form-label">{{ 'Date of Birth (as shown on ID)' if lang == 'en' else 'تاريخ الميلاد (كما في الهوية)' }}</label>
+            <div class="row g-1">
+                <div class="col-4">
+                    <select name="kyc_dob_day" class="form-select" required>
+                        <option value="">{{ 'Day' if lang == 'en' else 'اليوم' }}</option>
+                        {% for d in range(1, 32) %}
+                        <option value="{{ d }}">{{ '%02d'|format(d) }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-4">
+                    <select name="kyc_dob_month" class="form-select" required>
+                        <option value="">{{ 'Month' if lang == 'en' else 'الشهر' }}</option>
+                        {% for m in range(1, 13) %}
+                        <option value="{{ m }}">{{ months_en[m-1] if lang == 'en' else months_ar[m-1] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-4">
+                    <select name="kyc_dob_year" class="form-select" required>
+                        <option value="">{{ 'Year' if lang == 'en' else 'السنة' }}</option>
+                        {% for y in range(1950, 2009) %}
+                        <option value="{{ y }}">{{ y }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
         </div>
         <div class="col-md-3">

@@ -249,7 +249,7 @@
                             <p class="text-muted">{{ 'Your identity has been verified successfully.' if lang == 'en' else 'تم التحقق من هويتك بنجاح.' }}</p>
                             <div class="d-flex justify-content-center gap-4 mt-3">
                                 <div><small class="text-muted d-block">{{ 'Country' if lang == 'en' else 'البلد' }}</small><strong>{{ current_user.kyc_country }}</strong></div>
-                                <div><small class="text-muted d-block">{{ 'Age' if lang == 'en' else 'العمر' }}</small><strong>{{ current_user.kyc_age }}</strong></div>
+                                <div><small class="text-muted d-block">{{ 'Date of Birth' if lang == 'en' else 'تاريخ الميلاد' }}</small><strong>{{ current_user.kyc_dob }}</strong></div>
                                 <div><small class="text-muted d-block">{{ 'Phone' if lang == 'en' else 'الهاتف' }}</small><strong>{{ current_user.kyc_phone }}</strong></div>
                             </div>
                         </div>

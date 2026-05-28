@@ -104,18 +104,18 @@
     </div>
 </div>
 
-{% if user.kyc_status != 'none' %}
-<div class="card mb-4">
+<div class="card mb-4" id="kyc">
     <div class="card-header"><i class="bi bi-shield-check me-2"></i>{{ 'KYC Verification' if lang == 'en' else 'التحقق من الهوية' }}</div>
     <div class="card-body">
         <div class="row g-3">
             <div class="col-md-3">
-                <small class="text-muted d-block">{{ 'Country' if lang == 'en' else 'البلد' }}</small>
+                <small class="text-muted d-block">{{ 'Country' as shown on ID }}</small>
                 <strong>{{ user.kyc_country or '-' }}</strong>
             </div>
             <div class="col-md-2">
-                <small class="text-muted d-block">{{ 'Age' if lang == 'en' else 'العمر' }}</small>
-                <strong>{{ user.kyc_age or '-' }}</strong>
+                <small class="text-muted d-block">{{ 'Date of Birth' if lang == 'en' else 'تاريخ الميلاد' }}</small>
+                <strong>{{ user.kyc_dob or '-' }}</strong>
+                {% if user.kyc_age %}<small class="text-muted">({{ user.kyc_age }} {{ 'years' if lang == 'en' else 'سنة' }})</small>{% endif %}
             </div>
             <div class="col-md-3">
                 <small class="text-muted d-block">{{ 'Phone' if lang == 'en' else 'الهاتف' }}</small>

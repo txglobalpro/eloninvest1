@@ -32,10 +32,12 @@ def profile():
         db.session.commit()
         flash('Profile updated', 'success')
         return redirect(url_for('user.profile'))
+    months_en = ['January','February','March','April','May','June','July','August','September','October','November','December']
+    months_ar = ['يناير','فبراير','مارس','إبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر']
     referrals_count = Referral.query.filter_by(referrer_id=current_user.id).count()
     investments_count = Investment.query.filter_by(user_id=current_user.id).count()
     transactions_count = Transaction.query.filter_by(user_id=current_user.id).count()
-    return render_template('user/profile.html', referrals_count=referrals_count, investments_count=investments_count, transactions_count=transactions_count)
+    return render_template('user/profile.html', referrals_count=referrals_count, investments_count=investments_count, transactions_count=transactions_count, months_en=months_en, months_ar=months_ar)
 
 @user_bp.route('/profile/kyc', methods=['POST'])
 @login_required
@@ -47,10 +49,25 @@ def submit_kyc():
         flash('KYC already verified' if current_user.lang == 'en' else 'التحقق موثق بالفعل', 'info')
         return redirect(url_for('user.profile'))
     country = request.form.get('kyc_country', '').strip()
-    age = request.form.get('kyc_age', type=int)
+    dob_day = request.form.get('kyc_dob_day', '').strip()
+    dob_month = request.form.get('kyc_dob_month', '').strip()
+    dob_year = request.form.get('kyc_dob_year', '').strip()
     phone = request.form.get('kyc_phone', '').strip()
-    if not country or not age or not phone:
+    if not country or not dob_day or not dob_month or not dob_year or not phone:
         flash('Please fill in all fields' if current_user.lang == 'en' else 'يرجى تعبئة جميع الحقول', 'danger')
+        return redirect(url_for('user.profile'))
+    try:
+        dob_str = f'{dob_year}-{int(dob_month):02d}-{int(dob_day):02d}'
+        dob_date = datetime.strptime(dob_str, '%Y-%m-%d')
+        if dob_date > datetime.utcnow():
+            flash('Date of birth cannot be in the future' if current_user.lang == 'en' else 'تاريخ الميلاد لا يمكن أن يكون في المستقبل', 'danger')
+            return redirect(url_for('user.profile'))
+        age = datetime.utcnow().year - dob_date.year - ((datetime.utcnow().month, datetime.utcnow().day) < (dob_date.month, dob_date.day))
+        if age < 18:
+            flash('You must be at least 18 years old' if current_user.lang == 'en' else 'يجب أن يكون عمرك 18 عاماً على الأقل', 'danger')
+            return redirect(url_for('user.profile'))
+    except ValueError:
+        flash('Invalid date' if current_user.lang == 'en' else 'تاريخ غير صالح', 'danger')
         return redirect(url_for('user.profile'))
     if 'kyc_id' not in request.files:
         flash('Please upload an ID document' if current_user.lang == 'en' else 'يرجى رفع وثيقة الهوية', 'danger')
@@ -67,6 +84,7 @@ def submit_kyc():
     file.save(filepath)
     current_user.kyc_status = 'pending'
     current_user.kyc_country = country
+    current_user.kyc_dob = dob_str
     current_user.kyc_age = age
     current_user.kyc_phone = phone
     current_user.kyc_id_path = f'static/uploads/kyc/{filename}'

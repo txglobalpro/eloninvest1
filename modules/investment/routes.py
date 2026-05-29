@@ -85,7 +85,9 @@ def deposit():
                 if existing == 1:
                     from services.rewards import grant_first_deposit_reward
                     grant_first_deposit_reward(user, amount, app)
+                db.session.commit()
             except Exception as e:
+                db.session.rollback()
                 current_app.logger.error(f'Post-deposit processing error: {e}')
             current_app.logger.info(f'User {user.username} auto-deposited ${amount} via Trust Wallet (TXID: {txid[:20]}...)')
             flash(f'Deposit of ${amount:.2f} confirmed and credited!', 'success')

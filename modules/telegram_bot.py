@@ -1,84 +1,53 @@
 import logging
-import xml.etree.ElementTree as ET
+import random
 import requests
 from datetime import datetime
-from html import unescape
+from services.content_library import get_random_content, IMAGE_KEYWORDS
 
 logger = logging.getLogger(__name__)
 
-RSS_FEEDS = [
-    'https://news.google.com/rss/search?q=Elon+Musk+business+deal&hl=en-US&gl=US&ceid=US:en',
-    'https://news.google.com/rss/search?q=Tesla+news+financial+deal&hl=en-US&gl=US&ceid=US:en',
-    'https://news.google.com/rss/search?q=SpaceX+Starlink+investment&hl=en-US&gl=US&ceid=US:en',
-    'https://news.google.com/rss/search?q=xAI+Neuralink+news&hl=en-US&gl=US&ceid=US:en',
-]
+UNSPLASH_ACCESS_KEY = None  # Optional: set in config for higher quality images
 
-HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
-
-def fetch_news():
-    articles = []
-    for url in RSS_FEEDS:
+def get_image_url(keyword):
+    kw = IMAGE_KEYWORDS.get(keyword, 'investment+business')
+    if UNSPLASH_ACCESS_KEY:
         try:
-            r = requests.get(url, headers=HEADERS, timeout=10)
-            if r.status_code != 200:
-                continue
-            root = ET.fromstring(r.content)
-            for item in root.findall('.//item'):
-                title = item.findtext('title', '')
-                link = item.findtext('link', '')
-                pub = item.findtext('pubDate', '')
-                if title and link:
-                    # Remove source suffix like " - Reuters" from title
-                    clean = title.rsplit(' - ', 1)[0] if ' - ' in title else title
-                    articles.append({'title': unescape(clean), 'link': link, 'published': pub})
+            r = requests.get(
+                f'https://api.unsplash.com/photos/random?query={kw}&orientation=landscape&w=800',
+                headers={'Authorization': f'Client-ID {UNSPLASH_ACCESS_KEY}'},
+                timeout=8
+            )
+            if r.status_code == 200:
+                return r.json()['urls']['regular']
         except Exception as e:
-            logger.warning(f'RSS failed for {url}: {e}')
-    seen = set()
-    unique = []
-    for a in articles:
-        key = a['title'].lower().strip()
-        if key not in seen:
-            seen.add(key)
-            unique.append(a)
-    return unique[:6]
+            logger.warning(f'Unsplash failed: {e}')
+    return f'https://picsum.photos/seed/{keyword}{random.randint(1,9999)}/800/400'
 
-def format_message(articles, lang='en'):
-    if not articles:
-        return None
-    if lang == 'ar':
-        lines = [
-            '🚀 *ملخص ElonInvest اليومي*',
-            f'📅 {datetime.utcnow().strftime("%Y/%m/%d")}',
-            '',
-        ]
-        for i, a in enumerate(articles, 1):
-            t = a['title'].replace('_', '\\_').replace('*', '\\*').replace('[', '\\[').replace('`', '\\`')
-            lines.append(f'{i}. [{t}]({a["link"]})')
-        lines.extend(['', '💡 *استثمر بذكاء مع ElonInvest*', '👉 [eloninvest.publicvm.com](https://eloninvest.publicvm.com)'])
-    else:
-        lines = [
-            '🚀 *ElonInvest Daily Digest*',
-            f'📅 {datetime.utcnow().strftime("%B %d, %Y")}',
-            '',
-        ]
-        for i, a in enumerate(articles, 1):
-            t = a['title'].replace('_', '\\_').replace('*', '\\*').replace('[', '\\[').replace('`', '\\`')
-            lines.append(f'{i}. [{t}]({a["link"]})')
-        lines.extend(['', '💡 *Invest wisely with ElonInvest*', '👉 [eloninvest.publicvm.com](https://eloninvest.publicvm.com)'])
-    return '\n'.join(lines)
-
-def post_to_telegram(message, token, channel_id):
+def post_to_telegram(message, token, channel_id, image_url=None):
     if not token or not channel_id:
         logger.warning('Telegram not configured')
         return False
-    url = f'https://api.telegram.org/bot{token}/sendMessage'
     try:
-        resp = requests.post(url, json={
-            'chat_id': channel_id,
-            'text': message,
-            'parse_mode': 'Markdown',
-            'disable_web_page_preview': False,
-        }, timeout=15)
+        if image_url:
+            resp = requests.post(
+                f'https://api.telegram.org/bot{token}/sendPhoto',
+                json={
+                    'chat_id': channel_id,
+                    'photo': image_url,
+                    'caption': message,
+                    'parse_mode': 'Markdown',
+                }, timeout=20
+            )
+        else:
+            resp = requests.post(
+                f'https://api.telegram.org/bot{token}/sendMessage',
+                json={
+                    'chat_id': channel_id,
+                    'text': message,
+                    'parse_mode': 'Markdown',
+                    'disable_web_page_preview': False,
+                }, timeout=15
+            )
         if resp.status_code == 200:
             logger.info('Telegram post OK')
             return True
@@ -88,19 +57,20 @@ def post_to_telegram(message, token, channel_id):
         logger.error(f'Telegram post failed: {e}')
         return False
 
-def run_daily_news(app):
+def run_auto_poster(app):
     with app.app_context():
         token = app.config.get('TELEGRAM_BOT_TOKEN', '')
         channel = app.config.get('TELEGRAM_CHANNEL_ID', '')
         if not token or not channel:
-            logger.info('Telegram bot not configured, skipping news')
+            logger.info('Telegram bot not configured, skipping auto post')
             return
-        articles = fetch_news()
-        # Try Arabic first, fallback to English
-        msg = format_message(articles, 'ar')
-        if not msg:
-            msg = format_message(articles, 'en')
-        if msg:
-            post_to_telegram(msg, token, channel)
-        else:
-            logger.warning('No articles found')
+
+        lang = random.choice(['ar', 'en'])
+        content = get_random_content(lang)
+        image_url = get_image_url(content['image'])
+        msg = f"*{content['title']}*\n\n{content['text']}"
+        msg += f"\n\n🌐 [ElonInvest](https://eloninvest.publicvm.com)"
+        post_to_telegram(msg, token, channel, image_url)
+
+def run_daily_news(app):
+    run_auto_poster(app)

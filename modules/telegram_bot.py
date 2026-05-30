@@ -74,10 +74,14 @@ def run_auto_poster(app):
 
         lang = random.choice(['ar', 'en'])
         content = get_random_content(lang)
-        image_url = get_image_url(content['image'])
         msg = f"*{content['title']}*\n\n{content['text']}"
         msg += f"\n\n🌐 [ElonInvest](https://eloninvest.onrender.com)"
-        post_to_telegram(msg, token, channel, image_url)
+
+        if content['type'] == 'video':
+            post_to_telegram(msg, token, channel)
+        else:
+            image_url = get_image_url(content['image'])
+            post_to_telegram(msg, token, channel, image_url)
 
 def run_daily_news(app):
     run_auto_poster(app)

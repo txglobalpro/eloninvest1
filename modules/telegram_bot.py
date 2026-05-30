@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 UNSPLASH_ACCESS_KEY = None  # Optional: set in config for higher quality images
 
 def get_image_url(keyword):
-    kw = IMAGE_KEYWORDS.get(keyword, 'investment+business')
+    kw = IMAGE_KEYWORDS.get(keyword, 'wealthy+success+money')
     if UNSPLASH_ACCESS_KEY:
         try:
             r = requests.get(
@@ -21,6 +21,13 @@ def get_image_url(keyword):
                 return r.json()['urls']['regular']
         except Exception as e:
             logger.warning(f'Unsplash failed: {e}')
+    try:
+        kw_clean = kw.replace('+', ',')
+        r = requests.get(f'https://loremflickr.com/800/400/{kw_clean}', timeout=8, allow_redirects=True)
+        if r.status_code == 200 and len(r.content) > 1000:
+            return r.url
+    except Exception as e:
+        logger.warning(f'LoremFlickr failed: {e}')
     return f'https://picsum.photos/seed/{keyword}{random.randint(1,9999)}/800/400'
 
 def post_to_telegram(message, token, channel_id, image_url=None):
